@@ -29,8 +29,9 @@ class RegisterController extends Controller
 
         // Générer et envoyer OTP
         $otp = rand(100000, 999999);
-        $this->sendOTP($validated['phone_number'], $otp);
-
+        // $this->sendOTP($validated['phone_number'], $otp);
+// dd($otp);
+        Log::info("OTP for {$validated['phone_number']}: $otp");
         // Stocker OTP en session
         Session::put('register_otp', $otp);
         Session::put('register_phone', $validated['phone_number']);
@@ -133,22 +134,22 @@ class RegisterController extends Controller
         }
     }
 
-    protected function sendOTP($phoneNumber, $otp)
-    {
-        $sid = config('services.twilio.sid');
-        $token = config('services.twilio.token');
-        $from = config('services.twilio.phone_number');
+    // protected function sendOTP($phoneNumber, $otp)
+    // {
+    //     $sid = config('services.twilio.sid');
+    //     $token = config('services.twilio.token');
+    //     $from = config('services.twilio.phone_number');
 
-        $twilio = new Client($sid, $token);
+    //     $twilio = new Client($sid, $token);
 
-        $message = $twilio->messages->create(
-            $this->formatPhoneNumber($phoneNumber),
-            [
-                'from' => $from,
-                'body' => "Votre code de vérification B Kassoua est: $otp"
-            ]
-        );
-    }
+    //     $message = $twilio->messages->create(
+    //         $this->formatPhoneNumber($phoneNumber),
+    //         [
+    //             'from' => $from,
+    //             'body' => "Votre code de vérification B Kassoua est: $otp"
+    //         ]
+    //     );
+    // }
 
     protected function formatPhoneNumber($phoneNumber)
     {

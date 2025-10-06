@@ -62,9 +62,13 @@ class HomeController extends Controller
         $popularProducts = Product::whereIn('id', OrderItem::pluck('product_id'))
             ->distinct()
             ->get();
-        $categories = Category::withCount('products')
-            ->having('products_count', '>', 0)
-            ->get();
+        // $categories = Category::withCount('products')
+        //     ->having('products_count', '>', 0)
+        //     ->get();
+        $categories = Category::whereHas('products')
+                      ->withCount('products')
+                      ->get();
+
         $vendor = Vendor::where('user_id', Auth::id())->first();
         // dd($popularProducts);
         // return view('layouts.master', compact('categories','vendor'));
