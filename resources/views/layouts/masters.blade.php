@@ -1,1546 +1,552 @@
-{{-- <!DOCTYPE html>
-<html lang="fr">
-
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Bkassoua - Accueil</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" />
-    <style>
-        :root {
-            --primary: #1780d6;
-            --secondary: #f4a261;
-            --accent: #e76f51;
-            --light: #f8f9fa;
-            --dark: #264653;
-        }
-
-        body {
-            font-family: "Poppins", sans-serif;
-            background-color: var(--light);
-        }
-
-        /* Secondary Navbar (Logo + Search) */
-        .secondary-navbar {
-            background-color: rgba(248, 249, 250, 0.95);
-            padding: 10px 0;
-            position: fixed;
-            top: 0;
-            width: 100%;
-            z-index: 1030;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            transition: background-color 0.3s ease;
-        }
-
-        .secondary-navbar.scrolled {
-            background-color: rgba(248, 249, 250, 1);
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .secondary-navbar .navbar-brand img {
-            height: 40px;
-            transition: transform 0.3s;
-        }
-
-        .secondary-navbar .navbar-brand img:hover {
-            transform: scale(1.1);
-        }
-
-        .secondary-navbar form {
-            max-width: 500px;
-            flex-grow: 1;
-        }
-
-        .secondary-navbar .form-control {
-            border-radius: 5px 0 0 5px;
-            transition: border-color 0.3s;
-        }
-
-        .secondary-navbar .form-control:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 5px rgba(231, 111, 81, 0.3);
-        }
-
-        .secondary-navbar .btn-outline-primary {
-            border-radius: 0 5px 5px 0;
-            border-color: var(--primary);
-            color: var(--primary);
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-        .secondary-navbar .btn-outline-primary:hover {
-            background-color: var(--secondary);
-            color: var(--dark);
-        }
-
-        /* Primary Navbar */
-        .navbar {
-            background-color: var(--primary);
-            padding: 10px 0;
-            position: fixed;
-            top: 60px;
-            /* Adjust for secondary navbar height */
-            width: 100%;
-            z-index: 1020;
-            transition: background-color 0.3s ease;
-        }
-
-        .navbar.scrolled {
-            background-color: rgba(44, 74, 110, 0.9);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .nav-link {
-            color: white !important;
-            font-weight: 400;
-            margin: 0 10px;
-            transition: color 0.3s;
-        }
-
-        .nav-link:hover {
-            color: var(--secondary) !important;
-        }
-
-        .nav-link.active {
-            font-weight: 600;
-        }
-
-        .navbar .bi {
-            font-size: 1.5rem;
-            color: white;
-            transition: color 0.3s;
-        }
-
-        .navbar .bi:hover {
-            color: var(--secondary);
-        }
-
-        .nav-item.disabled .nav-link {
-            color: #ffc107 !important;
-            cursor: not-allowed;
-        }
-
-        /* Cart Table */
-        .table {
-            background-color: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .table thead {
-            background-color: var(--primary);
-            color: white;
-        }
-
-        .table tbody tr {
-            transition: background-color 0.3s;
-        }
-
-        .table tbody tr:hover {
-            background-color: var(--light);
-        }
-
-        .table td {
-            vertical-align: middle;
-        }
-
-        .table input[type="number"] {
-            max-width: 80px;
-            border-radius: 5px;
-            transition: border-color 0.3s;
-        }
-
-        .table input[type="number"]:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 5px rgba(231, 111, 81, 0.3);
-        }
-
-        .table .btn-outline-danger {
-            border-color: var(--accent);
-            color: var(--accent);
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-        .table .btn-outline-danger:hover {
-            background-color: var(--accent);
-            color: white;
-        }
-
-        /* Checkout Form */
-        #checkout {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        #checkout h3 {
-            color: var(--primary);
-            font-weight: 600;
-        }
-
-        #checkout .form-label {
-            color: var(--dark);
-            font-weight: 500;
-        }
-
-        #checkout .form-control,
-        #checkout .form-select {
-            border-radius: 5px;
-            transition: border-color 0.3s;
-        }
-
-        #checkout .form-control:focus,
-        #checkout .form-select:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 5px rgba(231, 111, 81, 0.3);
-        }
-
-        #checkout .btn-success {
-            background-color: var(--primary);
-            border: none;
-            padding: 10px 20px;
-            font-weight: 500;
-            transition: background-color 0.3s, transform 0.3s;
-        }
-
-        #checkout .btn-success:hover {
-            background-color: var(--accent);
-            transform: translateY(-2px);
-        }
-
-        .trust-badge img {
-            height: 40px;
-            margin-right: 10px;
-            transition: transform 0.3s;
-        }
-
-        .trust-badge img:hover {
-            transform: scale(1.1);
-        }
-
-        /* Hero Section */
-        .hero-section {
-            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-                url("assets/img/logo_bkassoua_last.png") center/cover no-repeat;
-            height: 600px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .hero-section h1 {
-            font-weight: 600;
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
-
-        .hero-section p {
-            font-size: 1.25rem;
-            margin-bottom: 2rem;
-        }
-
-        .hero-section .btn {
-            background-color: var(--secondary);
-            border: none;
-            padding: 12px 30px;
-            font-weight: 500;
-            transition: background-color 0.3s, transform 0.3s;
-        }
-
-        .hero-section .btn:hover {
-            background-color: var(--accent);
-            transform: translateY(-3px);
-        }
-
-        /* Sidebar */
-        .sidebar {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            margin-bottom: 20px;
-        }
-
-        .sidebar h5 {
-            color: var(--primary);
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-        }
-
-        .accordion-button {
-            color: var(--primary);
-            font-weight: 500;
-            background-color: transparent;
-        }
-
-        .accordion-button:not(.collapsed) {
-            color: var(--primary);
-            background-color: var(--light);
-        }
-
-        .accordion-body a {
-            color: var(--dark);
-            text-decoration: none;
-            padding: 5px 0;
-            display: block;
-            transition: color 0.3s;
-        }
-
-        .accordion-body a:hover {
-            color: var(--accent);
-        }
-
-        .form-label {
-            color: var(--primary);
-            font-weight: 500;
-        }
-
-        /* Product Cards */
-        .product-card {
-            border: none;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-
-        .product-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-        }
-
-        .product-card img {
-            aspect-ratio: 4/3;
-            object-fit: cover;
-            transition: transform 0.3s;
-        }
-
-        .product-card:hover img {
-            transform: scale(1.05);
-        }
-
-        .product-card .card-body {
-            padding: 1.5rem;
-        }
-
-        .product-card .card-title {
-            color: var(--dark);
-            font-weight: 500;
-        }
-
-        .product-card .card-text {
-            color: var(--accent);
-            font-weight: 600;
-        }
-
-        .product-card .btn {
-            border-color: var(--primary);
-            color: var(--primary);
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-        .product-card .btn:hover {
-            background-color: var(--primary);
-            color: white;
-        }
-
-        /* Category Cards */
-        .category-card {
-            position: relative;
-            border-radius: 8px;
-            overflow: hidden;
-            transition: transform 0.3s;
-        }
-
-        .category-card:hover {
-            transform: scale(1.05);
-        }
-
-        .category-card img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            transition: transform 0.3s;
-        }
-
-        .category-card:hover img {
-            transform: scale(1.1);
-        }
-
-        .category-card .title {
-            position: absolute;
-            bottom: 15px;
-            left: 15px;
-            color: white;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 8px 15px;
-            border-radius: 5px;
-            font-weight: 500;
-        }
-
-        /* Contact Section */
-        .contact-section {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .contact-section h2 {
-            color: var(--primary);
-            font-weight: 600;
-            margin-bottom: 1rem;
-        }
-
-        .contact-section p {
-            color: var(--dark);
-            line-height: 1.6;
-        }
-
-        .contact-section form {
-            max-width: 500px;
-        }
-
-        .contact-section .form-control,
-        .contact-section .form-select {
-            border-radius: 5px;
-            transition: border-color 0.3s;
-        }
-
-        .contact-section .form-control:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 5px rgba(231, 111, 81, 0.3);
-        }
-
-        .contact-section .btn-primary {
-            background-color: var(--secondary);
-            border: none;
-            padding: 10px 20px;
-            font-weight: 500;
-            transition: background-color 0.3s, transform 0.3s;
-        }
-
-        .contact-section .btn-primary:hover {
-            background-color: var(--accent);
-            transform: translateY(-2px);
-        }
-
-        /* Contact Info */
-        .contact-info h5 {
-            color: var(--primary);
-            font-weight: 600;
-            margin-bottom: 1rem;
-        }
-
-        .contact-info p {
-            color: var(--dark);
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-        }
-
-        .contact-info .bi {
-            font-size: 1.2rem;
-            color: var(--accent);
-            margin-right: 10px;
-        }
-
-        .map-placeholder {
-            height: 300px;
-            background: #e9ecef;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--dark);
-            font-weight: 500;
-            transition: transform 0.3s;
-        }
-
-        .map-placeholder:hover {
-            transform: scale(1.02);
-        }
-
-        /* Footer */
-        footer {
-            background-color: #1780d6;
-            padding: 3rem 0;
-        }
-
-        footer a {
-            color: var(--secondary);
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-
-        footer a:hover {
-            color: var(--accent);
-        }
-
-        .social-icons .bi {
-            font-size: 1.5rem;
-            margin: 0 10px;
-            color: white;
-            transition: color 0.3s;
-        }
-
-        .social-icons .bi:hover {
-            color: var(--secondary);
-        }
-
-        .newsletter-form input {
-            border-radius: 5px 0 0 5px;
-            border: none;
-        }
-
-        .newsletter-form button {
-            border-radius: 0 5px 5px 0;
-            background-color: var(--secondary);
-            border: none;
-            transition: background-color 0.3s;
-        }
-
-        .newsletter-form button:hover {
-            background-color: var(--accent);
-        }
-
-        /* Responsive Adjustments */
-        @media (max-width: 768px) {
-            .secondary-navbar {
-                padding: 8px 0;
-            }
-
-            .secondary-navbar .navbar-brand img {
-                height: 30px;
-            }
-
-            .secondary-navbar form {
-                max-width: 100%;
-                margin: 5px 0;
-            }
-
-            .navbar {
-                top: 50px;
-            }
-
-            .hero-section {
-                height: 400px;
-            }
-
-            .hero-section h1 {
-                font-size: 2rem;
-            }
-
-            .hero-section p {
-                font-size: 1rem;
-            }
-
-            .sidebar {
-                margin-bottom: 30px;
-            }
-
-            .container.mt-5.pt-5 {
-                margin-top: 120px !important;
-                /* Adjust for dual navbars */
-            }
-        }
-    </style>
-</head>
-
-<body>
-    <!-- Secondary Navbar (Logo + Search) -->
-    <nav class="secondary-navbar">
-        <div class="container">
-            <div class="d-flex align-items-center w-100">
-                <a class="navbar-brand" href="{{ route('home') }}">
-                    <img src="{{ asset('assets/img/logo_nav.png') }}" alt="Bkassoua" />
-                </a>
-                <form class="d-flex ms-auto" action="{{ route('search') }}" method="GET">
-                    <input class="form-control me-2" type="search" name="query" placeholder="Rechercher"
-                        aria-label="Search" />
-                    <button class="btn btn-outline-primary" type="submit">Rechercher</button>
-                </form>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Primary Navbar -->
-    <nav class="navbar navbar-expand-lg">
-        <div class="container">
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav mx-auto">
-                    <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}"
-                            href="{{ route('home') }}">Accueil</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('shop') ? 'active' : '' }}"
-                            href="{{ route('shop') }}">Boutique</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('about') }}">À Propos</a>
-                    </li>
-                    @auth
-                        @if (Auth::user()->role === 'vendor' && isset($vendor) && $vendor->status == 'active')
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('vendor.dashboard') }}">Ma boutique</a>
-                            </li>
-                        @elseif (Auth::user()->role === 'vendor' && isset($vendor) && $vendor->status == 'inactive')
-                            <li class="nav-item">
-                                <a class="nav-link text-warning disabled" href="#">Ma boutique (En cours de
-                                    validation)</a>
-                            </li>
-                        @else
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('vendor.register') }}">Devenir vendeur</a>
-                            </li>
-                        @endif
-                    @endauth
-                </ul>
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('wishlist') }}"><i class="bi bi-heart"></i></a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('cart') }}"><i class="bi bi-cart"></i></a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('profile.edit') }}"><i class="bi bi-person"></i></a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Contenu Principal -->
-    <div class="container mt-5 pt-5">
-        <div class="row">
-            <!-- Sidebar -->
-            <div class="col-md-3">
-                <div class="sidebar">
-                    <h5>Catégories</h5>
-
-                    <div class="accordion" id="categoryAccordion">
-                        @foreach ($categories as $categorie)
-                            <div class="accordion-item">
-                                <h2 class="accordion-header" id="headingOne">
-                                    <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                                        data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                                        {{ $categorie->name }}
-                                    </button>
-                                </h2>
-                            </div>
-                        @endforeach
-                    </div>
-                    <hr />
-                </div>
-            </div>
-            <!-- Contenu Accueil -->
-            <div class="col-md-9">
-                <!-- Hero Section -->
-                <div class="hero-section mb-5">
-                    <div>
-                        <h1>Découvrez les Dernières Tendances</h1>
-                        <p>Explorez notre nouvelle collection dès maintenant</p>
-                        <a href="products.html" class="btn btn-primary btn-lg">Acheter Maintenant</a>
-                    </div>
-                </div>
-                <!-- Nouveautés -->
-                <section class="mb-5">
-                    <h2 class="mb-4">Nouveautés</h2>
-                    <div class="row row-cols-1 row-cols-md-3 g-4">
-                        @foreach ($productsThisWeeks as $productsThisWeek)
-                            <div class="col">
-                                <div class="card product-card h-100">
-                                    <img src="{{ $productsThisWeek->image ? asset('storage/' . $productsThisWeek->image) : asset('images/default-product.jpg') }}"
-                                        class="card-img-top" alt="Robe d'Été" />
-                                    <div class="card-body">
-                                        <h5 class="card-title">{{ $productsThisWeek->name }}</h5>
-                                        <p class="card-text">{{ $productsThisWeek->price }} fcfa</p>
-                                        <a href="{{ route('shop.detail', $productsThisWeek->id) }}"
-                                            class="btn btn-outline-primary">Voir
-                                            Détails</a>
-                                    </div>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                </section>
-                <!-- Meilleures Ventes -->
-                <section class="mb-5 bg-light py-5">
-                    <div class="container">
-                        <h2 class="mb-4">Meilleures Ventes</h2>
-                        <div class="row row-cols-1 row-cols-md-3 g-4">
-                            @foreach ($popularProducts as $popularProduct)
-                                <div class="col">
-                                    <div class="card product-card h-100">
-                                        <img src="{{ $popularProduct->image ? asset('storage/' . $popularProduct->image) : asset('images/default-product.jpg') }}"
-                                            class="card-img-top" alt="Haut en Coton" />
-                                        <div class="card-body">
-                                            <h5 class="card-title">{{ $popularProduct->name }}</h5>
-                                            <p class="card-text">{{ $popularProduct->price }}</p>
-                                            <a href="{{ route('shop.detail', $popularProduct->id) }}"
-                                                class="btn btn-outline-primary">Voir
-                                                Détails</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-                </section>
-                <!-- Par Catégorie -->
-                <section class="mb-5">
-                    <h2 class="mb-4">Parcourir par Catégorie</h2>
-                    <div class="row row-cols-1 row-cols-md-4 g-4">
-                        @foreach ($categories as $categorie)
-                            <div class="col">
-                                <a href="/shop/{{ $categorie->slug }}" class="category-card text-decoration-none">
-                                    <img src="{{ asset('storage/' . $categorie->image) }}"
-                                        alt="{{ $categorie->slug }}" />
-                                    <div class="title">{{ $categorie->name }}</div>
-                                </a>
-                            </div>
-                        @endforeach
-                    </div>
-                </section>
-            </div>
+@extends('layouts.slaves')
+
+@section('title', 'Accueil')
+
+@section('content')
+<!-- Hero Section améliorée -->
+<section @class(['hero-section', 'mb-5'])>
+    <div @class(['hero-content'])>
+        <h1 @class(['hero-title'])>Découvrez les Dernières Tendances</h1>
+        <p @class(['hero-subtitle'])>Explorez notre nouvelle collection de mode élégante et abordable</p>
+        <div @class(['hero-buttons'])>
+            <a href="{{ route('shop') }}" @class(['btn', 'btn-primary'])>
+                <i @class(['bi', 'bi-bag', 'me-2'])></i> Acheter Maintenant
+            </a>
+            <a href="#new-arrivals" @class(['btn', 'btn-outline-light'])>
+                <i @class(['bi', 'bi-arrow-down', 'me-2'])></i> Découvrir
+            </a>
         </div>
     </div>
-
-    <!-- Footer -->
-    <footer class="text-white">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-4 mb-3">
-                    <h5>À Propos</h5>
-                    <p>
-                        Bkassoua est votre destination pour les dernières tendances en
-                        mode. Découvrez nos collections uniques et élégantes.
-                    </p>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <h5>Liens Utiles</h5>
-                    <ul class="list-unstyled">
-                        <li><a href="#">Politique de Confidentialité</a></li>
-                        <li><a href="#">Conditions d'Utilisation</a></li>
-                        <li><a href="contact.html">Nous Contacter</a></li>
-                    </ul>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <h5>Newsletter</h5>
-                    <form class="newsletter-form d-flex">
-                        <input type="email" class="form-control" placeholder="Votre email" required />
-                        <button class="btn btn-primary" type="submit">S'abonner</button>
-                    </form>
-                    <div class="social-icons mt-3">
-                        <a href="#"><i class="bi bi-facebook"></i></a>
-                        <a href="#"><i class="bi bi-instagram"></i></a>
-                        <a href="#"><i class="bi bi-twitter"></i></a>
-                    </div>
-                </div>
-            </div>
-            <hr class="bg-light" />
-            <p class="text-center mb-0">© 2025 Bkassoua. Tous droits réservés.</p>
+    
+    <!-- Indicateurs de statistiques -->
+    <div @class(['hero-stats'])>
+        <div @class(['stat-item'])>
+            <div @class(['stat-number'])>500+</div>
+            <div @class(['stat-label'])>Produits</div>
         </div>
-    </footer>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Navbar scroll effect
-        window.addEventListener("scroll", () => {
-            const navbar = document.querySelector(".navbar");
-            if (window.scrollY > 50) {
-                navbar.classList.add("scrolled");
-            } else {
-                navbar.classList.remove("scrolled");
-            }
-        });
-    </script>
-</body>
-
-</html> --}}
-<!DOCTYPE html>
-<html lang="fr">
-
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Bkassoua - Accueil</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet" />
-    <style>
-        :root {
-            --primary: #1780d6;
-            --secondary: #f4a261;
-            --accent: #e76f51;
-            --light: #f8f9fa;
-            --dark: #264653;
-        }
-
-        body {
-            font-family: "Poppins", sans-serif;
-            background-color: var(--light);
-            padding-top: 135px; /* Ajout pour compenser la hauteur des deux navbars */
-        }
-
-        /* Secondary Navbar (Logo + Search) */
-        .secondary-navbar {
-            background-color: rgba(248, 249, 250, 0.95);
-            padding: 10px 0;
-            position: fixed;
-            top: 0;
-            width: 100%;
-            z-index: 1030;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            transition: background-color 0.3s ease;
-        }
-
-        .secondary-navbar.scrolled {
-            background-color: rgba(248, 249, 250, 1);
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .secondary-navbar .navbar-brand img {
-            height: 40px;
-            transition: transform 0.3s;
-        }
-
-        .secondary-navbar .navbar-brand img:hover {
-            transform: scale(1.1);
-        }
-
-        .secondary-navbar form {
-            max-width: 500px;
-            flex-grow: 1;
-        }
-
-        .secondary-navbar .form-control {
-            border-radius: 5px 0 0 5px;
-            transition: border-color 0.3s;
-        }
-
-        .secondary-navbar .form-control:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 5px rgba(231, 111, 81, 0.3);
-        }
-
-        .secondary-navbar .btn-outline-primary {
-            border-radius: 0 5px 5px 0;
-            border-color: var(--primary);
-            color: var(--primary);
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-        .secondary-navbar .btn-outline-primary:hover {
-            background-color: var(--secondary);
-            color: var(--dark);
-        }
-
-        /* Primary Navbar */
-        .navbar {
-            background-color: var(--primary);
-            padding: 10px 0;
-            position: fixed;
-            top: 60px;
-            width: 100%;
-            z-index: 1020;
-            transition: background-color 0.3s ease;
-        }
-
-        .navbar.scrolled {
-            background-color: rgba(44, 74, 110, 0.9);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .nav-link {
-            color: white !important;
-            font-weight: 400;
-            margin: 0 10px;
-            transition: color 0.3s;
-        }
-
-        .nav-link:hover {
-            color: var(--secondary) !important;
-        }
-
-        .nav-link.active {
-            font-weight: 600;
-        }
-
-        .navbar .bi {
-            font-size: 1.5rem;
-            color: white;
-            transition: color 0.3s;
-        }
-
-        .navbar .bi:hover {
-            color: var(--secondary);
-        }
-
-        .nav-item.disabled .nav-link {
-            color: #ffc107 !important;
-            cursor: not-allowed;
-        }
-
-        /* Cart Table */
-        .table {
-            background-color: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .table thead {
-            background-color: var(--primary);
-            color: white;
-        }
-
-        .table tbody tr {
-            transition: background-color 0.3s;
-        }
-
-        .table tbody tr:hover {
-            background-color: var(--light);
-        }
-
-        .table td {
-            vertical-align: middle;
-        }
-
-        .table input[type="number"] {
-            max-width: 80px;
-            border-radius: 5px;
-            transition: border-color 0.3s;
-        }
-
-        .table input[type="number"]:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 5px rgba(231, 111, 81, 0.3);
-        }
-
-        .table .btn-outline-danger {
-            border-color: var(--accent);
-            color: var(--accent);
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-        .table .btn-outline-danger:hover {
-            background-color: var(--accent);
-            color: white;
-        }
-
-        /* Checkout Form */
-        #checkout {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        #checkout h3 {
-            color: var(--primary);
-            font-weight: 600;
-        }
-
-        #checkout .form-label {
-            color: var(--dark);
-            font-weight: 500;
-        }
-
-        #checkout .form-control,
-        #checkout .form-select {
-            border-radius: 5px;
-            transition: border-color 0.3s;
-        }
-
-        #checkout .form-control:focus,
-        #checkout .form-select:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 5px rgba(231, 111, 81, 0.3);
-        }
-
-        #checkout .btn-success {
-            background-color: var(--primary);
-            border: none;
-            padding: 10px 20px;
-            font-weight: 500;
-            transition: background-color 0.3s, transform 0.3s;
-        }
-
-        #checkout .btn-success:hover {
-            background-color: var(--accent);
-            transform: translateY(-2px);
-        }
-
-        .trust-badge img {
-            height: 40px;
-            margin-right: 10px;
-            transition: transform 0.3s;
-        }
-
-        .trust-badge img:hover {
-            transform: scale(1.1);
-        }
-
-        /* Hero Section */
-        .hero-section {
-            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-                url("assets/img/logo_bkassoua_last.png") center/cover no-repeat;
-            height: 600px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .hero-section h1 {
-            font-weight: 600;
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
-
-        .hero-section p {
-            font-size: 1.25rem;
-            margin-bottom: 2rem;
-        }
-
-        .hero-section .btn {
-            background-color: var(--secondary);
-            border: none;
-            padding: 12px 30px;
-            font-weight: 500;
-            transition: background-color 0.3s, transform 0.3s;
-        }
-
-        .hero-section .btn:hover {
-            background-color: var(--accent);
-            transform: translateY(-3px);
-        }
-
-        /* Sidebar */
-        .sidebar {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            margin-bottom: 20px;
-        }
-
-        .sidebar h5 {
-            color: var(--primary);
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-        }
-
-        .accordion-button {
-            color: var(--primary);
-            font-weight: 500;
-            background-color: transparent;
-        }
-
-        .accordion-button:not(.collapsed) {
-            color: var(--primary);
-            background-color: var(--light);
-        }
-
-        .accordion-body a {
-            color: var(--dark);
-            text-decoration: none;
-            padding: 5px 0;
-            display: block;
-            transition: color 0.3s;
-        }
-
-        .accordion-body a:hover {
-            color: var(--accent);
-        }
-
-        .form-label {
-            color: var(--primary);
-            font-weight: 500;
-        }
-
-        /* Product Cards */
-        .product-card {
-            border: none;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-
-        .product-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-        }
-
-        .product-card img {
-            aspect-ratio: 4/3;
-            object-fit: cover;
-            transition: transform 0.3s;
-        }
-
-        .product-card:hover img {
-            transform: scale(1.05);
-        }
-
-        .product-card .card-body {
-            padding: 1.5rem;
-        }
-
-        .product-card .card-title {
-            color: var(--dark);
-            font-weight: 500;
-        }
-
-        .product-card .card-text {
-            color: var(--accent);
-            font-weight: 600;
-        }
-
-        .product-card .btn {
-            border-color: var(--primary);
-            color: var(--primary);
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-        .product-card .btn:hover {
-            background-color: var(--primary);
-            color: white;
-        }
-
-        /* Category Cards */
-        .category-card {
-            position: relative;
-            border-radius: 8px;
-            overflow: hidden;
-            transition: transform 0.3s;
-        }
-
-        .category-card:hover {
-            transform: scale(1.05);
-        }
-
-        .category-card img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            transition: transform 0.3s;
-        }
-
-        .category-card:hover img {
-            transform: scale(1.1);
-        }
-
-        .category-card .title {
-            position: absolute;
-            bottom: 15px;
-            left: 15px;
-            color: white;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 8px 15px;
-            border-radius: 5px;
-            font-weight: 500;
-        }
-
-        /* Contact Section */
-        .contact-section {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .contact-section h2 {
-            color: var(--primary);
-            font-weight: 600;
-            margin-bottom: 1rem;
-        }
-
-        .contact-section p {
-            color: var(--dark);
-            line-height: 1.6;
-        }
-
-        .contact-section form {
-            max-width: 500px;
-        }
-
-        .contact-section .form-control,
-        .contact-section .form-select {
-            border-radius: 5px;
-            transition: border-color 0.3s;
-        }
-
-        .contact-section .form-control:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 5px rgba(231, 111, 81, 0.3);
-        }
-
-        .contact-section .btn-primary {
-            background-color: var(--secondary);
-            border: none;
-            padding: 10px 20px;
-            font-weight: 500;
-            transition: background-color 0.3s, transform 0.3s;
-        }
-
-        .contact-section .btn-primary:hover {
-            background-color: var(--accent);
-            transform: translateY(-2px);
-        }
-
-        /* Contact Info */
-        .contact-info h5 {
-            color: var(--primary);
-            font-weight: 600;
-            margin-bottom: 1rem;
-        }
-
-        .contact-info p {
-            color: var(--dark);
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-        }
-
-        .contact-info .bi {
-            font-size: 1.2rem;
-            color: var(--accent);
-            margin-right: 10px;
-        }
-
-        .map-placeholder {
-            height: 300px;
-            background: #e9ecef;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--dark);
-            font-weight: 500;
-            transition: transform 0.3s;
-        }
-
-        .map-placeholder:hover {
-            transform: scale(1.02);
-        }
-
-        /* Footer */
-        footer {
-            background-color: #1780d6;
-            padding: 3rem 0;
-        }
-
-        footer a {
-            color: var(--secondary);
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-
-        footer a:hover {
-            color: var(--accent);
-        }
-
-        .social-icons .bi {
-            font-size: 1.5rem;
-            margin: 0 10px;
-            color: white;
-            transition: color 0.3s;
-        }
-
-        .social-icons .bi:hover {
-            color: var(--secondary);
-        }
-
-        .newsletter-form input {
-            border-radius: 5px 0 0 5px;
-            border: none;
-        }
-
-        .newsletter-form button {
-            border-radius: 0 5px 5px 0;
-            background-color: var(--secondary);
-            border: none;
-            transition: background-color 0.3s;
-        }
-
-        .newsletter-form button:hover {
-            background-color: var(--accent);
-        }
-
-        /* Responsive Adjustments */
-        @media (max-width: 768px) {
-            body {
-                padding-top: 100px; /* Ajustement pour mobile */
-            }
-
-            .secondary-navbar {
-                padding: 8px 0;
-            }
-
-            .secondary-navbar .navbar-brand img {
-                height: 30px;
-            }
-
-            .secondary-navbar form {
-                max-width: 100%;
-                margin: 5px 0;
-            }
-
-            .navbar {
-                top: 50px;
-            }
-
-            .hero-section {
-                height: 400px;
-            }
-
-            .hero-section h1 {
-                font-size: 2rem;
-            }
-
-            .hero-section p {
-                font-size: 1rem;
-            }
-
-            .sidebar {
-                margin-bottom: 30px;
-            }
-        }
-    </style>
-</head>
-
-<body>
-    <!-- Secondary Navbar (Logo + Search) -->
-    <nav class="secondary-navbar">
-        <div class="container">
-            <div class="d-flex align-items-center w-100">
-                <a class="navbar-brand" href="{{ route('home') }}">
-                    <img src="{{ asset('assets/img/logo_nav.png') }}" alt="Bkassoua" />
-                </a>
-                <form class="d-flex ms-auto" action="{{ route('search') }}" method="GET">
-                    <input class="form-control me-2" type="search" name="query" placeholder="Rechercher"
-                        aria-label="Search" />
-                    <button class="btn btn-outline-primary" type="submit">Rechercher</button>
-                </form>
-            </div>
+        <div @class(['stat-item'])>
+            <div @class(['stat-number'])>95%</div>
+            <div @class(['stat-label'])>Clients Satisfaits</div>
         </div>
-    </nav>
-
-    <!-- Primary Navbar -->
-    <nav class="navbar navbar-expand-lg">
-        <div class="container">
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav mx-auto">
-                    <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}"
-                            href="{{ route('home') }}">Accueil</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('shop') ? 'active' : '' }}"
-                            href="{{ route('shop') }}">Boutique</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('about') }}">À Propos</a>
-                    </li>
-                    @auth
-                        @if (Auth::user()->role === 'vendor' && isset($vendor) && $vendor->status == 'active')
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('vendor.dashboard') }}">Ma boutique</a>
-                            </li>
-                        @elseif (Auth::user()->role === 'vendor' && isset($vendor) && $vendor->status == 'inactive')
-                            <li class="nav-item">
-                                <a class="nav-link text-warning disabled" href="#">Ma boutique (En cours de
-                                    validation)</a>
-                            </li>
-                        @else
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('vendor.register') }}">Devenir vendeur</a>
-                            </li>
-                        @endif
-                    @endauth
-                </ul>
-                <ul class="navbar-nav ms-auto">
-                    {{-- <li class="nav-item">
-                        <a class="nav-link" href="{{ route('wishlist') }}"><i class="bi bi-heart"></i></a>
-                    </li> --}}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('cart') }}"><i class="bi bi-cart"></i></a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('profile.edit') }}"><i class="bi bi-person"></i></a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Contenu Principal -->
-    <div class="container">
-        <div class="row">
-            <!-- Sidebar -->
-            <div class="col-md-3">
-                <div class="sidebar">
-                    <h5>Catégories</h5>
-                    <div class="accordion" id="categoryAccordion">
-                        @foreach ($categories as $categorie)
-                            <div class="accordion-item">
-                                <h2 class="accordion-header" id="headingOne">
-                                    <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                                        data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                                        {{ $categorie->name }}
-                                    </button>
-                                </h2>
-                            </div>
-                        @endforeach
-                    </div>
-                    <hr />
-                </div>
-            </div>
-            <!-- Contenu Accueil -->
-            <div class="col-md-9">
-                <!-- Hero Section -->
-                <div class="hero-section mb-5">
-                    <div>
-                        <h1>Découvrez les Dernières Tendances</h1>
-                        <p>Explorez notre nouvelle collection dès maintenant</p>
-                        <a href="products.html" class="btn btn-primary btn-lg">Acheter Maintenant</a>
-                    </div>
-                </div>
-                <!-- Nouveautés -->
-                <section class="mb-5">
-                    <h2 class="mb-4">Nouveautés</h2>
-                    <div class="row row-cols-1 row-cols-md-3 g-4">
-                        @foreach ($productsThisWeeks as $productsThisWeek)
-                            <div class="col">
-                                <div class="card product-card h-100">
-                                    <img src="{{ $productsThisWeek->image ? asset('storage/' . $productsThisWeek->image) : asset('images/default-product.jpg') }}"
-                                        class="card-img-top" alt="Robe d'Été" />
-                                    <div class="card-body">
-                                        <h5 class="card-title">{{ $productsThisWeek->name }}</h5>
-                                        <p class="card-text">{{ $productsThisWeek->price }} fcfa</p>
-                                        <a href="{{ route('shop.detail', $productsThisWeek->id) }}"
-                                            class="btn btn-outline-primary">Voir
-                                            Détails</a>
-                                    </div>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                </section>
-                <!-- Meilleures Ventes -->
-                <section class="mb-5 bg-light py-5">
-                    <div class="container">
-                        <h2 class="mb-4">Meilleures Ventes</h2>
-                        <div class="row row-cols-1 row-cols-md-3 g-4">
-                            @foreach ($popularProducts as $popularProduct)
-                                <div class="col">
-                                    <div class="card product-card h-100">
-                                        <img src="{{ $popularProduct->image ? asset('storage/' . $popularProduct->image) : asset('images/default-product.jpg') }}"
-                                            class="card-img-top" alt="Haut en Coton" />
-                                        <div class="card-body">
-                                            <h5 class="card-title">{{ $popularProduct->name }}</h5>
-                                            <p class="card-text">{{ $popularProduct->price }}</p>
-                                            <a href="{{ route('shop.detail', $popularProduct->id) }}"
-                                                class="btn btn-outline-primary">Voir
-                                                Détails</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-                </section>
-                <!-- Par Catégorie -->
-                <section class="mb-5">
-                    <h2 class="mb-4">Parcourir par Catégorie</h2>
-                    <div class="row row-cols-1 row-cols-md-4 g-4">
-                        @foreach ($categories as $categorie)
-                            <div class="col">
-                                <a href="/shop/{{ $categorie->slug }}" class="category-card text-decoration-none">
-                                    <img src="{{ asset('storage/' . $categorie->image) }}"
-                                        alt="{{ $categorie->slug }}" />
-                                    <div class="title">{{ $categorie->name }}</div>
-                                </a>
-                            </div>
-                        @endforeach
-                    </div>
-                </section>
-            </div>
+        <div @class(['stat-item'])>
+            <div @class(['stat-number'])>24h</div>
+            <div @class(['stat-label'])>Livraison Express</div>
         </div>
     </div>
+</section>
 
-    <!-- Footer -->
-    <footer class="text-white">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-4 mb-3">
-                    <h5>À Propos</h5>
-                    <p>
-                        Bkassoua est votre destination pour les dernières tendances en
-                        mode. Découvrez nos collections uniques et élégantes.
-                    </p>
+<div @class(['container'])>
+    <div @class(['row'])>
+        <!-- Sidebar améliorée -->
+        <div @class(['col-lg-3', 'col-md-4', 'mb-4'])>
+            <div @class(['sidebar'])>
+                <h5 @class(['sidebar-title'])>
+                    <i @class(['bi', 'bi-list-ul'])></i>
+                    Catégories
+                </h5>
+                
+                <div @class(['filter-section'])>
+                    <div @class(['filter-options'])>
+                        @foreach ($categories as $categorie)
+                        <div @class(['filter-option'])>
+                            <a href="/shop/{{ $categorie->slug }}" @class(['d-flex', 'align-items-center', 'justify-content-between', 'text-decoration-none', 'text-dark'])>
+                                <span>{{ $categorie->name }}</span>
+                                <i @class(['bi', 'bi-chevron-right', 'text-muted'])></i>
+                            </a>
+                        </div>
+                        @endforeach
+                    </div>
                 </div>
-                <div class="col-md-4 mb-3">
-                    <h5>Liens Utiles</h5>
-                    <ul class="list-unstyled">
-                        <li><a href="#">Politique de Confidentialité</a></li>
-                        <li><a href="#">Conditions d'Utilisation</a></li>
-                        <li><a href="contact.html">Nous Contacter</a></li>
-                    </ul>
+
+                <!-- Bannière promotionnelle -->
+                <div @class(['promo-banner', 'mt-4', 'p-3', 'rounded', 'text-white', 'text-center']) 
+                     style="background: linear-gradient(135deg, var(--primary), var(--accent));">
+                    <i @class(['bi', 'bi-lightning', 'display-6', 'mb-2'])></i>
+                    <h6 @class(['mb-2'])>Soldes d'Été</h6>
+                    <p @class(['small', 'mb-2'])>Jusqu'à -50% sur toute la collection</p>
+                    <a href="{{ route('shop') }}" @class(['btn', 'btn-sm', 'btn-light'])>Profiter</a>
                 </div>
-                <div class="col-md-4 mb-3">
-                    <h5>Newsletter</h5>
-                    <form class="newsletter-form d-flex">
-                        <input type="email" class="form-control" placeholder="Votre email" required />
-                        <button class="btn btn-primary" type="submit">S'abonner</button>
-                    </form>
-                    <div class="social-icons mt-3">
-                        <a href="#"><i class="bi bi-facebook"></i></a>
-                        <a href="#"><i class="bi bi-instagram"></i></a>
-                        <a href="#"><i class="bi bi-twitter"></i></a>
+            </div>
+
+            <!-- Services -->
+            <div @class(['sidebar', 'mt-4'])>
+                <h5 @class(['sidebar-title'])>
+                    <i @class(['bi', 'bi-shield-check'])></i>
+                    Nos Services
+                </h5>
+                <div @class(['service-list'])>
+                    <div @class(['service-item', 'd-flex', 'align-items-center', 'mb-3'])>
+                        <i @class(['bi', 'bi-truck', 'text-primary', 'me-3'])></i>
+                        <div>
+                            <div @class(['fw-semibold'])>Livraison Rapide</div>
+                            <small @class(['text-muted'])>Sous 24-48h</small>
+                        </div>
+                    </div>
+                    <div @class(['service-item', 'd-flex', 'align-items-center', 'mb-3'])>
+                        <i @class(['bi', 'bi-arrow-left-right', 'text-primary', 'me-3'])></i>
+                        <div>
+                            <div @class(['fw-semibold'])>Retours Faciles</div>
+                            <small @class(['text-muted'])>30 jours pour changer d'avis</small>
+                        </div>
+                    </div>
+                    <div @class(['service-item', 'd-flex', 'align-items-center'])>
+                        <i @class(['bi', 'bi-lock', 'text-primary', 'me-3'])></i>
+                        <div>
+                            <div @class(['fw-semibold'])>Paiement Sécurisé</div>
+                            <small @class(['text-muted'])>Cryptage SSL</small>
+                        </div>
                     </div>
                 </div>
             </div>
-            <hr class="bg-light" />
-            <p class="text-center mb-0">© 2025 Bkassoua. Tous droits réservés.</p>
         </div>
-    </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Navbar scroll effect
-        window.addEventListener("scroll", () => {
-            const navbar = document.querySelector(".navbar");
-            if (window.scrollY > 50) {
-                navbar.classList.add("scrolled");
-            } else {
-                navbar.classList.remove("scrolled");
+        <!-- Contenu principal amélioré -->
+        <div @class(['col-lg-9', 'col-md-8'])>
+            <!-- Section Nouveautés -->
+            <section id="new-arrivals" @class(['mb-5'])>
+                <div @class(['section-title'])>
+                    <h2>Nouveautés</h2>
+                    <p @class(['text-muted'])>Découvrez les dernières arrivées</p>
+                </div>
+                
+                <div @class(['products-grid'])>
+                    @foreach ($productsThisWeeks as $productsThisWeek)
+                    <div @class(['product-card', 'fade-in'])>
+                        <div @class(['product-image'])>
+                            <img src="{{ $productsThisWeek->image ? asset('storage/' . $productsThisWeek->image) : asset('images/default-product.jpg') }}" 
+                                 alt="{{ $productsThisWeek->name }}">
+                            <span @class(['product-badge', 'new'])>Nouveau</span>
+                            <div @class(['product-actions'])>
+                                <button @class(['action-btn']) title="Ajouter aux favoris">
+                                    <i @class(['bi', 'bi-heart'])></i>
+                                </button>
+                                <button @class(['action-btn']) title="Vue rapide">
+                                    <i @class(['bi', 'bi-eye'])></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div @class(['product-info'])>
+                            <div @class(['product-category'])>{{ $productsThisWeek->category->name ?? 'Nouveauté' }}</div>
+                            <h3 @class(['product-title'])>{{ $productsThisWeek->name }}</h3>
+                            
+                            <div @class(['product-rating'])>
+                                <div @class(['stars'])>
+                                    <i @class(['bi', 'bi-star-fill'])></i>
+                                    <i @class(['bi', 'bi-star-fill'])></i>
+                                    <i @class(['bi', 'bi-star-fill'])></i>
+                                    <i @class(['bi', 'bi-star-fill'])></i>
+                                    <i @class(['bi', 'bi-star'])></i>
+                                </div>
+                                <span @class(['rating-count'])>({{ rand(5, 20) }})</span>
+                            </div>
+                            
+                            <div @class(['product-price'])>
+                                <span @class(['current-price'])>{{ number_format($productsThisWeek->price, 0, ',', ' ') }} fcfa</span>
+                            </div>
+                            
+                            <div @class(['d-flex', 'gap-2', 'mt-3'])>
+                                <a href="{{ route('shop.detail', $productsThisWeek->id) }}" 
+                                   @class(['btn', 'btn-outline-primary', 'flex-fill', 'd-flex', 'align-items-center', 'justify-content-center', 'gap-2'])>
+                                    <i @class(['bi', 'bi-eye'])></i>
+                                    <span>Voir détails</span>
+                                </a>
+                                <button @class(['btn', 'btn-primary', 'add-to-cart']) data-product-id="{{ $productsThisWeek->id }}">
+                                    <i @class(['bi', 'bi-cart-plus'])></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+                
+                <div @class(['text-center', 'mt-4'])>
+                    <a href="{{ route('shop') }}" @class(['btn', 'btn-outline-primary'])>
+                        Voir tous les nouveaux produits <i @class(['bi', 'bi-arrow-right', 'ms-2'])></i>
+                    </a>
+                </div>
+            </section>
+
+            <!-- Section Meilleures Ventes -->
+            <section @class(['mb-5', 'py-5', 'bg-light', 'rounded'])>
+                <div @class(['container'])>
+                    <div @class(['section-title'])>
+                        <h2>Meilleures Ventes</h2>
+                        <p @class(['text-muted'])>Les produits préférés de nos clients</p>
+                    </div>
+                    
+                    <div @class(['products-grid'])>
+                        @foreach ($popularProducts as $popularProduct)
+                        <div @class(['product-card', 'fade-in'])>
+                            <div @class(['product-image'])>
+                                <img src="{{ $popularProduct->image ? asset('storage/' . $popularProduct->image) : asset('images/default-product.jpg') }}" 
+                                     alt="{{ $popularProduct->name }}">
+                                <span @class(['product-badge'])>Populaire</span>
+                                <div @class(['product-actions'])>
+                                    <button @class(['action-btn']) title="Ajouter aux favoris">
+                                        <i @class(['bi', 'bi-heart'])></i>
+                                    </button>
+                                    <button @class(['action-btn']) title="Vue rapide">
+                                        <i @class(['bi', 'bi-eye'])></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div @class(['product-info'])>
+                                <div @class(['product-category'])>{{ $popularProduct->category->name ?? 'Best-seller' }}</div>
+                                <h3 @class(['product-title'])>{{ $popularProduct->name }}</h3>
+                                
+                                <div @class(['product-rating'])>
+                                    <div @class(['stars'])>
+                                        <i @class(['bi', 'bi-star-fill'])></i>
+                                        <i @class(['bi', 'bi-star-fill'])></i>
+                                        <i @class(['bi', 'bi-star-fill'])></i>
+                                        <i @class(['bi', 'bi-star-fill'])></i>
+                                        <i @class(['bi', 'bi-star-half'])></i>
+                                    </div>
+                                    <span @class(['rating-count'])>({{ rand(20, 100) }})</span>
+                                </div>
+                                
+                                <div @class(['product-price'])>
+                                    <span @class(['current-price'])>{{ number_format($popularProduct->price, 0, ',', ' ') }} fcfa</span>
+                                </div>
+                                
+                                <div @class(['d-flex', 'gap-2', 'mt-3'])>
+                                    <a href="{{ route('shop.detail', $popularProduct->id) }}" 
+                                       @class(['btn', 'btn-outline-primary', 'flex-fill', 'd-flex', 'align-items-center', 'justify-content-center', 'gap-2'])>
+                                        <i @class(['bi', 'bi-eye'])></i>
+                                        <span>Voir détails</span>
+                                    </a>
+                                    <button @class(['btn', 'btn-primary', 'add-to-cart']) data-product-id="{{ $popularProduct->id }}">
+                                        <i @class(['bi', 'bi-cart-plus'])></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section Catégories améliorée -->
+            <section @class(['mb-5'])>
+                <div @class(['section-title'])>
+                    <h2>Parcourir par Catégorie</h2>
+                    <p @class(['text-muted'])>Trouvez ce qui vous correspond</p>
+                </div>
+                
+                <div @class(['categories-grid'])>
+                    @foreach ($categories as $categorie)
+                    <a href="/shop/{{ $categorie->slug }}" @class(['category-card', 'text-decoration-none'])>
+                        <div @class(['category-image'])>
+                            <img src="{{ asset('storage/' . $categorie->image) }}" alt="{{ $categorie->name }}">
+                            <div @class(['category-overlay'])>
+                                <h5 @class(['category-title'])>{{ $categorie->name }}</h5>
+                                <span @class(['category-link'])>Explorer <i @class(['bi', 'bi-arrow-right'])></i></span>
+                            </div>
+                        </div>
+                    </a>
+                    @endforeach
+                </div>
+            </section>
+
+            <!-- Section Avantages -->
+            <section @class(['mb-5'])>
+                <div @class(['row', 'g-4'])>
+                    <div @class(['col-md-4'])>
+                        <div @class(['feature-card', 'text-center', 'p-4', 'rounded'])>
+                            <i @class(['bi', 'bi-star', 'feature-icon'])></i>
+                            <h5 @class(['mt-3'])>Qualité Premium</h5>
+                            <p @class(['text-muted'])>Des matériaux de haute qualité pour un confort optimal</p>
+                        </div>
+                    </div>
+                    <div @class(['col-md-4'])>
+                        <div @class(['feature-card', 'text-center', 'p-4', 'rounded'])>
+                            <i @class(['bi', 'bi-truck', 'feature-icon'])></i>
+                            <h5 @class(['mt-3'])>Livraison Rapide</h5>
+                            <p @class(['text-muted'])>Expédition sous 24h et livraison gratuite dès 50,000 fcfa</p>
+                        </div>
+                    </div>
+                    <div @class(['col-md-4'])>
+                        <div @class(['feature-card', 'text-center', 'p-4', 'rounded'])>
+                            <i @class(['bi', 'bi-headset', 'feature-icon'])></i>
+                            <h5 @class(['mt-3'])>Support 7j/7</h5>
+                            <p @class(['text-muted'])>Notre équipe est là pour vous accompagner</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts pour la page d'accueil -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animation des statistiques du hero
+    function animateStats() {
+        const stats = document.querySelectorAll('.stat-number');
+        stats.forEach(stat => {
+            const target = parseInt(stat.textContent);
+            let current = 0;
+            const increment = target / 50;
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    stat.textContent = target + (stat.textContent.includes('+') ? '+' : '');
+                    clearInterval(timer);
+                } else {
+                    stat.textContent = Math.floor(current) + (stat.textContent.includes('+') ? '+' : '');
+                }
+            }, 40);
+        });
+    }
+
+    // Observer pour l'animation des statistiques
+    const heroObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                animateStats();
+                heroObserver.unobserve(entry.target);
             }
         });
-    </script>
-</body>
+    });
 
-</html>
+    const heroSection = document.querySelector('.hero-section');
+    if (heroSection) {
+        heroObserver.observe(heroSection);
+    }
+
+    // Animation des cartes produits
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('fade-in');
+            }
+        });
+    }, observerOptions);
+
+    document.querySelectorAll('.product-card, .feature-card').forEach(card => {
+        observer.observe(card);
+    });
+
+    // Ajout au panier
+    document.querySelectorAll('.add-to-cart').forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.getAttribute('data-product-id');
+            const button = this;
+            
+            // Animation d'ajout
+            button.innerHTML = '<i @class(['bi', 'bi-check-lg'])></i>';
+            button.classList.add('btn-success');
+            button.classList.remove('btn-primary');
+            
+            // Réinitialiser après 2 secondes
+            setTimeout(() => {
+                button.innerHTML = '<i @class(['bi', 'bi-cart-plus'])></i>';
+                button.classList.remove('btn-success');
+                button.classList.add('btn-primary');
+            }, 2000);
+            
+            // Ici, vous pouvez ajouter l'appel AJAX pour ajouter au panier
+            console.log('Produit ajouté au panier:', productId);
+        });
+    });
+
+    // Smooth scroll pour les liens d'ancrage
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+});
+</script>
+
+<style>
+/* Styles spécifiques à la page d'accueil */
+.hero-stats {
+    position: absolute;
+    bottom: 30px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    z-index: 2;
+}
+
+.stat-item {
+    text-align: center;
+    color: white;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.stat-number {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    opacity: 0.9;
+}
+
+.categories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.category-card {
+    background: white;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    display: block;
+}
+
+.category-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.category-image {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+}
+
+.category-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: var(--transition);
+}
+
+.category-card:hover .category-image img {
+    transform: scale(1.1);
+}
+
+.category-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+    color: white;
+    padding: 20px;
+    transform: translateY(10px);
+    transition: var(--transition);
+}
+
+.category-card:hover .category-overlay {
+    transform: translateY(0);
+}
+
+.category-title {
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.category-link {
+    font-size: 0.875rem;
+    opacity: 0;
+    transition: var(--transition);
+}
+
+.category-card:hover .category-link {
+    opacity: 1;
+}
+
+.feature-card {
+    background: white;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.feature-icon {
+    font-size: 2.5rem;
+    color: var(--primary);
+}
+
+.promo-banner {
+    transition: var(--transition);
+}
+
+.promo-banner:hover {
+    transform: scale(1.02);
+}
+
+.service-list {
+    padding: 0;
+}
+
+.service-item {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--gray-light);
+}
+
+.service-item:last-child {
+    border-bottom: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .hero-stats {
+        position: static;
+        margin-top: 30px;
+        gap: 20px;
+    }
+    
+    .stat-number {
+        font-size: 1.4rem;
+    }
+    
+    .categories-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .feature-card {
+        margin-bottom: 20px;
+    }
+}
+
+@media (max-width: 576px) {
+    .hero-title {
+        font-size: 2.2rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.1rem;
+    }
+    
+    .hero-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .hero-buttons .btn {
+        width: 100%;
+        max-width: 250px;
+        margin-bottom: 10px;
+    }
+}
+</style>
+@endsection

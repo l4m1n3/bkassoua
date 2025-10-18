@@ -22,7 +22,7 @@ class OrderController extends Controller
     public function showCheckout()
     {
         $categories = Category::all();
-        return view('shop.checkout', compact('categories'));
+        return view('shop.shop', compact('categories'));
     }
     // Afficher les commandes reçues par le vendeur
     public function index()
@@ -31,7 +31,7 @@ class OrderController extends Controller
 
         return view('vendor.orders.index', compact('orders'));
     }
- 
+
     // Voir les détails d'une commande
     // public function show(Order $order)
     // {
@@ -63,7 +63,7 @@ class OrderController extends Controller
         ]);
 
         foreach ($request->items as $item) {
-            $quantity=$item['quantity'];
+            $quantity = $item['quantity'];
             OrderItem::create([
                 'order_id' => $order->id,
                 'product_id' => $item['product_id'],
@@ -71,7 +71,7 @@ class OrderController extends Controller
                 'price' => $item['price'],
             ]);
             // $user = User::where('id',Auth::user()->id)->update(['role'=>'vendor']);
-           $product= Product::where('id', $item['product_id'])->update(['stock_quantity'=>--$quantity]);
+            $product = Product::where('id', $item['product_id'])->update(['stock_quantity' => --$quantity]);
         }
 
         return response()->json(['message' => 'Commande créée avec succès.', 'order' => $order]);
@@ -121,7 +121,7 @@ class OrderController extends Controller
 
     //     return redirect()->route('shop', $order->id)->with('success', 'Commande passée avec succès.');
     // }
-   
+
     // public function placeOrder(Request $request)
     // {
     //     $user = Auth::user();
@@ -184,84 +184,83 @@ class OrderController extends Controller
     //     }
     // }
     public function placeOrder(Request $request)
-{
-    $user = Auth::user();
-    $carts = Cart::with('product')->where('user_id', $user->id)->get();
+    {
+        $user = Auth::user();
+        $carts = Cart::with('product')->where('user_id', $user->id)->get();
 
-    if ($carts->isEmpty()) {
-        return redirect()->back()->with('error', 'Votre panier est vide.');
-    }
-
-    // Vérification des produits
-    foreach ($carts as $cart) {
-        if (!$cart->product) {
-            return redirect()->back()->with('error', 'Un produit dans votre panier n\'existe plus.');
+        if ($carts->isEmpty()) {
+            return redirect()->back()->with('error', 'Votre panier est vide.');
         }
-    }
 
-    // Calcul du total
-    $totalAmount = $carts->sum(function ($cart) {
-        return $cart->product->price * $cart->quantity;
-    });
-
-    // Démarrer une transaction
-    DB::beginTransaction();
-
-    try {
-        // Créer la commande
-        $order = Order::create([
-            'user_id' => $user->id,
-            'total_amount' => $totalAmount,
-            'status' => 'pending',
-        ]);
-
-        // Créer le paiement associé
-        $payment = Payment::create([
-            'order_id' => $order->id,
-            'amount' => $totalAmount,
-            'status' => 'pending', // ou 'completed' selon votre flux
-            'payment_method' => $request->payment_method ?? 'unknown',
-            'transaction_id' => Str::uuid(), // ou un ID de transaction réel
-        ]);
-
-        // Ajouter les produits à la commande
-        $productNames = [];
+        // Vérification des produits
         foreach ($carts as $cart) {
-            OrderItem::create([
-                'order_id' => $order->id,
-                'product_id' => $cart->product->id,
-                'quantity' => $cart->quantity,
-                'price' => $cart->product->price,
-            ]);
-            $productNames[] = $cart->product->name;
+            if (!$cart->product) {
+                return redirect()->back()->with('error', 'Un produit dans votre panier n\'existe plus.');
+            }
         }
 
-        // Vider le panier
-        Cart::where('user_id', $user->id)->delete();
+        // Calcul du total
+        $totalAmount = $carts->sum(function ($cart) {
+            return $cart->product->price * $cart->quantity;
+        });
 
-        // Notifications
-        $productsList = implode(', ', $productNames);
-        Notification::create([
-            'user_id' => $user->id,
-            'title' => 'Nouvelle commande',
-            'message' => "Vous avez commandé : $productsList. Paiement en attente.",
-            'type' => 'order',
-            'read' => false,
-        ]);
+        // Démarrer une transaction
+        DB::beginTransaction();
 
-        // Notifier l'admin si nécessaire
-        // ...
+        try {
+            // Créer la commande
+            $order = Order::create([
+                'user_id' => $user->id,
+                'total_amount' => $totalAmount,
+                'status' => 'pending',
+            ]);
 
-        // Valider la transaction
-        DB::commit();
+            // Créer le paiement associé
+            $payment = Payment::create([
+                'order_id' => $order->id,
+                'amount' => $totalAmount,
+                'status' => 'pending', // ou 'completed' selon votre flux
+                'payment_method' => $request->payment_method ?? 'unknown',
+                'transaction_id' => Str::uuid(), // ou un ID de transaction réel
+            ]);
 
-        return redirect()->route('order.confirmation', ['order' => $order->id])
-                        ->with('success', 'Commande passée avec succès. Paiement en attente.');
+            // Ajouter les produits à la commande
+            $productNames = [];
+            foreach ($carts as $cart) {
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $cart->product->id,
+                    'quantity' => $cart->quantity,
+                    'price' => $cart->product->price,
+                ]);
+                $productNames[] = $cart->product->name;
+            }
 
-    } catch (\Exception $e) {
-        DB::rollBack();
-        Log::error('Erreur lors de la commande : ' . $e->getMessage());
-        return redirect()->back()->with('error', 'Une erreur est survenue : ' . $e->getMessage());
+            // Vider le panier
+            Cart::where('user_id', $user->id)->delete();
+
+            // Notifications
+            $productsList = implode(', ', $productNames);
+            Notification::create([
+                'user_id' => $user->id,
+                'title' => 'Nouvelle commande',
+                'message' => "Vous avez commandé : $productsList. Paiement en attente.",
+                'type' => 'order',
+                'read' => false,
+            ]);
+
+            // Notifier l'admin si nécessaire
+            // ...
+
+            // Valider la transaction
+            DB::commit();
+
+            return redirect()->route('order.confirmation', ['order' => $order->id])
+                ->with('success', 'Commande passée avec succès. Paiement en attente.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Erreur lors de la commande : ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Une erreur est survenue : ' . $e->getMessage());
+        }
     }
-}
 }

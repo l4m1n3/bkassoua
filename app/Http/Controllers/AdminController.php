@@ -25,13 +25,17 @@ class AdminController extends Controller
         $productsCount = Product::count();
         $ordersCount = Order::count();
         $categoriesCount = Category::count();
+        $categories = Category::all();
+        $recentOrders = Order::all();
 
         return view('admin.dashboard', compact(
             'vendorsCount',
             'productsCount',
             'ordersCount',
             'categoriesCount',
-            'customersCount'
+            'customersCount',
+            'categories',
+            'recentOrders'
         ));
     }
 
@@ -56,8 +60,9 @@ class AdminController extends Controller
     public function users()
     {
         $vendors = Vendor::with('user')
-        ->get();
-        
+        ->paginate(10);
+        $users = User::paginate(10);
+        $vendorCount=Vendor::count();
         // $vendors = Vendor::whereIn('user_id', User::pluck('id'))
         // ->distinct()
         // ->get();

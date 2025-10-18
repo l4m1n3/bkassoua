@@ -19,8 +19,8 @@
   --white: #fff;
   --gray: #6c757d;
   --gray-dark: #343a40;
-  --primary: #D19C97;
-  --secondary: #EDF1FF;
+  --primary: #0081f2;
+  --secondary: #082263;
   --success: #28a745;
   --info: #17a2b8;
   --warning: #ffc107;
@@ -2366,19 +2366,19 @@ fieldset:disabled a.btn {
 .btn-primary {
   color: #fafdff;
   background-color: #007bff;
-  border-color: #D19C97;
+  border-color: #0f1572;
 }
 
 .btn-primary:hover {
   color: #fff;
-  background-color: #c5837c;
-  border-color: #c17a74;
+  background-color: #007bff;
+  border-color: #0f1572;
 }
 
 .btn-primary:focus, .btn-primary.focus {
   color: #fff;
-  background-color: #c5837c;
-  border-color: #c17a74;
+  background-color: #007bff;
+  border-color: #0f1572;
   box-shadow: 0 0 0 0.2rem rgba(183, 138, 135, 0.5);
 }
 

@@ -51,576 +51,621 @@
 
 
 <!DOCTYPE html>
-<html lang="zxx">
+<html lang="fr">
 
 <head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion - Bkassoua</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1780d6;
+            --primary-dark: #1269b3;
+            --primary-light: #e3f2fd;
+            --secondary: #f4a261;
+            --accent: #e76f51;
+            --light: #f8f9fa;
+            --dark: #264653;
+            --gray: #6c757d;
+            --gray-light: #e9ecef;
+            --success: #28a745;
+            --border-radius: 12px;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+        }
 
-    <!-- Links Of CSS File -->
-    <link rel="stylesheet" href="{{ asset('assetss/css/sidebar-menu.css') }}">
-    <link rel="stylesheet" href="{{ asset('assetss/css/simplebar.css') }}">
-    <link rel="stylesheet" href="{{ asset('assetss/css/apexcharts.css') }}">
-    <link rel="stylesheet" href="{{ asset('assetss/css/prism.css') }}">
-    <link rel="stylesheet" href="{{ asset('assetss/css/rangeslider.css') }}">
-    <link rel="stylesheet" href="{{ asset('assetss/css/sweetalert.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('assetss/css/quill.snow.css') }}">
-    <link rel="stylesheet" href="{{ asset('assetss/css/google-icon.css') }}">
-    <link rel="stylesheet" href="{{ asset('assetss/css/remixicon.css') }}">
-    <link rel="stylesheet" href="{{ asset('assetss/css/swiper-bundle.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('assetss/css/fullcalendar.main.css') }}">
-    <link rel="stylesheet" href="{{ asset('assetss/css/style.css') }}">
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    <!-- Favicon -->
-    <link href="{{ asset('assets/img/logo.png') }}" rel="icon">
-    <!-- Title -->
-    <title>B Kassoua - Login</title>
+        body {
+            font-family: "Poppins", sans-serif;
+            background: linear-gradient(135deg, var(--primary-light) 0%, #ffffff 50%, var(--primary-light) 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .login-card {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            min-height: 600px;
+        }
+
+        .login-hero {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 200%;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            animation: float 20s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(-50px, -50px) rotate(360deg); }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .logo-container {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .logo {
+            height: 80px;
+            margin-bottom: 1rem;
+        }
+
+        .hero-title {
+            font-weight: 700;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .hero-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        .features-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 2rem;
+        }
+
+        .features-list li {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+
+        .features-list li i {
+            background: rgba(255, 255, 255, 0.2);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+
+        .login-form-section {
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .form-title {
+            font-weight: 700;
+            color: var(--dark);
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-subtitle {
+            color: var(--gray);
+            font-size: 1rem;
+        }
+
+        .login-form {
+            max-width: 400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .form-control {
+            border: 2px solid var(--gray-light);
+            border-radius: var(--border-radius);
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            transition: var(--transition);
+            background: var(--light);
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(23, 128, 214, 0.1);
+            background: white;
+        }
+
+        .form-control.is-invalid {
+            border-color: var(--accent);
+        }
+
+        .invalid-feedback {
+            display: block;
+            color: var(--accent);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--gray);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .password-toggle:hover {
+            color: var(--primary);
+        }
+
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-check {
+            display: flex;
+            align-items: center;
+        }
+
+        .form-check-input {
+            margin-right: 0.5rem;
+        }
+
+        .form-check-label {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .forgot-password {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .forgot-password:hover {
+            color: var(--primary-dark);
+            text-decoration: underline;
+        }
+
+        .btn-login {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: var(--transition);
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-login:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(23, 128, 214, 0.3);
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+        }
+
+        .divider {
+            text-align: center;
+            margin: 2rem 0;
+            position: relative;
+            color: var(--gray);
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--gray-light);
+        }
+
+        .divider span {
+            background: white;
+            padding: 0 1rem;
+            position: relative;
+        }
+
+        .register-link {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .register-link p {
+            color: var(--gray);
+            margin-bottom: 0.5rem;
+        }
+
+        .btn-register {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            border-radius: var(--border-radius);
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-register:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(23, 128, 214, 0.3);
+        }
+
+        .alert {
+            border-radius: var(--border-radius);
+            border: none;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .alert-success {
+            background: rgba(40, 167, 69, 0.1);
+            color: var(--success);
+            border-left: 4px solid var(--success);
+        }
+
+        .alert-danger {
+            background: rgba(231, 111, 81, 0.1);
+            color: var(--accent);
+            border-left: 4px solid var(--accent);
+        }
+
+        /* Animation pour le fade-in */
+        .fade-in {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .login-card {
+                flex-direction: column;
+                min-height: auto;
+            }
+            
+            .login-hero {
+                padding: 2rem;
+                text-align: center;
+            }
+            
+            .login-form-section {
+                padding: 2rem;
+            }
+            
+            .hero-title {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            body {
+                padding: 10px;
+            }
+            
+            .login-hero,
+            .login-form-section {
+                padding: 1.5rem;
+            }
+            
+            .form-title {
+                font-size: 1.75rem;
+            }
+            
+            .hero-title {
+                font-size: 1.75rem;
+            }
+            
+            .form-options {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+        }
+    </style>
 </head>
 
-<body class="boxed-size bg-white">
-    <!-- Start Preloader Area -->
-    <div class="preloader" id="preloader">
-        <div class="preloader">
-            <div class="waviy position-relative">
-                <span class="d-inline-block">B</span>
-                <span class="d-inline-block">K</span>
-                <span class="d-inline-block">A</span>
-                <span class="d-inline-block">S</span>
-                <span class="d-inline-block">S</span>
-                <span class="d-inline-block">O</span>
-                <span class="d-inline-block">U</span>
-                <span class="d-inline-block">A</span>
-            </div>
-        </div>
-    </div>
-    <!-- End Preloader Area -->
-
-    <!-- Start Main Content Area -->
-    <div class="container">
-        <div class="main-content d-flex flex-column p-0">
-            <div class="m-auto m-1230">
-                <div class="row align-items-center">
-                    <div class="col-lg-6 d-none d-lg-block">
-                        <img src="{{ asset('assets/img/logo.png') }}" class="rounded-3" alt="login">
-
+<body>
+    <div class="login-container">
+        <div class="login-card d-flex">
+            <!-- Section Hero (côté gauche) -->
+            <div class="col-lg-6 login-hero">
+                <div class="hero-content">
+                    <div class="logo-container">
+                        <img src="{{ asset('assets/img/logo.png') }}" alt="Bkassoua" class="logo">
                     </div>
-                    <div class="col-lg-6">
-                        <div class="mw-480 ms-lg-auto">
-                            <h3 class="fs-28 mb-2">Bienvenue sur B Kassoua!</h3>
-                            <form action="{{ route('login') }}" method="POST">
-                                @csrf
-                                <div class="form-floating mb-3 mt-3">
-                                    <input type="text" class="form-control" name="phone_number" id="email"
-                                        placeholder="Exemple 90 00 00 00" name="phone_number">
-                                    <label for="email">Numero Telephone</label>
-                                </div>
-                                <div class="form-floating mt-3 mb-3">
-                                    <input type="text" class="form-control" name="password" id="pwd"
-                                        placeholder="Enter password" name="password">
-                                    <label for="pwd">Password</label>
-                                </div>
-                                <div class="form-floating mb-3 mt-3">
-                                    <a href="forget-password.html"
-                                        class="text-decoration-none text-primary fw-semibold">Forgot Password?</a>
-                                </div>
-                                <div class="form-floating mb-3 mt-3">
+                    <h1 class="hero-title">Bienvenue sur Bkassoua</h1>
+                    <p class="hero-subtitle">
+                        Rejoignez notre communauté et découvrez les dernières tendances de la mode africaine. 
+                        Une expérience shopping unique vous attend.
+                    </p>
+                    
+                    <ul class="features-list">
+                        <li class="fade-in">
+                            <i class="bi bi-truck"></i>
+                            Livraison rapide et sécurisée
+                        </li>
+                        <li class="fade-in" style="animation-delay: 0.1s;">
+                            <i class="bi bi-shield-check"></i>
+                            Paiement 100% sécurisé
+                        </li>
+                        <li class="fade-in" style="animation-delay: 0.2s;">
+                            <i class="bi bi-arrow-left-right"></i>
+                            Retours faciles sous 30 jours
+                        </li>
+                        <li class="fade-in" style="animation-delay: 0.3s;">
+                            <i class="bi bi-headset"></i>
+                            Support client dédié
+                        </li>
+                    </ul>
+                </div>
+            </div>
 
-                                    <button type="submit" class="btn btn-primary fw-medium py-2 px-3 w-100">
-                                        <div class="d-flex align-items-center justify-content-center py-1">
-                                            <i class="material-symbols-outlined text-white fs-20 me-2">Login</i>
-                                            <span>Connecter</span>
-                                    </button>
-                                </div>
-                                <div class="form-group">
-                                    <p>Don’t have an account. <a href="{{ route('register') }}"
-                                            class="fw-medium text-primary text-decoration-none">Register</a></p>
-                                </div>
-                            </form>
+            <!-- Section Formulaire (côté droit) -->
+            <div class="col-lg-6 login-form-section">
+                <div class="form-header">
+                    <h2 class="form-title">Connexion</h2>
+                    <p class="form-subtitle">Accédez à votre compte Bkassoua</p>
+                </div>
+
+                <!-- Alertes -->
+                @if(session('success'))
+                    <div class="alert alert-success fade-in">
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        {{ session('success') }}
+                    </div>
+                @endif
+
+                @if($errors->any())
+                    <div class="alert alert-danger fade-in">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        @foreach($errors->all() as $error)
+                            <div>{{ $error }}</div>
+                        @endforeach
+                    </div>
+                @endif
+
+                <form class="login-form" action="{{ route('login') }}" method="POST">
+                    @csrf
+                    
+                    <div class="form-group fade-in">
+                        <label for="phone_number" class="form-label">
+                            <i class="bi bi-phone me-1"></i>
+                            Numéro de téléphone
+                        </label>
+                        <input type="text" 
+                               class="form-control @error('phone_number') is-invalid @enderror" 
+                               id="phone_number" 
+                               name="phone_number" 
+                               value="{{ old('phone_number') }}"
+                               placeholder="Exemple: 90 00 00 00" 
+                               required>
+                        @error('phone_number')
+                            <div class="invalid-feedback">
+                                <i class="bi bi-exclamation-circle me-1"></i>{{ $message }}
+                            </div>
+                        @enderror
+                    </div>
+
+                    <div class="form-group fade-in" style="animation-delay: 0.1s;">
+                        <label for="password" class="form-label">
+                            <i class="bi bi-lock me-1"></i>
+                            Mot de passe
+                        </label>
+                        <div class="position-relative">
+                            <input type="password" 
+                                   class="form-control @error('password') is-invalid @enderror" 
+                                   id="password" 
+                                   name="password" 
+                                   placeholder="Votre mot de passe" 
+                                   required>
+                            <button type="button" class="password-toggle" onclick="togglePassword()">
+                                <i class="bi bi-eye" id="password-toggle-icon"></i>
+                            </button>
                         </div>
+                        @error('password')
+                            <div class="invalid-feedback">
+                                <i class="bi bi-exclamation-circle me-1"></i>{{ $message }}
+                            </div>
+                        @enderror
                     </div>
+
+                    <div class="form-options fade-in" style="animation-delay: 0.2s;">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="remember" name="remember">
+                            <label class="form-check-label" for="remember">
+                                Se souvenir de moi
+                            </label>
+                        </div>
+                        <a href="{{ route('password.request') }}" class="forgot-password">
+                            Mot de passe oublié ?
+                        </a>
+                    </div>
+
+                    <div class="fade-in" style="animation-delay: 0.3s;">
+                        <button type="submit" class="btn-login">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>
+                            Se connecter
+                        </button>
+                    </div>
+                </form>
+
+                <div class="divider fade-in" style="animation-delay: 0.4s;">
+                    <span>Nouveau sur Bkassoua ?</span>
+                </div>
+
+                <div class="register-link fade-in" style="animation-delay: 0.5s;">
+                    <p>Créez votre compte et commencez votre shopping</p>
+                    <a href="{{ route('register') }}" class="btn-register">
+                        <i class="bi bi-person-plus me-2"></i>
+                        Créer un compte
+                    </a>
                 </div>
             </div>
         </div>
     </div>
-    <!-- Start Main Content Area -->
 
-    <button class="theme-settings-btn p-0 border-0 bg-transparent position-absolute" style="right: 30px; bottom: 30px;"
-        type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasScrolling"
-        aria-controls="offcanvasScrolling">
-        <i class="material-symbols-outlined bg-primary wh-35 lh-35 text-white rounded-1" data-bs-toggle="tooltip"
-            data-bs-placement="left" data-bs-title="Click On Theme Settings">settings</i>
-    </button>
+    <script>
+        // Toggle password visibility
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleIcon = document.getElementById('password-toggle-icon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('bi-eye');
+                toggleIcon.classList.add('bi-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('bi-eye-slash');
+                toggleIcon.classList.add('bi-eye');
+            }
+        }
 
-    <!-- Start Theme Setting Area -->
-    <div class="offcanvas offcanvas-end bg-white" data-bs-scroll="true" data-bs-backdrop="true" tabindex="-1"
-        id="offcanvasScrolling" aria-labelledby="offcanvasScrollingLabel"
-        style="box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;">
-        <div class="offcanvas-header bg-body-bg py-3 px-4">
-            <h5 class="offcanvas-title fs-18" id="offcanvasScrollingLabel">Theme Settings</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-        </div>
-        <div class="offcanvas-body p-4">
-            <div class="mb-4 pb-2">
-                <h4 class="fs-15 fw-semibold border-bottom pb-2 mb-3">RTL / LTR</h4>
-                <div class="settings-btn rtl-btn">
-                    <label id="switch" class="switch">
-                        <input type="checkbox" onchange="toggleTheme()" id="slider">
-                        <span class="slider round"></span>
-                    </label>
-                </div>
-            </div>
-            <div class="mb-4 pb-2">
-                <h4 class="fs-15 fw-semibold border-bottom pb-2 mb-3">Container Style Fluid / Boxed</h4>
-                <button class="boxed-style settings-btn fluid-boxed-btn" id="boxed-style">
-                    Click To <span class="fluid">Fluid</span> <span class="boxed">Boxed</span>
-                </button>
-            </div>
-            <div class="mb-4 pb-2">
-                <h4 class="fs-15 fw-semibold border-bottom pb-2 mb-3">Only Sidebar Light / Dark</h4>
-                <button class="sidebar-light-dark settings-btn sidebar-dark-btn" id="sidebar-light-dark">
-                    Click To <span class="dark1">Dark</span> <span class="light1">Light</span>
-                </button>
-            </div>
-            <div class="mb-4 pb-2">
-                <h4 class="fs-15 fw-semibold border-bottom pb-2 mb-3">Only Header Light / Dark</h4>
-                <button class="header-light-dark settings-btn header-dark-btn" id="header-light-dark">
-                    Click To <span class="dark2">Dark</span> <span class="light2">Light</span>
-                </button>
-            </div>
-            <div class="mb-4 pb-2">
-                <h4 class="fs-15 fw-semibold border-bottom pb-2 mb-3">Only Footer Light / Dark</h4>
-                <button class="footer-light-dark settings-btn footer-dark-btn" id="footer-light-dark">
-                    Click To <span class="dark3">Dark</span> <span class="light3">Light</span>
-                </button>
-            </div>
-            <div class="mb-4 pb-2">
-                <h4 class="fs-15 fw-semibold border-bottom pb-2 mb-3">Card Style Radius / Square</h4>
-                <button class="card-radius-square settings-btn card-style-btn" id="card-radius-square">
-                    Click To <span class="square">Square</span> <span class="radius">Radius</span>
-                </button>
-            </div>
-            <div class="mb-4 pb-2">
-                <h4 class="fs-15 fw-semibold border-bottom pb-2 mb-3">Card Style BG White / Gray</h4>
-                <button class="card-bg settings-btn card-bg-style-btn" id="card-bg">
-                    Click To <span class="white">White</span> <span class="gray">Gray</span>
-                </button>
-            </div>
-        </div>
-    </div>
-    <!-- End Theme Setting Area -->
+        // Format phone number input
+        document.getElementById('phone_number').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 0) {
+                value = value.match(/.{1,2}/g).join(' ');
+            }
+            e.target.value = value;
+        });
 
-    <button class="switch-toggle settings-btn dark-btn p-0 bg-transparent position-absolute top-0 d-none"
-        id="switch-toggle">
-        <span class="dark"><i class="material-symbols-outlined">light_mode</i></span>
-        <span class="light"><i class="material-symbols-outlined">dark_mode</i></span>
-    </button>
+        // Animation au chargement
+        document.addEventListener('DOMContentLoaded', function() {
+            const fadeElements = document.querySelectorAll('.fade-in');
+            fadeElements.forEach((element, index) => {
+                element.style.animationDelay = (index * 0.1) + 's';
+            });
+        });
 
-    <!-- Link Of JS File -->
-    <script src="{{ asset('assetss/js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ asset('assetss/js/sidebar-menu.js') }}"></script>
-    <script src="{{ asset('assetss/js/dragdrop.js') }}"></script>
-    <script src="{{ asset('assetss/js/rangeslider.min.js') }}"></script>
-    <script src="{{ asset('assetss/js/sweetalert.js') }}"></script>
-    <script src="{{ asset('assetss/js/quill.min.js') }}"></script>
-    <script src="{{ asset('assetss/js/data-table.js') }}"></script>
-    <script src="{{ asset('assetss/js/prism.js') }}"></script>
-    <script src="{{ asset('assetss/js/clipboard.min.js') }}"></script>
-    <script src="{{ asset('assetss/js/feather.min.js') }}"></script>
-    <script src="{{ asset('assetss/js/simplebar.min.js') }}"></script>
-    <script src="{{ asset('assetss/js/apexcharts.min.js') }}"></script>
-    <script src="{{ asset('assetss/js/swiper-bundle.min.js') }}"></script>
-    <script src="{{ asset('assetss/js/fullcalendar.main.js') }}"></script>
-    <script src="{{ asset('assetss/js/custom/apexcharts.js') }}"></script>
-    <script src="{{ asset('assetss/js/custom/custom.js') }}"></script>
+        // Validation du formulaire
+        document.querySelector('.login-form').addEventListener('submit', function(e) {
+            const phoneNumber = document.getElementById('phone_number').value;
+            const password = document.getElementById('password').value;
+            
+            if (!phoneNumber || !password) {
+                e.preventDefault();
+                alert('Veuillez remplir tous les champs obligatoires.');
+                return false;
+            }
+            
+            // Validation basique du numéro de téléphone (8 chiffres minimum)
+            const cleanPhone = phoneNumber.replace(/\s/g, '');
+            if (cleanPhone.length < 8) {
+                e.preventDefault();
+                alert('Veuillez entrer un numéro de téléphone valide.');
+                return false;
+            }
+            
+            return true;
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>
-{{-- <!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bkassoua - Connexion / Inscription</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --primary: #2c6e49;
-      --secondary: #f4a261;
-      --accent: #e76f51;
-      --light: #f8f9fa;
-      --dark: #264653;
-    }
-
-    body {
-      font-family: 'Poppins', sans-serif;
-      background-color: var(--light);
-    }
-
-    /* Navbar */
-    .navbar {
-      background-color: var(--primary);
-      transition: background-color 0.3s ease;
-    }
-    .navbar.scrolled {
-      background-color: rgba(44, 110, 73, 0.9);
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-    .navbar-brand img {
-      height: 50px;
-      transition: transform 0.3s;
-    }
-    .navbar-brand img:hover {
-      transform: scale(1.1);
-    }
-    .nav-link {
-      color: white !important;
-      font-weight: 400;
-      margin: 0 10px;
-      transition: color 0.3s;
-    }
-    .nav-link:hover {
-      color: var(--secondary) !important;
-    }
-    .nav-link.active {
-      font-weight: 600;
-    }
-    .navbar form {
-      max-width: 400px;
-    }
-    .navbar .btn-outline-light {
-      border-color: white;
-      color: white;
-      transition: background-color 0.3s, color 0.3s;
-    }
-    .navbar .btn-outline-light:hover {
-      background-color: var(--secondary);
-      color: var(--dark);
-    }
-    .navbar .bi {
-      font-size: 1.5rem;
-      color: white;
-      transition: color 0.3s;
-    }
-    .navbar .bi:hover {
-      color: var(--secondary);
-    }
-
-    /* Auth Section */
-    .auth-section {
-      background-color: white;
-      padding: 30px;
-      border-radius: 8px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-      max-width: 500px;
-      margin: 0 auto;
-      margin-top: 100px;
-      margin-bottom: 50px;
-    }
-    .auth-section h2 {
-      color: var(--primary);
-      font-weight: 600;
-      text-align: center;
-      margin-bottom: 1.5rem;
-    }
-    .auth-toggle {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 1.5rem;
-    }
-    .auth-toggle button {
-      flex: 1;
-      padding: 10px;
-      font-weight: 500;
-      border: none;
-      background-color: var(--light);
-      color: var(--dark);
-      transition: background-color 0.3s, color 0.3s;
-    }
-    .auth-toggle button.active {
-      background-color: var(--secondary);
-      color: white;
-    }
-    .auth-toggle button:hover {
-      background-color: var(--accent);
-      color: white;
-    }
-    .auth-form {
-      display: none;
-    }
-    .auth-form.active {
-      display: block;
-    }
-    .auth-form .form-control {
-      border-radius: 5px;
-      transition: border-color 0.3s;
-    }
-    .auth-form .form-control:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 5px rgba(231, 111, 81, 0.3);
-    }
-    .auth-form .btn-primary {
-      background-color: var(--secondary);
-      border: none;
-      width: 100%;
-      padding: 10px;
-      font-weight: 500;
-      transition: background-color 0.3s, transform 0.3s;
-    }
-    .auth-form .btn-primary:hover {
-      background-color: var(--accent);
-      transform: translateY(-2px);
-    }
-    .auth-form .error {
-      color: var(--accent);
-      font-size: 0.9rem;
-      display: none;
-      margin-top: 0.25rem;
-    }
-    .auth-form .form-check {
-      margin-top: 1rem;
-    }
-    .auth-form .form-check-label {
-      color: var(--dark);
-    }
-    .auth-form a {
-      color: var(--primary);
-      text-decoration: none;
-      transition: color 0.3s;
-    }
-    .auth-form a:hover {
-      color: var(--accent);
-    }
-
-    /* Footer */
-    footer {
-      background-color: var(--dark);
-      padding: 3rem 0;
-    }
-    footer a {
-      color: var(--secondary);
-      text-decoration: none;
-      transition: color 0.3s;
-    }
-    footer a:hover {
-      color: var(--accent);
-    }
-    .social-icons .bi {
-      font-size: 1.5rem;
-      margin: 0 10px;
-      color: white;
-      transition: color 0.3s;
-    }
-    .social-icons .bi:hover {
-      color: var(--secondary);
-    }
-    .newsletter-form input {
-      border-radius: 5px 0 0 5px;
-      border: none;
-    }
-    .newsletter-form button {
-      border-radius: 0 5px 5px 0;
-      background-color: var(--secondary);
-      border: none;
-      transition: background-color 0.3s;
-    }
-    .newsletter-form button:hover {
-      background-color: var(--accent);
-    }
-
-    /* Responsive Adjustments */
-    @media (max-width: 768px) {
-      .auth-section {
-        padding: 20px;
-        margin-top: 80px;
-      }
-      .auth-toggle button {
-        font-size: 0.9rem;
-        padding: 8px;
-      }
-      .navbar form {
-        margin: 10px 0;
-      }
-    }
-  </style>
-</head>
-<body>
-  <!-- Navbar -->
-  {{-- <nav class="navbar navbar-expand-lg fixed-top">
-    <div class="container">
-      <a class="navbar-brand" href="index.html"><img src="https://via.placeholder.com/100x40" alt="Bkassoua"></a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav me-auto">
-          <li class="nav-item"><a class="nav-link" href="index.html">Accueil</a></li>
-          <li class="nav-item"><a class="nav-link" href="products.html">Boutique</a></li>
-          <li class="nav-item"><a class="nav-link" href="about.html">À Propos</a></li>
-          <li class="nav-item"><a class="nav-link" href="contact.html">Contact</a></li>
-        </ul>
-        <form class="d-flex flex-grow-1 mx-3">
-          <input class="form-control me-2" type="search" placeholder="Rechercher" aria-label="Search">
-          <button class="btn btn-outline-light" type="submit">Rechercher</button>
-        </form>
-        <ul class="navbar-nav">
-          <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-heart"></i></a></li>
-          <li class="nav-item"><a class="nav-link" href="cart.html"><i class="bi bi-cart"></i></a></li>
-          <li class="nav-item"><a class="nav-link active" href="auth.html"><i class="bi bi-person"></i></a></li>
-        </ul>
-      </div>
-    </div>
-  </nav> --}}
-
-  <!-- Auth Section -->
-  <div class="auth-section">
-    <h2>Connexion / Inscription</h2>
-    <div class="auth-toggle">
-      <button class="active" onclick="showForm('login')">Connexion</button>
-      <button onclick="showForm('register')">Inscription</button>
-    </div>
-    <!-- Login Form -->
-    <form id="login-form" class="auth-form active" onsubmit="return validateLogin(event)">
-      <div class="mb-3">
-        <label for="login-email" class="form-label">Adresse E-mail</label>
-        <input type="email" class="form-control" id="login-email" required>
-        <div class="error" id="login-email-error">Veuillez entrer une adresse e-mail valide.</div>
-      </div>
-      <div class="mb-3">
-        <label for="login-password" class="form-label">Mot de Passe</label>
-        <input type="password" class="form-control" id="login-password" required>
-        <div class="error" id="login-password-error">Le mot de passe est requis.</div>
-      </div>
-      <div class="form-check">
-        <input class="form-check-input" type="checkbox" id="remember-me">
-        <label class="form-check-label" for="remember-me">Se souvenir de moi</label>
-      </div>
-      <button type="submit" class="btn btn-primary mt-3">Se Connecter</button>
-      <p class="text-center mt-3"><a href="#">Mot de passe oublié ?</a></p>
-    </form>
-    <!-- Register Form -->
-    <form id="register-form" class="auth-form" onsubmit="return validateRegister(event)">
-      <div class="mb-3">
-        <label for="register-name" class="form-label">Nom Complet</label>
-        <input type="text" class="form-control" id="register-name" required>
-        <div class="error" id="register-name-error">Le nom est requis.</div>
-      </div>
-      <div class="mb-3">
-        <label for="register-email" class="form-label">Adresse E-mail</label>
-        <input type="email" class="form-control" id="register-email" required>
-        <div class="error" id="register-email-error">Veuillez entrer une adresse e-mail valide.</div>
-      </div>
-      <div class="mb-3">
-        <label for="register-password" class="form-label">Mot de Passe</label>
-        <input type="password" class="form-control" id="register-password" required>
-        <div class="error" id="register-password-error">Le mot de passe doit contenir au moins 6 caractères.</div>
-      </div>
-      <div class="mb-3">
-        <label for="register-confirm-password" class="form-label">Confirmer le Mot de Passe</label>
-        <input type="password" class="form-control" id="register-confirm-password" required>
-        <div class="error" id="register-confirm-password-error">Les mots de passe ne correspondent pas.</div>
-      </div>
-      <button type="submit" class="btn btn-primary mt-3">S'Inscrire</button>
-    </form>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    // Navbar scroll effect
-    window.addEventListener('scroll', () => {
-      const navbar = document.querySelector('.navbar');
-      if (window.scrollY > 50) {
-        navbar.classList.add('scrolled');
-      } else {
-        navbar.classList.remove('scrolled');
-      }
-    });
-
-    // Toggle between login and register forms
-    function showForm(formId) {
-      document.querySelectorAll('.auth-form').forEach(form => form.classList.remove('active'));
-      document.querySelectorAll('.auth-toggle button').forEach(btn => btn.classList.remove('active'));
-      document.getElementById(`${formId}-form`).classList.add('active');
-      document.querySelector(`button[onclick="showForm('${formId}')"]`).classList.add('active');
-    }
-
-    // Validate login form
-    function validateLogin(event) {
-      event.preventDefault();
-      const email = document.getElementById('login-email').value;
-      const password = document.getElementById('login-password').value;
-      const emailError = document.getElementById('login-email-error');
-      const passwordError = document.getElementById('login-password-error');
-      let isValid = true;
-
-      emailError.style.display = 'none';
-      passwordError.style.display = 'none';
-
-      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        emailError.style.display = 'block';
-        isValid = false;
-      }
-      if (!password) {
-        passwordError.style.display = 'block';
-        isValid = false;
-      }
-
-      if (isValid) {
-        // Replace with backend API call for login
-        alert('Connexion en cours (simulation). Intégrez une requête API vers /api/login ici.');
-        // Example: POST /api/login with { email, password }
-        // On success, redirect to account.html
-        // window.location.href = 'account.html';
-      }
-      return isValid;
-    }
-
-    // Validate register form
-    function validateRegister(event) {
-      event.preventDefault();
-      const name = document.getElementById('register-name').value;
-      const email = document.getElementById('register-email').value;
-      const password = document.getElementById('register-password').value;
-      const confirmPassword = document.getElementById('register-confirm-password').value;
-      const nameError = document.getElementById('register-name-error');
-      const emailError = document.getElementById('register-email-error');
-      const passwordError = document.getElementById('register-password-error');
-      const confirmPasswordError = document.getElementById('register-confirm-password-error');
-      let isValid = true;
-
-      nameError.style.display = 'none';
-      emailError.style.display = 'none';
-      passwordError.style.display = 'none';
-      confirmPasswordError.style.display = 'none';
-
-      if (!name) {
-        nameError.style.display = 'block';
-        isValid = false;
-      }
-      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        emailError.style.display = 'block';
-        isValid = false;
-      }
-      if (!password || password.length < 6) {
-        passwordError.style.display = 'block';
-        isValid = false;
-      }
-      if (password !== confirmPassword) {
-        confirmPasswordError.style.display = 'block';
-        isValid = false;
-      }
-
-      if (isValid) {
-        // Replace with backend API call for registration
-        alert('Inscription en cours (simulation). Intégrez une requête API vers /api/register ici.');
-        // Example: POST /api/register with { name, email, password }
-        // On success, redirect to account.html or login
-        // window.location.href = 'account.html';
-      }
-      return isValid;
-    }
-  </script>
-</body>
-</html> --}}
