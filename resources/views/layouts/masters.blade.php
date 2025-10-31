@@ -3,7 +3,7 @@
 @section('title', 'Accueil')
 
 @section('content')
-<!-- Hero Section améliorée -->
+<!-- Hero Section améliorée --> 
 <section @class(['hero-section', 'mb-5'])>
     <div @class(['hero-content'])>
         <h1 @class(['hero-title'])>Découvrez les Dernières Tendances</h1>
@@ -21,7 +21,7 @@
     <!-- Indicateurs de statistiques -->
     <div @class(['hero-stats'])>
         <div @class(['stat-item'])>
-            <div @class(['stat-number'])>500+</div>
+            <div @class(['stat-number'])>{{$productsCount}}+</div>
             <div @class(['stat-label'])>Produits</div>
         </div>
         <div @class(['stat-item'])>
@@ -51,7 +51,7 @@
                         <div @class(['filter-option'])>
                             <a href="/shop/{{ $categorie->slug }}" @class(['d-flex', 'align-items-center', 'justify-content-between', 'text-decoration-none', 'text-dark'])>
                                 <span>{{ $categorie->name }}</span>
-                                <i @class(['bi', 'bi-chevron-right', 'text-muted'])></i>
+                                {{-- <i @class(['bi', 'bi-chevron-right', 'text-muted'])></i> --}}
                             </a>
                         </div>
                         @endforeach
@@ -59,13 +59,13 @@
                 </div>
 
                 <!-- Bannière promotionnelle -->
-                <div @class(['promo-banner', 'mt-4', 'p-3', 'rounded', 'text-white', 'text-center']) 
+                {{-- <div @class(['promo-banner', 'mt-4', 'p-3', 'rounded', 'text-white', 'text-center']) 
                      style="background: linear-gradient(135deg, var(--primary), var(--accent));">
                     <i @class(['bi', 'bi-lightning', 'display-6', 'mb-2'])></i>
                     <h6 @class(['mb-2'])>Soldes d'Été</h6>
                     <p @class(['small', 'mb-2'])>Jusqu'à -50% sur toute la collection</p>
                     <a href="{{ route('shop') }}" @class(['btn', 'btn-sm', 'btn-light'])>Profiter</a>
-                </div>
+                </div> --}}
             </div>
 
             <!-- Services -->
@@ -82,20 +82,13 @@
                             <small @class(['text-muted'])>Sous 24-48h</small>
                         </div>
                     </div>
-                    <div @class(['service-item', 'd-flex', 'align-items-center', 'mb-3'])>
-                        <i @class(['bi', 'bi-arrow-left-right', 'text-primary', 'me-3'])></i>
-                        <div>
-                            <div @class(['fw-semibold'])>Retours Faciles</div>
-                            <small @class(['text-muted'])>30 jours pour changer d'avis</small>
-                        </div>
-                    </div>
-                    <div @class(['service-item', 'd-flex', 'align-items-center'])>
+                    {{-- <div @class(['service-item', 'd-flex', 'align-items-center'])>
                         <i @class(['bi', 'bi-lock', 'text-primary', 'me-3'])></i>
                         <div>
                             <div @class(['fw-semibold'])>Paiement Sécurisé</div>
                             <small @class(['text-muted'])>Cryptage SSL</small>
                         </div>
-                    </div>
+                    </div> --}}
                 </div>
             </div>
         </div>

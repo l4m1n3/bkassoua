@@ -10,136 +10,19 @@
             <div @class(['sidebar'])>
                 <h5 @class(['sidebar-title'])>
                     <i @class(['bi', 'bi-filter-circle'])></i>
-                    Filtres & Catégories
+                 Catégories
                 </h5>
                 
                 <!-- Catégories -->
                 <div @class(['filter-section'])>
-                    <div @class(['filter-title'])>
-                        <span>Catégories</span>
-                    </div> 
-                    <div @class(['accordion']) id="categoryAccordion">
-                        <div @class(['accordion-item', 'border-0', 'mb-2'])>
-                            <h2 @class(['accordion-header']) id="headingOne">
-                                <button @class(['accordion-button', 'py-2', 'rounded']) type="button" data-bs-toggle="collapse"
-                                    data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                                    <i @class(['bi', 'bi-grid', 'me-2'])></i> Vêtements
-                                </button>
-                            </h2>
-                            <div id="collapseOne" @class(['accordion-collapse', 'collapse', 'show']) aria-labelledby="headingOne"
-                                data-bs-parent="#categoryAccordion">
-                                <div @class(['accordion-body', 'pt-2', 'pb-1'])>
-                                    <div @class(['filter-options'])>
-                                        <div @class(['filter-option'])>
-                                            <input type="checkbox" id="category-dresses" @class(['form-check-input'])>
-                                            <label for="category-dresses" @class(['form-check-label'])>Robes</label>
-                                        </div>
-                                        <div @class(['filter-option'])>
-                                            <input type="checkbox" id="category-tops" @class(['form-check-input'])>
-                                            <label for="category-tops" @class(['form-check-label'])>Hauts</label>
-                                        </div>
-                                        <div @class(['filter-option'])>
-                                            <input type="checkbox" id="category-pants" @class(['form-check-input'])>
-                                            <label for="category-pants" @class(['form-check-label'])>Pantalons</label>
-                                        </div>
-                                        <div @class(['filter-option'])>
-                                            <input type="checkbox" id="category-skirts" @class(['form-check-input'])>
-                                            <label for="category-skirts" @class(['form-check-label'])>Jupes</label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div @class(['accordion-item', 'border-0', 'mb-2'])>
-                            <h2 @class(['accordion-header']) id="headingTwo">
-                                <button @class(['accordion-button', 'collapsed', 'py-2', 'rounded']) type="button" data-bs-toggle="collapse"
-                                    data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                                    <i @class(['bi', 'bi-bag', 'me-2'])></i> Accessoires
-                                </button>
-                            </h2>
-                            <div id="collapseTwo" @class(['accordion-collapse', 'collapse']) aria-labelledby="headingTwo"
-                                data-bs-parent="#categoryAccordion">
-                                <div @class(['accordion-body', 'pt-2', 'pb-1'])>
-                                    <div @class(['filter-options'])>
-                                        <div @class(['filter-option'])>
-                                            <input type="checkbox" id="category-bags" @class(['form-check-input'])>
-                                            <label for="category-bags" @class(['form-check-label'])>Sacs</label>
-                                        </div>
-                                        <div @class(['filter-option'])>
-                                            <input type="checkbox" id="category-jewelry" @class(['form-check-input'])>
-                                            <label for="category-jewelry" @class(['form-check-label'])>Bijoux</label>
-                                        </div>
-                                        <div @class(['filter-option'])>
-                                            <input type="checkbox" id="category-shoes" @class(['form-check-input'])>
-                                            <label for="category-shoes" @class(['form-check-label'])>Chaussures</label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Filtre Prix -->
-                <div @class(['filter-section'])>
-                    <div @class(['filter-title'])>
-                        <span>Prix</span>
-                        <button @class(['btn', 'btn-sm', 'btn-link', 'p-0', 'text-decoration-none', 'text-primary'])>Réinitialiser</button>
-                    </div>
-                    <input type="range" @class(['form-range', 'mb-3']) id="priceRange" min="0" max="100000" step="1000" value="50000">
-                    <div @class(['price-inputs'])>
-                        <input type="number" @class(['price-input']) placeholder="Min" value="0">
-                        <input type="number" @class(['price-input']) placeholder="Max" value="50000">
-                    </div>
-                    <div @class(['price-display', 'mt-2'])>
-                        <small @class(['text-muted'])>Prix: 0 - 50,000 fcfa</small>
-                    </div>
-                </div>
-
-                <!-- Filtre Taille -->
-                <div @class(['filter-section'])>
-                    <div @class(['filter-title'])>Taille</div>
-                    <div @class(['d-flex', 'flex-wrap', 'gap-2'])>
+                     @foreach ($categories as $categorie)
                         <div @class(['filter-option'])>
-                            <input @class(['form-check-input']) type="checkbox" id="sizeS">
-                            <label @class(['form-check-label']) for="sizeS">S</label>
+                            <a href="/shop/{{ $categorie->slug }}" @class(['d-flex', 'align-items-center', 'justify-content-between', 'text-decoration-none', 'text-dark'])>
+                                <span>{{ $categorie->name }}</span>
+                                {{-- <i @class(['bi', 'bi-chevron-right', 'text-muted'])></i> --}}
+                            </a>
                         </div>
-                        <div @class(['filter-option'])>
-                            <input @class(['form-check-input']) type="checkbox" id="sizeM">
-                            <label @class(['form-check-label']) for="sizeM">M</label>
-                        </div>
-                        <div @class(['filter-option'])>
-                            <input @class(['form-check-input']) type="checkbox" id="sizeL">
-                            <label @class(['form-check-label']) for="sizeL">L</label>
-                        </div>
-                        <div @class(['filter-option'])>
-                            <input @class(['form-check-input']) type="checkbox" id="sizeXL">
-                            <label @class(['form-check-label']) for="sizeXL">XL</label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Filtre Couleur -->
-                <div @class(['filter-section'])>
-                    <div @class(['filter-title'])>Couleur</div>
-                    <div @class(['color-options'])>
-                        <div @class(['color-option']) style="background-color: #000;" title="Noir"></div>
-                        <div @class(['color-option']) style="background-color: #fff; border: 1px solid #ddd;" title="Blanc"></div>
-                        <div @class(['color-option']) style="background-color: #dc2626;" title="Rouge"></div>
-                        <div @class(['color-option']) style="background-color: #2563eb;" title="Bleu"></div>
-                        <div @class(['color-option']) style="background-color: #16a34a;" title="Vert"></div>
-                        <div @class(['color-option']) style="background-color: #f59e0b;" title="Jaune"></div>
-                    </div>
-                </div>
-
-                <!-- Boutons d'action -->
-                <div @class(['d-grid', 'gap-2', 'mt-4'])>
-                    <button @class(['btn', 'btn-primary'])>
-                        <i @class(['bi', 'bi-funnel', 'me-2'])></i>Appliquer les filtres
-                    </button>
-                    <button @class(['btn', 'btn-outline-secondary'])>
-                        <i @class(['bi', 'bi-arrow-clockwise', 'me-2'])></i>Tout effacer
-                    </button>
+                        @endforeach
                 </div>
             </div>
 
@@ -147,8 +30,8 @@
             <div @class(['sidebar', 'mt-4', 'text-white']) style="background: linear-gradient(135deg, var(--primary), var(--accent));">
                 <div @class(['text-center'])>
                     <i @class(['bi', 'bi-truck', 'display-6', 'mb-3'])></i>
-                    <h6>Livraison Gratuite</h6>
-                    <p @class(['small', 'mb-0'])>À partir de 50,000 fcfa d'achat</p>
+                    <h6>Livraison Rapide</h6>
+                    <p @class(['small', 'mb-0'])></p>
                 </div>
             </div>
         </div>

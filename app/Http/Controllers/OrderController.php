@@ -192,7 +192,7 @@ class OrderController extends Controller
             return redirect()->back()->with('error', 'Votre panier est vide.');
         }
 
-        // Vérification des produits
+        // Vérification des produits 
         foreach ($carts as $cart) {
             if (!$cart->product) {
                 return redirect()->back()->with('error', 'Un produit dans votre panier n\'existe plus.');
@@ -255,7 +255,7 @@ class OrderController extends Controller
             // Valider la transaction
             DB::commit();
 
-            return redirect()->route('order.confirmation', ['order' => $order->id])
+            return redirect()->back()
                 ->with('success', 'Commande passée avec succès. Paiement en attente.');
         } catch (\Exception $e) {
             DB::rollBack();

@@ -34,8 +34,9 @@ Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist');
 
 Route::middleware('auth')->get('/notifications', [NotificationController::class, 'index']);
 // Checkout
-Route::get('/cart/checkout', [OrderController::class, 'showCheckout'])->name('orders.show.checkout');
-Route::post('/cart/checkout', [OrderController::class, 'placeOrder'])->name('checkout.process');
+Route::get('/cart/checkout/show', [OrderController::class, 'showCheckout'])->name('orders.show.checkout');
+Route::post('/cart/checkout/order', [OrderController::class, 'placeOrder'])->name('checkout.process');
+
 // Admin routes group
 Route::prefix('admin')->middleware(['auth'])->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
@@ -106,7 +107,7 @@ Route::post('/payments', [PaymentController::class, 'processPayment'])->name('pa
 Route::middleware(['auth'])->group(function () {
     Route::post('/add/cart/', [ProductController::class, 'storeCart'])->name('cart.add');
     Route::get('/show/cart/', [ProductController::class, 'showCart'])->name('cart');
-    Route::post('/remove/cart/', [ProductController::class, 'removeCart'])->name('cart.remove');
+    Route::delete('/remove/cart/', [ProductController::class, 'removeCart'])->name('cart.remove');
     // routes/web.php
 Route::put('/cart/update/{cart}', [ProductController::class, 'update'])->name('cart.update');
 }); 

@@ -835,7 +835,7 @@
                         
                         <a class="nav-icon" href="{{ route('cart') }}">
                             <i class="bi bi-cart"></i>
-                            <span class="badge">2</span>
+                            <span class="badge">{{ $cartCount ?? 0 }}</span>
                         </a>
                         
                         <a class="nav-icon" href="{{ route('profile.edit') }}">

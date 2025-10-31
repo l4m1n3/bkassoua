@@ -79,9 +79,10 @@
                                         <div class="fw-bold text-primary mb-2" id="total-{{ $cart->id }}" data-current-total="{{ $cart->product->price * $cart->quantity }}">
                                             {{ number_format($cart->product->price * $cart->quantity, 0, ',', ' ') }} fcfa
                                         </div>
-                                        <form action="{{ route('cart.remove', $cart->id) }}" method="POST" class="d-inline">
+                                        <form action="{{ route('cart.remove') }}" method="POST" class="d-inline">
                                             @csrf
                                             @method('DELETE')
+                                            <input type="hidden" name="product_id" value="{{ $cart->product->id }}">
                                             <button type="submit" class="btn btn-outline-danger btn-sm" 
                                                     onclick="return confirm('Supprimer cet article du panier ?')">
                                                 <i class="bi bi-trash"></i>
@@ -170,9 +171,12 @@
                                 </div>
 
                                 <div class="d-grid gap-2">
-                                    <a href="{{ route('checkout.process') }}" class="btn btn-primary btn-lg">
+                                    <form action="{{ route('checkout.process') }}" method="post">
+                                        @csrf
+                                    <button type="submit" class="btn btn-primary btn-lg">
                                         <i class="bi bi-credit-card me-2"></i>Passer la commande
-                                    </a>
+                                    </button>
+                                    </form>
                                     <a href="{{ route('shop') }}" class="btn btn-outline-primary">
                                         <i class="bi bi-bag me-2"></i>Continuer mes achats
                                     </a>
