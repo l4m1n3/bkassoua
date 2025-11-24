@@ -11,15 +11,16 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\PromotionController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\AdController;
-use App\Http\Controllers\RegisterController;
+use App\Http\Controllers\Api\RegisterController;
 
 Route::post('/register', [RegisterController::class, 'register']);
 Route::post('/verify-otp', [RegisterController::class, 'verifyOtp']);
 Route::post('/resend-otp', [RegisterController::class, 'resendOtp']);
+Route::post('/forgot-password', [RegisterController::class, 'forgotPassword']);
+Route::post('/send-otp', [RegisterController::class, 'sendOtp']);
 
 Route::get('/ads', [AdController::class, 'index']); // Liste des annonces actives
-Route::get('/ads/{id}', [AdController::class, 'show']);
-
+Route::get('/ads/{id}', [AdController::class, 'show']); 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index']);
     Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
@@ -33,14 +34,20 @@ Route::get('/user', function (Request $request) {
 // Route::post('register', [AuthController::class, 'register']);
 Route::middleware('auth:sanctum')->post('/cart/add', [CartController::class, 'addToCart']);
 Route::middleware('auth:sanctum')->get('/cart', [CartController::class, 'cart']);
+Route::middleware('auth:sanctum')->delete('/cart/{id}', [CartController::class, 'cartDelete']);
 Route::middleware('auth:sanctum')->post('/place-order', [OrderController::class, 'placeOrder']);
 Route::middleware('auth:sanctum')->get('/user/profile', [UserController::class, 'getUserProfile']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::put('/user/profile', [UserController::class, 'updateProfile']);
+});
 // Route::middleware('auth:sanctum')->get('product/{vendorId}', [ProductController::class, 'getProducts']);
 Route::get('/vendor/{vendorId}/products', [ProductController::class, 'getProducts']);
 Route::get('/popular/products', [ProductController::class, 'getPopularProduct']);
-Route::get('/new/products', [ProductController::class, 'getNewProduct']);
+Route::get('/new/products',[ProductController::class,'getNewProduct']);
 Route::get('/promotions', [PromotionController::class, 'index']);
 Route::get('/order/history/{id}', [ProductController::class, 'getHistory']);
+
 
 // Route::post('/send-otp', [OTPController::class, 'generateOTP']);
 // Route::post('/verify-otp', [OTPController::class, 'verifyOTP']);

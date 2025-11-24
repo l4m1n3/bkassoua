@@ -629,11 +629,10 @@
         document.getElementById('phone_number').addEventListener('input', function(e) {
             let value = e.target.value.replace(/\D/g, '');
             if (value.length > 0) {
-                value = value.match(/.{1,2}/g).join(' ');
+                value = value.match(/.{1,2}/g).join('');
             }
             e.target.value = value;
         });
-
         // Animation au chargement
         document.addEventListener('DOMContentLoaded', function() {
             const fadeElements = document.querySelectorAll('.fade-in');

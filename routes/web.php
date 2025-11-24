@@ -68,16 +68,15 @@ Route::get('/ads/create', [AdController::class, 'create'])->middleware('auth');
 // Auth routes
 Route::get('/login', [CustomLoginController::class, 'showLoginForm'])->name('loginForm');
 Route::post('/login', [CustomLoginController::class, 'login'])->name('login');
-
-Route::post('/send-otp', [OTPController::class, 'generateOTP']);
-Route::post('/verify-otp', [OTPController::class, 'verifyOTP']);
-
-// Registration with OTP
-Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
-Route::post('/register', [RegisterController::class, 'step1'])->name('register.step1');
-Route::get('/verify-otp', [RegisterController::class, 'showVerifyOtpForm'])->name('verify.otp.form');
-Route::post('/verify-otp', [RegisterController::class, 'step2'])->name('register.step2');
+Route::post('/register', [RegisterController::class, 'register']);
+Route::post('/verify-otp', [RegisterController::class, 'verifyOtp']);
 Route::post('/resend-otp', [RegisterController::class, 'resendOtp'])->name('resend.otp');
+Route::post('/forgot-password', [RegisterController::class, 'forgotPassword']);
+Route::post('/send-otp', [RegisterController::class, 'sendOtp']);
+Route::post('/send-otp', [OTPController::class, 'generateOTP']);
+Route::post('/verify-otp', [RegisterController::class, 'verifyOTP'])->name('verify.otp');
+Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
+Route::get('/verify-otp', [RegisterController::class, 'showVerifyOtpForm'])->name('verify.otp.form');
 
 // Vendor routes
 Route::get('/vendor/dashboard', [VendorController::class, 'dashboard'])->name('vendor.dashboard');

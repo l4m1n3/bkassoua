@@ -48,7 +48,7 @@ class RegisterController extends Controller
 
         Session::put('pending_user_' . $request->phone_number, $pendingUser);
 
-        $code = sprintf("%06d", rand(0, 999999));
+        $code = sprintf("%06d", rand(0, 999999)); 
 
         OtpCode::create([
             'phone_number' => $request->phone_number,
@@ -90,8 +90,6 @@ class RegisterController extends Controller
     public function verifyOtp(Request $request)
     {
         try {
-            $phoneNumber = preg_replace('/^\+?227/', '', $request->phone_number);
-            $request->merge(['phone_number' => $phoneNumber]);
             // Validate request
             $request->validate([
                 'phone_number' => 'required|string|regex:/^[0-9]{8}$/',

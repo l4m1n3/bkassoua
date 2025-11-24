@@ -489,7 +489,7 @@
             <div @class(['col-lg-6', 'register-hero'])>
                 <div @class(['hero-content'])>
                     <div @class(['logo-container'])>
-                        <img src="{{ asset('assets/img/logo.png') }}" alt="Bkassoua" @class(['logo'])>
+                        <img src="{{ asset('public/assets/img/logo_nav.png') }}" alt="Bkassoua" @class(['logo'])>
                     </div>
                     <h1 @class(['hero-title'])>Rejoignez Bkassoua</h1>
                     <p @class(['hero-subtitle'])>
@@ -518,420 +518,101 @@
                 </div>
             </div>
 
-            <!-- Section Formulaire (côté droit) -->
-            <div @class(['col-lg-6', 'register-form-section'])>
-                <div @class(['form-header'])>
-                    <h2 @class(['form-title'])>Créer un compte</h2>
-                    <p @class(['form-subtitle'])>Rejoignez notre communauté en quelques étapes</p>
-                </div>
+<form class="register-form" method="POST" action="{{ route('register') }}">
+    @csrf
 
-                <!-- Alertes -->
-                @if(session('success'))
-                    <div @class(['alert', 'alert-success', 'fade-in'])>
-                        <i @class(['bi', 'bi-check-circle-fill', 'me-2'])></i>
-                        {{ session('success') }}
-                    </div>
-                @endif
+    <!-- Nom -->
+    <div class="form-group">
+        <label for="name">Nom complet</label>
+        <input type="text" class="form-control @error('name') is-invalid @enderror"
+               id="name" name="name" value="{{ old('name') }}" required>
+        @error('name')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
+<input type="hidden" name="type" value="register">
+    <!-- Email -->
+    <div class="form-group">
+        <label for="email">Adresse email</label>
+        <input type="email" class="form-control @error('email') is-invalid @enderror"
+               id="email" name="email" value="{{ old('email') }}" required>
+        @error('email')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
 
-                @if($errors->any())
-                    <div @class(['alert', 'alert-danger', 'fade-in'])>
-                        <i @class(['bi', 'bi-exclamation-triangle-fill', 'me-2'])></i>
-                        @foreach($errors->all() as $error)
-                            <div>{{ $error }}</div>
-                        @endforeach
-                    </div>
-                @endif
+    <!-- Phone -->
+    <div class="form-group">
+        <label for="phone_number">Téléphone</label>
+        <input type="text" class="form-control @error('phone_number') is-invalid @enderror"
+               id="phone_number" name="phone_number" value="{{ old('phone_number') }}" required>
+        @error('phone_number')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
 
-                <form @class(['register-form']) method="POST" action="{{ route('register') }}" id="registerForm">
-                    @csrf
-                    
-                    <div @class(['row'])>
-                        <div @class(['col-md-12'])>
-                            <div @class(['form-group', 'fade-in'])>
-                                <label for="name" @class(['form-label'])>
-                                    <i @class(['bi', 'bi-person', 'me-1'])></i>
-                                    Nom complet
-                                </label>
-                                <input type="text" 
-                                       @class(['form-control', '@error('name')', 'is-invalid', '@enderror']) 
-                                       id="name" 
-                                       name="name" 
-                                       value="{{ old('name') }}"
-                                       placeholder="Votre nom et prénom" 
-                                       required>
-                                @error('name')
-                                    <div @class(['invalid-feedback'])>
-                                        <i @class(['bi', 'bi-exclamation-circle', 'me-1'])></i>{{ $message }}
-                                    </div>
-                                @enderror
-                            </div>
-                        </div>
-                    </div>
+    <!-- Adresse -->
+    <div class="form-group">
+        <label for="address">Adresse</label>
+        <input type="text" class="form-control @error('address') is-invalid @enderror"
+               id="address" name="address" value="{{ old('address') }}" required>
+        @error('address')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
 
-                    <div @class(['row'])>
-                        <div @class(['col-md-6'])>
-                            <div @class(['form-group', 'fade-in']) style="animation-delay: 0.1s;">
-                                <label for="email" @class(['form-label'])>
-                                    <i @class(['bi', 'bi-envelope', 'me-1'])></i>
-                                    Adresse email
-                                </label>
-                                <input type="email" 
-                                       @class(['form-control', '@error('email')', 'is-invalid', '@enderror']) 
-                                       id="email" 
-                                       name="email" 
-                                       value="{{ old('email') }}"
-                                       placeholder="votre@email.com" 
-                                       required>
-                                @error('email')
-                                    <div @class(['invalid-feedback'])>
-                                        <i @class(['bi', 'bi-exclamation-circle', 'me-1'])></i>{{ $message }}
-                                    </div>
-                                @enderror
-                            </div>
-                        </div>
-                        <div @class(['col-md-6'])>
-                            <div @class(['form-group', 'fade-in']) style="animation-delay: 0.1s;">
-                                <label for="phone_number" @class(['form-label'])>
-                                    <i @class(['bi', 'bi-phone', 'me-1'])></i>
-                                    Numéro de téléphone
-                                </label>
-                                <input type="text" 
-                                       @class(['form-control', '@error('phone_number')', 'is-invalid', '@enderror']) 
-                                       id="phone_number" 
-                                       name="phone_number" 
-                                       value="{{ old('phone_number') }}"
-                                       placeholder="+227 XX XX XX XX" 
-                                       required>
-                                @error('phone_number')
-                                    <div @class(['invalid-feedback'])>
-                                        <i @class(['bi', 'bi-exclamation-circle', 'me-1'])></i>{{ $message }}
-                                    </div>
-                                @enderror
-                            </div>
-                        </div>
-                    </div>
+    <!-- Password -->
+    <div class="form-group">
+        <label for="password">Mot de passe</label>
+        <input type="password" class="form-control @error('password') is-invalid @enderror"
+               id="password" name="password" required>
+        @error('password')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
 
-                    <div @class(['form-group', 'fade-in']) style="animation-delay: 0.2s;">
-                        <label for="address" @class(['form-label'])>
-                            <i @class(['bi', 'bi-geo-alt', 'me-1'])></i>
-                            Adresse
-                        </label>
-                        <input type="text" 
-                               @class(['form-control', '@error('address')', 'is-invalid', '@enderror']) 
-                               id="address" 
-                               name="address" 
-                               value="{{ old('address') }}"
-                               placeholder="Votre adresse complète" 
-                               required>
-                        @error('address')
-                            <div @class(['invalid-feedback'])>
-                                <i @class(['bi', 'bi-exclamation-circle', 'me-1'])></i>{{ $message }}
-                            </div>
-                        @enderror
-                    </div>
+    <!-- Confirmation -->
+    <div class="form-group">
+        <label for="password_confirmation">Confirmer mot de passe</label>
+        <input type="password" class="form-control" name="password_confirmation" required>
+    </div>
 
-                    <div @class(['row'])>
-                        <div @class(['col-md-6'])>
-                            <div @class(['form-group', 'fade-in']) style="animation-delay: 0.3s;">
-                                <label for="password" @class(['form-label'])>
-                                    <i @class(['bi', 'bi-lock', 'me-1'])></i>
-                                    Mot de passe
-                                </label>
-                                <div @class(['position-relative'])>
-                                    <input type="password" 
-                                           @class(['form-control', '@error('password')', 'is-invalid', '@enderror']) 
-                                           id="password" 
-                                           name="password" 
-                                           placeholder="Votre mot de passe" 
-                                           required>
-                                    <button type="button" @class(['password-toggle']) onclick="togglePassword('password')">
-                                        <i @class(['bi', 'bi-eye']) id="password-toggle-icon"></i>
-                                    </button>
-                                </div>
-                                @error('password')
-                                    <div @class(['invalid-feedback'])>
-                                        <i @class(['bi', 'bi-exclamation-circle', 'me-1'])></i>{{ $message }}
-                                    </div>
-                                @enderror
-                                <div @class(['password-strength'])>
-                                    <div @class(['strength-bar'])>
-                                        <div @class(['strength-fill']) id="password-strength-bar"></div>
-                                    </div>
-                                    <div @class(['strength-text']) id="password-strength-text">Force du mot de passe</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div @class(['col-md-6'])>
-                            <div @class(['form-group', 'fade-in']) style="animation-delay: 0.3s;">
-                                <label for="password_confirmation" @class(['form-label'])>
-                                    <i @class(['bi', 'bi-lock-fill', 'me-1'])></i>
-                                    Confirmer le mot de passe
-                                </label>
-                                <div @class(['position-relative'])>
-                                    <input type="password" 
-                                           @class(['form-control', '@error('password_confirmation')', 'is-invalid', '@enderror']) 
-                                           id="password_confirmation" 
-                                           name="password_confirmation" 
-                                           placeholder="Confirmer le mot de passe" 
-                                           required>
-                                    <button type="button" @class(['password-toggle']) onclick="togglePassword('password_confirmation')">
-                                        <i @class(['bi', 'bi-eye']) id="password-confirm-toggle-icon"></i>
-                                    </button>
-                                </div>
-                                @error('password_confirmation')
-                                    <div @class(['invalid-feedback'])>
-                                        <i @class(['bi', 'bi-exclamation-circle', 'me-1'])></i>{{ $message }}
-                                    </div>
-                                @enderror
-                            </div>
-                        </div>
-                    </div>
+    <!-- CGU -->
+    <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" name="terms" required>
+        <label class="form-check-label">J'accepte les conditions générales</label>
+    </div>
 
-                    <!-- Section OTP (optionnelle) -->
-                    <div @class(['otp-section', 'fade-in']) style="animation-delay: 0.4s;" id="otpSection">
-                        <div @class(['otp-header'])>
-                            <h6 @class(['otp-title'])>Vérification du numéro</h6>
-                            <button type="button" @class(['btn-otp']) id="sendOtpBtn">
-                                <i @class(['bi', 'bi-send']) id="sendOtpIcon"></i>
-                                <span id="sendOtpText">Envoyer le code</span>
-                                <span @class(['spinner-border', 'spinner-border-sm', 'd-none']) id="sendOtpSpinner"></span>
-                            </button>
-                        </div>
-                        <div @class(['form-group'])>
-                            <input type="text" 
-                                   @class(['form-control']) 
-                                   id="otp" 
-                                   name="otp" 
-                                   placeholder="Code de vérification (6 chiffres)"
-                                   maxlength="6">
-                            <span @class(['otp-status']) id="otpStatus"></span>
-                            <input type="hidden" id="otpVerified" name="otp_verified" value="0">
-                        </div>
-                    </div>
+    <button type="submit" class="btn-register">
+        <i class="bi bi-person-plus me-2"></i>Créer mon compte
+    </button>
+</form>
 
-                    <div @class(['form-group', 'fade-in']) style="animation-delay: 0.5s;">
-                        <div @class(['form-check'])>
-                            <input @class(['form-check-input']) type="checkbox" id="terms" name="terms" required>
-                            <label @class(['form-check-label']) for="terms">
-                                J'accepte les <a href="#" @class(['text-primary'])>conditions générales</a> 
-                                et la <a href="#" @class(['text-primary'])>politique de confidentialité</a>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div @class(['fade-in']) style="animation-delay: 0.6s;">
-                        <button type="submit" @class(['btn-register']) id="submitBtn">
-                            <i @class(['bi', 'bi-person-plus', 'me-2'])></i>
-                            Créer mon compte
-                        </button>
-                    </div>
-                </form>
-
-                <div @class(['divider', 'fade-in']) style="animation-delay: 0.7s;">
-                    <span>Déjà membre ?</span>
-                </div>
-
-                <div @class(['login-link', 'fade-in']) style="animation-delay: 0.8s;">
-                    <p>Connectez-vous à votre compte existant</p>
-                    <a href="{{ route('login') }}" @class(['btn-login'])>
-                        <i @class(['bi', 'bi-box-arrow-in-right', 'me-2'])></i>
-                        Se connecter
-                    </a>
-                </div>
-            </div>
         </div>
     </div>
 
     <script>
-        // Toggle password visibility
-        function togglePassword(fieldId) {
-            const passwordInput = document.getElementById(fieldId);
-            const toggleIcon = document.getElementById(fieldId + '-toggle-icon');
-            
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                toggleIcon.classList.remove('bi-eye');
-                toggleIcon.classList.add('bi-eye-slash');
-            } else {
-                passwordInput.type = 'password';
-                toggleIcon.classList.remove('bi-eye-slash');
-                toggleIcon.classList.add('bi-eye');
-            }
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('registerForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const submitText = document.getElementById('submitText');
+    const submitSpinner = document.getElementById('submitSpinner');
+    const alertContainer = document.getElementById('alertContainer');
+    const otpSection = document.getElementById('otpSection');
+    const otpInput = document.getElementById('otp');
+    const sendOtpBtn = document.getElementById('sendOtpBtn');
+    const phoneInput = document.getElementById('phone_number');
+
+    // Formatage du numéro de téléphone (8 chiffres)
+    phoneInput.addEventListener('input', function (e) {
+        let v = e.target.value.replace(/\D/g, '').substring(0, 8);
+        if (v.length > 0) {
+            v = v.match(/.{1,2}/g).join('');
         }
-
-        // Format phone number input
-        document.getElementById('phone_number').addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\D/g, '');
-            
-            // Garde seulement les 8 derniers chiffres
-            if (value.length > 8) {
-                value = value.slice(-8);
-            }
-
-            // Appliquer le format lisible : XX XX XX XX
-            let formatted = '';
-            if (value.length > 0) {
-                formatted = value.match(/.{1,2}/g)?.join(' ') || '';
-            }
-
-            // Ajouter l'indicatif +227
-            e.target.value = '+227 ' + formatted.trim();
-        });
-
-        // Password strength indicator
-        document.getElementById('password').addEventListener('input', function(e) {
-            const password = e.target.value;
-            const strengthBar = document.getElementById('password-strength-bar');
-            const strengthText = document.getElementById('password-strength-text');
-            
-            const strength = calculatePasswordStrength(password);
-            
-            strengthBar.style.width = strength.percentage + '%';
-            strengthBar.style.backgroundColor = strength.color;
-            strengthText.textContent = strength.text;
-            strengthText.style.color = strength.color;
-        });
-
-        function calculatePasswordStrength(password) {
-            let score = 0;
-            
-            // Longueur
-            if (password.length >= 8) score += 25;
-            if (password.length >= 12) score += 15;
-            
-            // Complexité
-            if (/[a-z]/.test(password)) score += 10;
-            if (/[A-Z]/.test(password)) score += 10;
-            if (/[0-9]/.test(password)) score += 10;
-            if (/[^a-zA-Z0-9]/.test(password)) score += 10;
-            
-            // Variations
-            if (password.length >= 6 && /[a-z]/.test(password) && /[A-Z]/.test(password)) score += 10;
-            if (password.length >= 8 && /[0-9]/.test(password)) score += 10;
-            if (password.length >= 10 && /[^a-zA-Z0-9]/.test(password)) score += 10;
-
-            score = Math.min(score, 100);
-
-            if (score < 40) {
-                return {
-                    percentage: score,
-                    color: '#dc3545',
-                    text: 'Faible'
-                };
-            } else if (score < 70) {
-                return {
-                    percentage: score,
-                    color: '#ffc107',
-                    text: 'Moyen'
-                };
-            } else {
-                return {
-                    percentage: score,
-                    color: '#28a745',
-                    text: 'Fort'
-                };
-            }
-        }
-
-        // OTP functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            const sendOtpBtn = document.getElementById('sendOtpBtn');
-            const sendOtpText = document.getElementById('sendOtpText');
-            const sendOtpIcon = document.getElementById('sendOtpIcon');
-            const sendOtpSpinner = document.getElementById('sendOtpSpinner');
-            const otpStatus = document.getElementById('otpStatus');
-            const otpInput = document.getElementById('otp');
-            const otpVerifiedInput = document.getElementById('otpVerified');
-            const submitBtn = document.getElementById('submitBtn');
-
-            let otpCountdown;
-            let remainingTime = 120;
-
-            sendOtpBtn.addEventListener('click', async function() {
-                const phoneNumber = document.getElementById('phone_number').value.replace(/\D/g, '');
-
-                if (phoneNumber.length < 8) {
-                    otpStatus.textContent = 'Veuillez entrer un numéro de téléphone valide';
-                    otpStatus.className = 'otp-status text-danger';
-                    return;
-                }
-
-                try {
-                    sendOtpBtn.disabled = true;
-                    sendOtpText.textContent = 'Envoi...';
-                    sendOtpIcon.classList.add('d-none');
-                    sendOtpSpinner.classList.remove('d-none');
-                    otpStatus.textContent = '';
-
-                    // Simuler l'envoi d'OTP (remplacer par votre API)
-                    await new Promise(resolve => setTimeout(resolve, 2000));
-                    
-                    otpStatus.textContent = 'Code envoyé! Vérifiez votre téléphone.';
-                    otpStatus.className = 'otp-status text-success';
-                    startOtpCountdown();
-
-                } catch (error) {
-                    otpStatus.textContent = 'Erreur lors de l\'envoi du code';
-                    otpStatus.className = 'otp-status text-danger';
-                } finally {
-                    sendOtpBtn.disabled = false;
-                    sendOtpText.textContent = 'Renvoyer';
-                    sendOtpIcon.classList.remove('d-none');
-                    sendOtpSpinner.classList.add('d-none');
-                }
-            });
-
-            // Vérification OTP en temps réel
-            otpInput.addEventListener('input', function() {
-                const otp = this.value.trim();
-                if (otp.length === 6) {
-                    // Simuler la vérification
-                    setTimeout(() => {
-                        if (otp === '123456') { // Code de test
-                            otpVerifiedInput.value = '1';
-                            otpStatus.textContent = 'Numéro vérifié avec succès!';
-                            otpStatus.className = 'otp-status text-success';
-                            clearInterval(otpCountdown);
-                        } else {
-                            otpStatus.textContent = 'Code incorrect. Essayez à nouveau.';
-                            otpStatus.className = 'otp-status text-danger';
-                        }
-                    }, 1000);
-                }
-            });
-
-            function startOtpCountdown() {
-                clearInterval(otpCountdown);
-                remainingTime = 120;
-                updateCountdownDisplay();
-
-                otpCountdown = setInterval(() => {
-                    remainingTime--;
-                    updateCountdownDisplay();
-
-                    if (remainingTime <= 0) {
-                        clearInterval(otpCountdown);
-                        otpStatus.textContent = 'Le code a expiré. Veuillez en demander un nouveau.';
-                        otpStatus.className = 'otp-status text-danger';
-                        otpVerifiedInput.value = '0';
-                    }
-                }, 1000);
-            }
-
-            function updateCountdownDisplay() {
-                const minutes = Math.floor(remainingTime / 60);
-                const seconds = remainingTime % 60;
-                otpStatus.textContent = `Code valide pour ${minutes}:${seconds.toString().padStart(2, '0')}`;
-                otpStatus.className = 'otp-status text-warning';
-            }
-
-            // Animation au chargement
-            const fadeElements = document.querySelectorAll('.fade-in');
-            fadeElements.forEach((element, index) => {
-                element.style.animationDelay = (index * 0.1) + 's';
-            });
-        });
-    </script>
+        e.target.value = v;
+    });
+});
+</script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
