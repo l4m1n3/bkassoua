@@ -166,37 +166,50 @@
 <!-- Scripts supplémentaires pour la page boutique -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    // --- Gestion des filtres de couleur ---
+
+    /* -----------------------------
+       Gestion des filtres de couleur
+    ------------------------------ */
     document.querySelectorAll('.color-option').forEach(option => {
         option.addEventListener('click', function () {
             this.classList.toggle('active');
         });
     });
 
-    // --- Mise à jour de l'affichage du prix ---
+    /* -----------------------------
+       Mise à jour de l'affichage du prix (protégée)
+    ------------------------------ */
     const priceRange = document.getElementById('priceRange');
     const minPriceInput = document.querySelector('.price-inputs input:first-child');
     const maxPriceInput = document.querySelector('.price-inputs input:last-child');
     const priceDisplay = document.querySelector('.price-display small');
 
     function updatePriceDisplay() {
+        if (!minPriceInput || !maxPriceInput || !priceDisplay) return;
+
         const min = minPriceInput.value || 0;
         const max = maxPriceInput.value || 50000;
+
         priceDisplay.textContent = `Prix: ${parseInt(min).toLocaleString()} - ${parseInt(max).toLocaleString()} FCFA`;
-        priceRange.value = max;
     }
 
-    if (priceRange) {
+    // Range slider protégé
+    if (priceRange && maxPriceInput) {
         priceRange.addEventListener('input', function () {
             maxPriceInput.value = this.value;
             updatePriceDisplay();
         });
     }
 
-    minPriceInput.addEventListener('input', updatePriceDisplay);
-    maxPriceInput.addEventListener('input', updatePriceDisplay);
+    // Inputs protégés
+    if (minPriceInput && maxPriceInput) {
+        minPriceInput.addEventListener('input', updatePriceDisplay);
+        maxPriceInput.addEventListener('input', updatePriceDisplay);
+    }
 
-    // --- Boutons de vue (grille/liste) ---
+    /* -----------------------------
+       Boutons de vue Grille / Liste
+    ------------------------------ */
     const viewGridBtn = document.querySelector('.btn-group .btn:first-child');
     const viewListBtn = document.querySelector('.btn-group .btn:last-child');
     const productsGrid = document.querySelector('.products-grid');
@@ -215,24 +228,23 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // --- Ajout au panier ---
+    /* -----------------------------
+       Ajout au panier
+    ------------------------------ */
     document.querySelectorAll('.add-to-cart').forEach(button => {
         button.addEventListener('click', function () {
             const productId = this.getAttribute('data-product-id');
-            const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
-            const csrfToken = csrfTokenMeta ? csrfTokenMeta.getAttribute('content') : null;
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
             if (!csrfToken) {
-                console.error('❌ CSRF token manquant. Vérifie la balise <meta name="csrf-token"> dans le <head>.');
+                console.error('❌ CSRF token manquant.');
                 return;
             }
 
-            // Animation d’ajout
             button.innerHTML = '<i class="bi bi-check-lg"></i>';
             button.classList.add('btn-success');
             button.classList.remove('btn-primary');
 
-            // Envoi AJAX
             fetch('{{ route("cart.add") }}', {
                 method: "POST",
                 headers: {
@@ -247,7 +259,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        console.log("✅ Produit ajouté au panier avec succès");
                         button.innerHTML = '<i class="bi bi-check-circle"></i> Ajouté !';
                         button.classList.add("btn-success");
 
@@ -255,19 +266,18 @@ document.addEventListener('DOMContentLoaded', function () {
                             document.getElementById("cart-count").textContent = data.cart_count;
                         }
                     } else {
-                        throw new Error(data.message || "Erreur inconnue lors de l’ajout au panier.");
+                        throw new Error(data.message || "Erreur inconnue.");
                     }
                 })
                 .catch(error => {
-                    console.error("❌ Erreur lors de l’ajout au panier :", error.message);
-                    button.innerHTML = '<i class="bi bi-cart-plus"></i> Ajouter au panier';
+                    console.error("❌ Erreur :", error.message);
+                    button.innerHTML = '<i class="bi bi-cart-plus"></i>';
                     button.classList.remove("btn-success");
                     button.classList.add("btn-primary");
                 })
                 .finally(() => {
-                    // Réinitialiser après 2 secondes
                     setTimeout(() => {
-                        button.innerHTML = '<i class="bi bi-cart-plus"></i> Ajouter au panier';
+                        button.innerHTML = '<i class="bi bi-cart-plus"></i>';
                         button.classList.remove('btn-success');
                         button.classList.add('btn-primary');
                     }, 2000);
@@ -275,25 +285,25 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // --- Animation au défilement ---
-    const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-    };
-
-    const observer = new IntersectionObserver(function (entries) {
+    /* -----------------------------
+       Animation au scroll
+    ------------------------------ */
+    const observer = new IntersectionObserver(entries => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 entry.target.classList.add('fade-in');
             }
         });
-    }, observerOptions);
-
-    document.querySelectorAll('.product-card').forEach(card => {
-        observer.observe(card);
+    }, {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
     });
+
+    document.querySelectorAll('.product-card').forEach(card => observer.observe(card));
+
 });
 </script>
+
 
 
 <style>

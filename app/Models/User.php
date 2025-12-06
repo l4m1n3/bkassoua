@@ -11,7 +11,7 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-     use HasFactory, Notifiable, HasApiTokens;
+    use HasFactory, Notifiable, HasApiTokens;
 
 
     /**
@@ -41,7 +41,7 @@ class User extends Authenticatable
     ];
 
     /**
-     * Get the attributes that should be cast.
+     * Get the attributes that should be cast. 
      *
      * @return array<string, string>
      */
@@ -59,5 +59,10 @@ class User extends Authenticatable
     public function vendor()
     {
         return $this->hasOne(Vendor::class);  // Assurez-vous que le champ 'user_id' existe dans la table 'vendors'
+    }
+    // AJOUTE ÇA ICI
+    public function cartItems()
+    {
+        return $this->hasMany(Cart::class, 'user_id');
     }
 }

@@ -30,8 +30,6 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-
-// Route::post('register', [AuthController::class, 'register']);
 Route::middleware('auth:sanctum')->post('/cart/add', [CartController::class, 'addToCart']);
 Route::middleware('auth:sanctum')->get('/cart', [CartController::class, 'cart']);
 Route::middleware('auth:sanctum')->delete('/cart/{id}', [CartController::class, 'cartDelete']);
@@ -41,29 +39,14 @@ Route::middleware('auth:sanctum')->get('/user/profile', [UserController::class, 
 Route::middleware('auth:sanctum')->group(function () {
     Route::put('/user/profile', [UserController::class, 'updateProfile']);
 });
-// Route::middleware('auth:sanctum')->get('product/{vendorId}', [ProductController::class, 'getProducts']);
 Route::get('/vendor/{vendorId}/products', [ProductController::class, 'getProducts']);
 Route::get('/popular/products', [ProductController::class, 'getPopularProduct']);
 Route::get('/new/products',[ProductController::class,'getNewProduct']);
 Route::get('/promotions', [PromotionController::class, 'index']);
 Route::get('/order/history/{id}', [ProductController::class, 'getHistory']);
-
-
-// Route::post('/send-otp', [OTPController::class, 'generateOTP']);
-// Route::post('/verify-otp', [OTPController::class, 'verifyOTP']);
-// Étape 1: Enregistrement des infos + envoi OTP
-// Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
-// Route::post('/register', [RegisterController::class, 'step1'])->name('register');
-// Route::get('/verify-otp', [RegisterController::class, 'showVerifyOtpForm'])->name('verify.otp.form');
-// Route::post('/verify-otp', [RegisterController::class, 'step2'])->name('register.step2');
-// Route::post('/resend-otp', [RegisterController::class, 'resendOtp'])->name('resend.otp');
-// Route::get('/', function () { return view('welcome'); })->name('home');
-
+Route::get('/popular/categories', [ProductController::class, 'getPopularCategory']);
 Route::post('/products/add', [ProductController::class, 'addProduct']);
-// web.php ou api.php
 Route::delete('/products/{id}', [ProductController::class, 'destroy']);
-
-
 Route::get('categories', [CategoryController::class, 'categories']);
 Route::get('products/{productId}', [ProductController::class, 'show']);
 Route::get('products', [ProductController::class, 'index']);

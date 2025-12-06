@@ -108,7 +108,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/show/cart/', [ProductController::class, 'showCart'])->name('cart');
     Route::delete('/remove/cart/', [ProductController::class, 'removeCart'])->name('cart.remove');
     // routes/web.php
-Route::put('/cart/update/{cart}', [ProductController::class, 'update'])->name('cart.update');
+Route::put('/cart/update/{cart}', [ProductController::class, 'updateCart'])->name('cart.update');
 }); 
 
 

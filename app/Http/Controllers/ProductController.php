@@ -5,12 +5,60 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Cart;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+
 
 
 class ProductController extends Controller
 {
+
+    public function updateCart(Request $request, $cartId)
+    {
+        try {
+            $request->validate([
+                'quantity' => 'required|integer|min:1|max:100'
+            ]);
+
+            $cartItem = auth()->user()->cartItems()
+                ->where('id', $cartId)
+                ->firstOrFail();
+
+            // Vérification du stock
+            if ($request->quantity > $cartItem->product->stock_quantity) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Stock insuffisant ! Seulement ' . $cartItem->product->stock_quantity . ' disponible(s).'
+                ], 400);
+            }
+
+            $cartItem->quantity = $request->quantity;
+            $cartItem->save();
+
+            // Nombre d'articles dans le panier
+            $cartCount = auth()->user()->cartItems()->sum('quantity');
+
+            // Total du panier (prix réel du produit)
+            $cartTotal = auth()->user()->cartItems()
+                ->join('products', 'carts.product_id', '=', 'products.id')
+                ->sum(\DB::raw('carts.quantity * products.price'));
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Panier mis à jour !',
+                'cart_count' => $cartCount,
+                'cart_total' => $cartTotal
+            ]);
+        } catch (\Throwable $th) {
+            Log::error('Erreur lors de la mise à jour du panier : ' . $th->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la mise à jour du panier.'
+            ], 500);
+        }
+    }
     public function index()
     {
         // Récupérer les produits avec leurs vendeurs et catégories associés, paginés à 10 par page
@@ -211,56 +259,56 @@ class ProductController extends Controller
     }
 
     // app/Http/Controllers/CartController.php
-    public function updateCart(Request $request, Cart $cart)
-    {
-        // $request->validate([
-        //     'quantity' => 'required|integer|min:1'
-        // ]);
+    // public function updateCart(Request $request, Cart $cart)
+    // {
+    //     // $request->validate([
+    //     //     'quantity' => 'required|integer|min:1'
+    //     // ]);
 
-        try {
-            // Vérifier que l'article appartient à l'utilisateur connecté
-            if ($cart->user_id !== auth()->id()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Non autorisé'
-                ], 403);
-            }
+    //     try {
+    //         // Vérifier que l'article appartient à l'utilisateur connecté
+    //         if ($cart->user_id !== auth()->id()) {
+    //             return response()->json([
+    //                 'success' => false,
+    //                 'message' => 'Non autorisé'
+    //             ], 403);
+    //         }
 
-            // Vérifier le stock disponible
-            if ($request->quantity > $cart->product->stock_quantity) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Stock insuffisant'
-                ], 400);
-            }
+    //         // Vérifier le stock disponible
+    //         if ($request->quantity > $cart->product->stock_quantity) {
+    //             return response()->json([
+    //                 'success' => false,
+    //                 'message' => 'Stock insuffisant'
+    //             ], 400);
+    //         }
 
-            // Mettre à jour la quantité
-            $cart->update([
-                'quantity' => $request->quantity
-            ]);
+    //         // Mettre à jour la quantité
+    //         $cart->update([
+    //             'quantity' => $request->quantity
+    //         ]);
 
-            // Recalculer les totaux
-            $carts = Cart::where('user_id', auth()->id())->with('product')->get();
-            $total = $carts->sum(function ($cart) {
-                return $cart->product->price * $cart->quantity;
-            });
+    //         // Recalculer les totaux
+    //         $carts = Cart::where('user_id', auth()->id())->with('product')->get();
+    //         $total = $carts->sum(function ($cart) {
+    //             return $cart->product->price * $cart->quantity;
+    //         });
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Quantité mise à jour',
-                'cart' => $cart,
-                'item_total' => $cart->product->price * $cart->quantity,
-                'subtotal' => $total,
-                'grand_total' => $total >= 50000 ? $total : $total + 1000,
-                'free_shipping' => $total >= 50000
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Erreur lors de la mise à jour: ' . $e->getMessage()
-            ], 500);
-        }
-    }
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Quantité mise à jour',
+    //             'cart' => $cart,
+    //             'item_total' => $cart->product->price * $cart->quantity,
+    //             'subtotal' => $total,
+    //             'grand_total' => $total >= 50000 ? $total : $total + 1000,
+    //             'free_shipping' => $total >= 50000
+    //         ]);
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Erreur lors de la mise à jour: ' . $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
     public function showCart()
     {
         $categories = Category::all();

@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Models\Vendor;
 use App\Models\OrderItem;
 use App\Models\Order;
+use App\Models\Category;
 use Carbon\Carbon;
 
 class ProductController extends Controller
@@ -86,8 +87,6 @@ class ProductController extends Controller
             ], 500);
         }
     }
-
-
     // Ajouter un produit
     public function addProduct(Request $request)
     {
@@ -129,13 +128,23 @@ class ProductController extends Controller
 
         return response()->json(['message' => 'Produit supprimé avec succès'], 200);
     }
+    // Récupérer les produits populaires
     public function getPopularProduct()
     {
         $popularProducts = OrderItem::with(['product'])->get();
-        // dd($popularProducts);
         return response()->json([
-
             'popularProducts' => $popularProducts
+        ], 200);
+    }
+    public function getPopularCategory()
+    {
+        $popularCategories = Category::withCount('products')
+            ->orderBy('products_count', 'desc')
+            ->take(3)
+            ->get();
+
+        return response()->json([
+            'popularCategories' => $popularCategories
         ], 200);
     }
 
@@ -154,33 +163,33 @@ class ProductController extends Controller
         ], 200);
     }
 
-    public function getHistory($userId)
-    {
-        // Récupérer les commandes de l'utilisateur
-        $orders = Order::where('user_id', $userId)
-            ->with(['orderItems.product.category']) // Charger les relations
-            ->select('id', 'status', 'created_at')
-            ->get()
-            ->map(function ($order) {
-                return [
-                    'order_id' => $order->id,
-                    'status' => $order->status, // 'pending', 'confirmed', 'delivered'
-                    'created_at' => $order->created_at->toDateTimeString(),
-                    'products' => $order->orderItems->map(function ($item) {
-                        return [
-                            'product_id' => $item->product->id,
-                            'product_name' => $item->product->name,
-                            'category' => $item->product->category ? $item->product->category->name : null,
-                            'quantity' => $item->quantity,
-                        ];
-                    })->toArray(),
-                ];
-            });
+    // public function getHistory($userId)
+    // {
+    //     // Récupérer les commandes de l'utilisateur
+    //     $orders = Order::where('user_id', $userId)
+    //         ->with(['orderItems.product.category']) // Charger les relations
+    //         ->select('id', 'status', 'created_at')
+    //         ->get()
+    //         ->map(function ($order) {
+    //             return [
+    //                 'order_id' => $order->id,
+    //                 'status' => $order->status, // 'pending', 'confirmed', 'delivered'
+    //                 'created_at' => $order->created_at->toDateTimeString(),
+    //                 'products' => $order->orderItems->map(function ($item) {
+    //                     return [
+    //                         'product_id' => $item->product->id,
+    //                         'product_name' => $item->product->name,
+    //                         'category' => $item->product->category ? $item->product->category->name : null,
+    //                         'quantity' => $item->quantity,
+    //                     ];
+    //                 })->toArray(),
+    //             ];
+    //         });
 
-        return response()->json([
-            'orders' => $orders
-        ], 200);
-    }
+    //     return response()->json([
+    //         'orders' => $orders
+    //     ], 200);
+    // }
 
     public function getNewProduct()
     {
