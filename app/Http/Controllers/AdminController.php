@@ -42,7 +42,6 @@ class AdminController extends Controller
     public function changeVendorStatus($vendorId)
     {
         $vendor = Vendor::findOrFail($vendorId);
-        // dd($vendor);
         // Alterne le statut du vendeur
         if ($vendor->status === 'active') {
             $vendor->status = 'inactive';
@@ -59,17 +58,16 @@ class AdminController extends Controller
 
     public function users()
     {
-        $vendors = Vendor::with('user')
-        ->paginate(10);
+        $totalUsers = User::count();
+        $activeUsers = User::where('status', 'active')->count();
+        $vendors = Vendor::with('user','products')
+            ->paginate(10);
         $users = User::paginate(10);
-        $vendorCount=Vendor::count();
-        // $vendors = Vendor::whereIn('user_id', User::pluck('id'))
-        // ->distinct()
-        // ->get();
-        // dd($vendors);
-        
-        $users = User::all();
-        return view('admin.users', compact('users', 'vendors'));
+        $totalVendors = Vendor::count();
+        $pendingUsers = User::where('status', 'pending')->count();
+        // $users = User::all();
+        // dd($users);
+        return view('admin.users', compact('users', 'vendors', 'totalUsers', 'activeUsers', 'totalVendors', 'pendingUsers'));
     }
 
     public function showUser($id)
@@ -80,8 +78,9 @@ class AdminController extends Controller
 
     public function categories()
     {
-        $categories = Category::all();
-        return view('admin.category', compact('categories'));
+        $totalProducts = Product::with('category')->count();
+        $categories = Category::with('products')->get();
+        return view('admin.category', compact('categories', 'totalProducts'));
     }
 
     public function createCategory()
@@ -170,80 +169,123 @@ class AdminController extends Controller
         return redirect()->route('admin.categories')->with('success', 'Produit supprimé avec succès');
     }
     // Afficher toutes les commandes pour l'admin
+
+
     public function orders()
     {
-        // Récupérer toutes les commandes avec leurs articles et paiement associés
-        $orders = Order::with(['items', 'payment'])->paginate(10);
-        // dd($orders); 
-        // Retourner la vue avec les données des commandes
+        $orders = Order::with(['items', 'payment'])
+            ->latest()
+            ->paginate(10);
+
         return view('admin.commande', compact('orders'));
     }
 
-   
+    public function cancel(Order $order)
+    {
+        if (!in_array($order->status, ['pending', 'processing'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cette commande ne peut pas être annulée.'
+            ], 422);
+        }
+
+        DB::transaction(function () use ($order) {
+            $order->update(['status' => 'cancelled']);
+
+            if ($order->payment) {
+                $order->payment->update(['status' => 'refunded']);
+            }
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Commande annulée avec succès.'
+        ]);
+    }
+
+    public function validatePayment(Order $order)
+    {
+        if ($order->status !== 'pending') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Paiement déjà traité.'
+            ], 422);
+        }
+
+        DB::transaction(function () use ($order) {
+            $order->update(['status' => 'processing']);
+
+            if ($order->payment) {
+                $order->payment->update(['status' => 'paid']);
+            }
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Paiement validé avec succès.'
+        ]);
+    }
+
+    public function updateStatus(Request $request, Order $order)
+    {
+        $request->validate([
+            'status' => 'required|in:processing,shipped,delivered,cancelled'
+        ]);
+
+        // Sécurité logique
+        if ($order->status === 'cancelled') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Commande annulée, action impossible.'
+            ], 422);
+        }
+
+        $order->update(['status' => $request->status]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Statut de la commande mis à jour.'
+        ]);
+    }
+
+
+    public function bulkAction(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'action' => 'required|in:cancel,deliver'
+        ]);
+
+        DB::transaction(function () use ($request) {
+            foreach ($request->ids as $id) {
+                $order = Order::find($id);
+                if (!$order) continue;
+
+                if ($request->action === 'cancel') {
+                    if (in_array($order->status, ['pending', 'processing'])) {
+                        $order->update(['status' => 'cancelled']);
+                    }
+                }
+
+                if ($request->action === 'deliver') {
+                    if ($order->status === 'processing') {
+                        $order->update(['status' => 'delivered']);
+                    }
+                }
+            }
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Action groupée appliquée avec succès.'
+        ]);
+    }
+
 
     /**
      * Annule une commande
      */
-   public function cancel(Order $order)
-{
-    // ✅ Vérifier que la commande peut être annulée
-    if (!in_array($order->status, ['pending', 'processing'])) {
-        return redirect()->back()
-            ->with('error', 'Cette commande ne peut pas être annulée.');
-    }
 
-    DB::transaction(function () use ($order) {
-        // ✅ Annuler la commande
-        $order->update(['status' => 'cancelled']);
-
-        // ✅ Si un paiement existe, on le marque comme remboursé
-        if ($order->payment) {
-            // On évite le problème de $fillable et on met à jour directement
-            $order->payment->status = 'refunded';
-            $order->payment->save();
-        }
-    });
-
-    return redirect()->back()
-        ->with('success', 'La commande a été annulée avec succès.');
-}
-    /**
-     * Met à jour le statut d'une commande
-     */
-    public function updateStatus(Request $request, Order $order)
-    {
-        $validated = $request->validate([
-            'status' => 'required|in:pending,processing,delivered,cancelled'
-        ]);
-
-        $order->update($validated);
-
-        return redirect()->back()
-            ->with('success', 'Statut de la commande mis à jour.');
-    }
-
-
-public function validatePayment(Order $order)
-{
-    // Vérifier que la commande est encore en attente de paiement
-    if ($order->status !== 'pending') {
-        return redirect()->back()
-            ->with('error', 'Cette commande ne peut pas être validée.');
-    }
-
-    DB::transaction(function () use ($order) {
-        // Mettre à jour le statut de la commande
-        $order->update(['status' => 'processing']);
-// dd($order->payment);
-        // Si un paiement est lié, on le marque comme payé
-        if ($order->payment) {
-            $order->payment->update(['status' => 'paid']);
-        }
-    });
-
-    return redirect()->back()
-        ->with('success', 'Le paiement de la commande a été validé avec succès.');
-}
 
     // Ajouter une nouvelle publicité via un formulaire
     public function storeAds(Request $request)

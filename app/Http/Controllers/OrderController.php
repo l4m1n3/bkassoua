@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Exception;
 
 class OrderController extends Controller
 {
@@ -91,6 +92,10 @@ class OrderController extends Controller
             if (!$cart->product) {
                 return redirect()->back()->with('error', 'Un produit dans votre panier n\'existe plus.');
             }
+            if ($cart->quantity > $cart->product->stock_quantity) {
+                throw new Exception("Stock insuffisant pour {$cart->product->name}");
+            }
+            $cart->product->decrement('stock_quantity', $cart->quantity);
         }
 
         // Calcul du total
@@ -115,7 +120,7 @@ class OrderController extends Controller
                 'amount' => $totalAmount,
                 'status' => 'pending', // ou 'completed' selon votre flux
                 'payment_method' => $request->payment_method ?? 'unknown',
-                'transaction_id' => Str::uuid(), // ou un ID de transaction réel
+                // 'transaction_id' => Str::uuid(), // ou un ID de transaction réel
             ]);
 
             // Ajouter les produits à la commande
@@ -142,9 +147,6 @@ class OrderController extends Controller
                 'type' => 'order',
                 'read' => false,
             ]);
-
-            // Notifier l'admin si nécessaire
-            // ...
 
             // Valider la transaction
             DB::commit();

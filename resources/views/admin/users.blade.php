@@ -230,9 +230,8 @@
                         </div>
                     @endif
                 </div>
-
                 <!-- Pagination Utilisateurs -->
-                {{-- @if($users->hasPages())
+                @if($users->hasPages())
                 <div class="card-footer">
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="text-muted">
@@ -243,7 +242,7 @@
                         </nav>
                     </div>
                 </div>
-                @endif --}}
+                @endif
             </div>
         </div>
 
@@ -303,7 +302,7 @@
                                         <td>
                                             <div class="store-info">
                                                 <div class="store-name">{{ $vendor->store_name ?? 'Sans nom' }}</div>
-                                                <small class="text-muted">{{ $vendor->products_count ?? 0 }} produits</small>
+                                                <small class="text-muted">{{ $vendor->products->count() ?? 0 }} produits</small>
                                             </div>
                                         </td>
                                         <td>
@@ -516,7 +515,7 @@
                                 </div>
                                 <div class="info-item">
                                     <label>Produits</label>
-                                    <div>{{ $vendor->products_count ?? 0 }}</div>
+                                    <div>{{ $vendor->products->count() ?? 0 }}</div>
                                 </div>
                                 <div class="info-item">
                                     <label>Date d'inscription</label>

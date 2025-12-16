@@ -211,7 +211,7 @@
 
                                         @if($order->status == 'processing')
                                             <button class="btn btn-sm btn-info" 
-                                                    onclick="shipOrder({{ $order->id }})"
+                                                    onclick="updateOrderStatus({{ $order->id }}, 'shipped')"
                                                     title="Marquer comme expédiée">
                                                 <i class="bi bi-truck"></i>
                                             </button>
@@ -219,7 +219,7 @@
 
                                         @if($order->status == 'shipped')
                                             <button class="btn btn-sm btn-success" 
-                                                    onclick="deliverOrder({{ $order->id }})"
+                                                    onclick="updateOrderStatus({{ $order->id }}, 'delivered')"
                                                     title="Marquer comme livrée">
                                                 <i class="bi bi-check-circle"></i>
                                             </button>
@@ -427,17 +427,20 @@
                     </button>
                 @endif
 
-                @if($order->status == 'processing')
-                    <button type="button" class="btn btn-info" onclick="shipOrder({{ $order->id }})">
-                        <i class="bi bi-truck me-2"></i>Marquer comme expédiée
-                    </button>
-                @endif
+              @if($order->status == 'processing')
+                <button type="button" class="btn btn-info"
+                    onclick="updateOrderStatus({{ $order->id }}, 'shipped')">
+                    <i class="bi bi-truck me-2"></i>Marquer comme expédiée
+                </button>
+            @endif
 
-                @if($order->status == 'shipped')
-                    <button type="button" class="btn btn-success" onclick="deliverOrder({{ $order->id }})">
-                        <i class="bi bi-check-circle me-2"></i>Marquer comme livrée
-                    </button>
-                @endif
+            @if($order->status == 'shipped')
+                <button type="button" class="btn btn-success"
+                    onclick="updateOrderStatus({{ $order->id }}, 'delivered')">
+                    <i class="bi bi-check-circle me-2"></i>Marquer comme livrée
+                </button>
+            @endif
+
             </div>
         </div>
     </div>
@@ -483,125 +486,87 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Gestion de la sélection multiple
-    const selectAllCheckbox = document.getElementById('selectAll');
-    const selectAllFooter = document.getElementById('selectAllFooter');
-    const orderCheckboxes = document.querySelectorAll('.order-checkbox');
+document.addEventListener('DOMContentLoaded', () => {
 
-    selectAllCheckbox.addEventListener('change', function() {
-        orderCheckboxes.forEach(checkbox => {
-            checkbox.checked = selectAllCheckbox.checked;
-        });
-        selectAllFooter.checked = selectAllCheckbox.checked;
+    const token = document.querySelector('meta[name="csrf-token"]').content;
+
+    function csrfFetch(url, options = {}) {
+        return fetch(url, {
+            headers: {
+                'X-CSRF-TOKEN': token,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            credentials: 'same-origin',
+            ...options
+        }).then(res => res.json());
+    }
+
+    // ✅ Annuler une commande
+    window.cancelOrder = function (id) {
+        if (!confirm('Annuler cette commande ?')) return;
+
+        csrfFetch(`/admin/orders/${id}/cancel`, { method: 'POST' })
+            .then(r => {
+                showToast(r.message, r.success ? 'success' : 'error');
+                if (r.success) location.reload();
+            });
+    };
+
+    // ✅ Valider paiement
+    window.validatePayment = function (id) {
+        if (!confirm('Valider le paiement ?')) return;
+
+        csrfFetch(`/admin/orders/${id}/validate-payment`, { method: 'POST' })
+            .then(r => {
+                showToast(r.message, r.success ? 'success' : 'error');
+                if (r.success) location.reload();
+            });
+    };
+
+    // ✅ Changer statut
+   window.updateOrderStatus = function (orderId, status) {
+    if (!confirm('Confirmer ce changement de statut ?')) return;
+
+    csrfFetch(`/admin/orders/${orderId}/status`, {
+        method: 'POST',
+        body: JSON.stringify({ status })
+    })
+    .then(res => {
+        showToast(res.message, res.success ? 'success' : 'error');
+        if (res.success) location.reload();
+    })
+    .catch(() => {
+        showToast('Erreur serveur', 'error');
     });
+};
 
-    selectAllFooter.addEventListener('change', function() {
-        orderCheckboxes.forEach(checkbox => {
-            checkbox.checked = selectAllFooter.checked;
-        });
-        selectAllCheckbox.checked = selectAllFooter.checked;
-    });
 
-    // Application des filtres
-    window.applyFilters = function() {
-        const search = document.getElementById('searchInput').value;
-        const status = document.getElementById('statusFilter').value;
-        const payment = document.getElementById('paymentFilter').value;
-        
-        const params = new URLSearchParams();
-        if (search) params.append('search', search);
-        if (status) params.append('status', status);
-        if (payment) params.append('payment', payment);
-        
-        window.location.href = '{{ route('admin.orders') }}?' + params.toString();
-    };
+    // ✅ Action groupée
+    window.applyBulkAction = function () {
+        const ids = [...document.querySelectorAll('.order-checkbox:checked')]
+            .map(cb => cb.value);
 
-    // Réinitialisation des filtres
-    window.resetFilters = function() {
-        window.location.href = '{{ route('admin.orders') }}';
-    };
-
-    // Export des commandes
-    window.exportOrders = function() {
-        // Simulation d'export
-        showToast('Export des commandes en cours...', 'info');
-        setTimeout(() => {
-            showToast('Export terminé avec succès', 'success');
-        }, 2000);
-    };
-
-    // Actions sur les commandes
-    window.validatePayment = function(orderId) {
-        if (confirm('Êtes-vous sûr de vouloir valider ce paiement ?')) {
-            // Simulation de validation
-            showToast('Paiement validé avec succès', 'success');
-        }
-    };
-
-    window.cancelOrder = function(orderId) {
-        if (confirm('Êtes-vous sûr de vouloir annuler cette commande ?')) {
-            // Simulation d'annulation
-            showToast('Commande annulée avec succès', 'success');
-        }
-    };
-
-    window.shipOrder = function(orderId) {
-        if (confirm('Marquer cette commande comme expédiée ?')) {
-            // Simulation d'expédition
-            showToast('Commande marquée comme expédiée', 'success');
-        }
-    };
-
-    window.deliverOrder = function(orderId) {
-        if (confirm('Marquer cette commande comme livrée ?')) {
-            // Simulation de livraison
-            showToast('Commande marquée comme livrée', 'success');
-        }
-    };
-
-    // Actions groupées
-    window.applyBulkAction = function() {
-        const selectedOrders = Array.from(document.querySelectorAll('.order-checkbox:checked'))
-            .map(checkbox => checkbox.value);
-        
         const action = document.getElementById('bulkAction').value;
-        
-        if (selectedOrders.length === 0) {
-            showToast('Veuillez sélectionner au moins une commande', 'warning');
-            return;
-        }
-        
-        if (!action) {
-            showToast('Veuillez sélectionner une action', 'warning');
-            return;
-        }
-        
-        if (confirm(`Appliquer l'action "${action}" sur ${selectedOrders.length} commande(s) ?`)) {
-            // Simulation d'action groupée
-            showToast(`Action appliquée sur ${selectedOrders.length} commande(s)`, 'success');
-        }
-    };
 
-    // Filtres avancés
-    window.applyAdvancedFilters = function() {
-        const form = document.getElementById('advancedFilters');
-        const formData = new FormData(form);
-        const params = new URLSearchParams();
-        
-        for (let [key, value] of formData) {
-            if (value) params.append(key, value);
+        if (!ids.length || !action) {
+            showToast('Sélection ou action manquante', 'warning');
+            return;
         }
-        
-        window.location.href = '{{ route('admin.orders') }}?' + params.toString();
+
+        csrfFetch('/admin/orders/bulk-action', {
+            method: 'POST',
+            body: JSON.stringify({ ids, action })
+        }).then(r => {
+            showToast(r.message, r.success ? 'success' : 'error');
+            if (r.success) location.reload();
+        });
     };
 });
 
-// Fonction utilitaire pour les notifications
+// 🔔 Toast simple (à remplacer par SweetAlert / Toastr)
 function showToast(message, type = 'info') {
-    // Implémentation des toasts (à adapter selon votre système)
-    console.log(`${type.toUpperCase()}: ${message}`);
-    alert(message); // Remplacez par votre système de toast
+    alert(message);
 }
 </script>
 

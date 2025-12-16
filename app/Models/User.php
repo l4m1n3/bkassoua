@@ -13,7 +13,6 @@ class User extends Authenticatable
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, HasApiTokens;
 
-
     /**
      * The attributes that are mass assignable.
      *
@@ -29,7 +28,7 @@ class User extends Authenticatable
         'latitude',
         'longitude'
     ];
-
+    
     /**
      * The attributes that should be hidden for serialization.
      *

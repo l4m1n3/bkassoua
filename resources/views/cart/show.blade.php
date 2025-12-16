@@ -22,7 +22,7 @@
                         <i class="bi bi-bag me-2"></i> Continuer mes achats
                     </a>
                 </div>
-            @else
+            @else 
                 <div class="row">
                     <div class="col-lg-8">
                         <div class="cart-items">

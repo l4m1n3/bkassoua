@@ -17,61 +17,10 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-
+use Exception;
+ 
 class OrderController extends Controller
 {
-    // public function placeOrder(Request $request)
-    // {
-    //     $user = Auth::user();
-    //     $carts = Cart::with('product')->where('user_id', $user->id)->get();
-
-    //     if ($carts->isEmpty()) {
-    //         return response()->json(['error' => 'Votre panier est vide.'], 400);
-    //     }
-
-    //     // Calcul du total
-    //     $totalAmount = $carts->sum(function ($cart) {
-    //         return $cart->product->price * $cart->quantity;
-    //     });
-
-    //     // Créer la commande
-    //     $order = Order::create([
-    //         'user_id' => $user->id,
-    //         'total_amount' => $totalAmount,
-    //         'status' => 'pending',
-    //         'address' => $request->input('address', 'Adresse par défaut'),
-    //         'payment_method' => $request->input('payment_method', 'cash_on_delivery'),
-    //     ]);
-
-    //     // Ajouter les produits à la commande
-    //     foreach ($carts as $cart) {
-    //         OrderItem::create([
-    //             'order_id' => $order->id,
-    //             'product_id' => $cart->product->id,
-    //             'quantity' => $cart->quantity,
-    //             'price' => $cart->product->price,
-    //         ]);
-    //     }
-
-    //     // Vider le panier après la commande
-    //     Cart::where('user_id', $user->id)->delete();
-    //     Notification::create([
-    //         'user_id' => $order->seller_id,
-    //         'title' => 'Nouvelle commande',
-    //         'message' => "Vous avez reçu une nouvelle commande pour {$order->product->name}.",
-    //         'type' => 'order',
-    //         'read' => false,
-    //     ]);
-
-    //     // return response()->json(['message' => 'Commande créée avec succès', 'order' => $order], 201);
-    //     return response()->json([
-    //         'success' => true,
-    //         'message' => 'Commande passée avec succès.',
-    //         'order_id' => $order->id,
-    //         'order' => $order,
-    //         'total_amount' => $totalAmount,
-    //     ], 201);
-    // }
     public function placeOrder(Request $request)
     {
         $user = Auth::user();
@@ -86,6 +35,10 @@ class OrderController extends Controller
             if (!$cart->product) {
                 return redirect()->back()->with('error', 'Un produit dans votre panier n\'existe plus.');
             }
+            if ($cart->quantity > $cart->product->stock_quantity) {
+                throw new Exception("Stock insuffisant pour {$cart->product->name}");
+            }
+            $cart->product->decrement('stock_quantity', $cart->quantity);
         }
 
         // Calcul du total
@@ -138,13 +91,11 @@ class OrderController extends Controller
                 'read' => false,
             ]);
 
-            // Notifier l'admin si nécessaire
-            // ...
-
+          
             // Valider la transaction
             DB::commit();
 
-            return redirect()->route('order.confirmation', ['order' => $order->id])
+            return redirect()->back(['order' => $order->id])
                 ->with('success', 'Commande passée avec succès. Paiement en attente.');
         } catch (\Exception $e) {
             DB::rollBack();

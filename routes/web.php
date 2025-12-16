@@ -40,26 +40,34 @@ Route::post('/cart/checkout/order', [OrderController::class, 'placeOrder'])->nam
 // Admin routes group
 Route::prefix('admin')->middleware(['auth'])->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
-    
+
     // Vendors
     Route::get('/vendors/{vendorId}', [AdminController::class, 'changeVendorStatus'])->name('changeVendorStatus');
-    
+
     // Products - Use resource for full CRUD, but override index name if needed
     Route::resource('products', ProductController::class);
     // If you want 'admin.products' specifically for index (instead of 'admin.products.index'), add this explicit route BEFORE the resource
     Route::get('products', [ProductController::class, 'index'])->name('products'); // This overrides the resource index name
-    
+
     // Users
     Route::get('/users', [AdminController::class, 'users'])->name('users');
     Route::get('/users/{id}', [AdminController::class, 'showUser'])->name('showUser');
     Route::get('categories', [AdminController::class, 'categories'])->name('categories');
     // Categories - Use resource for consistency
-    Route::resource('categories', AdminController::class)->only([ 'store', 'update', 'destroy']);
-    
+    Route::resource('categories', AdminController::class)->only(['store', 'update', 'destroy']);
+
     // Orders
     Route::get('/orders', [AdminController::class, 'orders'])->name('orders');
     Route::get('/orders/{id}', [AdminController::class, 'viewOrder'])->name('viewOrder');
     Route::get('/orders/validate', [AdminController::class, 'validateOrder'])->name('order.validate');
+    Route::post('/orders/{order}/cancel', [AdminController::class, 'cancel'])
+        ->name('admin.orders.cancel');
+
+    Route::post('/orders/{order}/validate-payment', [AdminController::class, 'validatePayment'])
+        ->name('admin.orders.validatePayment');
+
+    Route::post('/orders/{order}/status', [AdminController::class, 'updateStatus'])
+        ->name('admin.orders.updateStatus');
 });
 
 // Ads
@@ -108,8 +116,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/show/cart/', [ProductController::class, 'showCart'])->name('cart');
     Route::delete('/remove/cart/', [ProductController::class, 'removeCart'])->name('cart.remove');
     // routes/web.php
-Route::put('/cart/update/{cart}', [ProductController::class, 'updateCart'])->name('cart.update');
-}); 
+    Route::put('/cart/update/{cart}', [ProductController::class, 'updateCart'])->name('cart.update');
+});
 
 
 
