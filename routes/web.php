@@ -30,6 +30,7 @@ Route::get('/search', [HomeController::class, 'search'])->name('search');
 
 Route::get('/about', [AboutController::class, 'index'])->name('about');
 Route::get('/contact', [ContactController::class, 'index'])->name('contact');
+Route::get('/contact/privacy', [ContactController::class, 'privacy'])->name('contact.privacy');
 Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist');
 
 Route::middleware('auth')->get('/notifications', [NotificationController::class, 'index']);
@@ -46,16 +47,26 @@ Route::prefix('admin')->middleware(['auth'])->name('admin.')->group(function () 
 
     // Products - Use resource for full CRUD, but override index name if needed
     Route::resource('products', ProductController::class);
-    // If you want 'admin.products' specifically for index (instead of 'admin.products.index'), add this explicit route BEFORE the resource
+
     Route::get('products', [ProductController::class, 'index'])->name('products'); // This overrides the resource index name
 
     // Users
     Route::get('/users', [AdminController::class, 'users'])->name('users');
     Route::get('/users/{id}', [AdminController::class, 'showUser'])->name('showUser');
     Route::get('categories', [AdminController::class, 'categories'])->name('categories');
+     Route::get('categories/sub', [AdminController::class, 'showSubCategory'])
+        ->name('categories.showSubCategory');
     // Categories - Use resource for consistency
-    Route::resource('categories', AdminController::class)->only(['store', 'update', 'destroy']);
+    // Route::resource('categories', AdminController::class)->only(['storeCategory', 'updateCategory', 'destroy']);
+    Route::post('categories', [AdminController::class, 'storeCategory'])
+        ->name('categories.storeCategory');
+    Route::post('categories/sub', [AdminController::class, 'storeSubCategory'])
+        ->name('categories.storeSubCategory');
+    Route::put('categories/{id}', [AdminController::class, 'updateCategory'])
+        ->name('categories.updateCategory');
 
+    Route::delete('categories/{id}', [AdminController::class, 'destroyCategories'])
+        ->name('categories.destroy');
     // Orders
     Route::get('/orders', [AdminController::class, 'orders'])->name('orders');
     Route::get('/orders/{id}', [AdminController::class, 'viewOrder'])->name('viewOrder');

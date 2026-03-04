@@ -7,24 +7,43 @@
     <div @class(['row'])>
         <!-- Sidebar améliorée -->
         <div @class(['col-lg-3', 'col-md-4', 'mb-4'])>
-            <div @class(['sidebar'])>
-                <h5 @class(['sidebar-title'])>
-                    <i @class(['bi', 'bi-filter-circle'])></i>
-                 Catégories
-                </h5>
-                
-                <!-- Catégories -->
-                <div @class(['filter-section'])>
-                     @foreach ($categories as $categorie)
-                        <div @class(['filter-option'])>
-                            <a href="/shop/{{ $categorie->slug }}" @class(['d-flex', 'align-items-center', 'justify-content-between', 'text-decoration-none', 'text-dark'])>
-                                <span>{{ $categorie->name }}</span>
-                                {{-- <i @class(['bi', 'bi-chevron-right', 'text-muted'])></i> --}}
-                            </a>
+            <div class="sidebar">
+    <h5 class="sidebar-title">
+        <i class="bi bi-filter-circle me-2"></i>
+        Catégories
+    </h5>
+
+    <div class="filter-section">
+        <div class="filter-options list-group list-group-flush">
+            @foreach ($categories as $categorie)
+                <a href="/shop/{{ $categorie->slug }}" 
+                   class="list-group-item list-group-item-action d-flex align-items-center gap-3 py-2 px-3 text-decoration-none text-dark">
+                    
+                    <!-- Icône / Image de la catégorie -->
+                    @if ($categorie->icon || $categorie->image)
+                        <img src="{{ asset('storage/' . $categorie->image)  }}" 
+                             alt="{{ $categorie->name }}" 
+                             class="category-icon rounded" 
+                             width="32" 
+                             height="32" 
+                             loading="lazy">
+                    @else
+                        <!-- Icône par défaut selon le nom (exemple simple) -->
+                        <div class="category-icon-default rounded bg-light d-flex align-items-center justify-content-center" 
+                             style="width:32px; height:32px;">
+                            <i class="bi bi-tag"></i>
                         </div>
-                        @endforeach
-                </div>
-            </div>
+                    @endif
+                    
+                    <span class="flex-grow-1">{{ $categorie->name }}</span>
+                    
+                    <!-- Chevron optionnel (décommenter si désiré) -->
+                    <!-- <i class="bi bi-chevron-right text-muted small"></i> -->
+                </a>
+            @endforeach
+        </div>
+    </div>
+</div>
 
             <!-- Bannière promotionnelle -->
             <div @class(['sidebar', 'mt-4', 'text-white']) style="background: linear-gradient(135deg, var(--primary), var(--accent));">
@@ -81,11 +100,16 @@
                     </button>
                 </div>
             @else
+            
                 <div @class(['products-grid'])>
                     @foreach ($products as $product)
                         <div @class(['product-card', 'fade-in'])>
                             <div @class(['product-image'])>
-                                <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}">
+                                <img src="{{ 
+                                $product->mainImage 
+                                    ? asset('storage/' . $product->mainImage->path) 
+                                    : asset('images/default-product.jpg') 
+                                    }}" alt="{{ $product->name }}">
                                 @if($product->discount > 0)
                                     <span @class(['product-badge'])>-{{ $product->discount }}%</span>
                                 @endif

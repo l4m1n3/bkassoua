@@ -10,23 +10,21 @@ use App\Models\OrderItem;
 use App\Models\Order;
 use App\Models\Category;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
     public function index(Request $request)
     {
         // Vérifier si un category_id est fourni dans la requête
-        $categoryId = $request->query('category_id');
+        $sous_cat_id = $request->query('sous_cat_id');
 
         // Récupérer les produits avec leurs vendeurs et catégories associés
-        $query = Product::with(['vendor', 'category']);
+        $query = Product::with(['vendor', 'sousCat']);
 
-        // Filtrer par catégorie si un ID est fourni
-        if ($categoryId) {
-            $query->where('category_id', $categoryId);
+        if ($sous_cat_id) {
+            $query->where('sous_cat_id', $sous_cat_id);
         }
-
-        // Paginer les résultats à 10 par page
         $products = $query->get();
 
         // Retourner les produits en JSON
@@ -38,7 +36,7 @@ class ProductController extends Controller
     public function show(Request $request, $productId)
     {
         // Récupérer le produit spécifique en fonction de son ID
-        $product = Product::with(['vendor', 'category'])->find($productId);
+        $product = Product::with(['vendor', 'sousCat'])->find($productId);
 
         // Vérifier si le produit existe
         if (!$product) {
@@ -56,23 +54,24 @@ class ProductController extends Controller
     public function getProducts($vendorId)
     {
         try {
-            $vendor = Vendor::with('products')->find($vendorId);
+            $vendor = Vendor::with('products.images')->find($vendorId);
 
             if (!$vendor) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Vendeur non trouvé.',
-                ], 404);
+                ], 404); // ✅ 404 OK ici car le vendeur n'existe pas
             }
 
             $products = $vendor->products;
 
+            // ✅ CORRECTION : Retourner 200 avec tableau vide au lieu de 404
             if ($products->isEmpty()) {
                 return response()->json([
-                    'success' => false,
+                    'success' => true, // ⚠️ Changé en true
                     'message' => 'Aucun produit trouvé pour ce vendeur.',
                     'products' => []
-                ], 404);
+                ], 200); // ⚠️ Changé en 200
             }
 
             return response()->json([
@@ -95,26 +94,43 @@ class ProductController extends Controller
             'description' => 'required|string',
             'price' => 'required|numeric',
             'stock_quantity' => 'required|integer',
-            'category_id' => 'required|integer',
-            'vendor_id' => 'required|integer',
-            'image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'sous_cat_id' => 'required|integer',
+            // 'vendor_id' => 'required|integer',
+            'images' => 'nullable|array|max:4',
+            'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
-
+        $vendor = auth()->user()->vendor;
         // Sauvegarder l'image
-        $imagePath = $request->file('image')->store('products', 'public');
-
+        // $imagePath = $request->file('image')->store('products', 'public');
+        DB::beginTransaction();
         // Créer le produit
-        $product = Product::create([
-            'name' => $request->name,
-            'description' => $request->description,
-            'price' => $request->price,
-            'stock_quantity' => $request->stock_quantity,
-            'category_id' => $request->category_id,
-            'vendor_id' => $request->vendor_id,
-            'image' => $imagePath,
-        ]);
+        try {
+            $product = Product::create([
+                'vendor_id' => $vendor->id,
+                'name' => $request->name,
+                'description' => $request->description,
+                'price' => $request->price,
+                'stock_quantity' => $request->stock_quantity,
+                'is_active' => $request->is_active,
+                'sous_cat_id' => $request->sous_cat_id,
+            ]);
 
-        return response()->json($product, 201);
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $index => $image) {
+                    $product->images()->create([
+                        'path' => $image->store('products', 'public'),
+                        'is_main' => $index === 0, // la 1ère image est principale
+                    ]);
+                }
+            }
+            // ✅ Charger les relations pour le retour
+            $product->load('images');
+            DB::commit();
+            return response()->json($product, 201);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['message' => 'Erreur lors de la création du produit: ' . $e->getMessage()], 500);
+        }
     }
     public function destroy($id)
     {
@@ -202,6 +218,28 @@ class ProductController extends Controller
         return response()->json([
 
             'newProducts' => $productsThisWeeks
+        ], 200);
+    }
+    // Produits similaires
+    public function similarProducts(int $productId)
+    {
+        $product = Product::find($productId);
+        // dd($product);
+        if (!$product) {
+            return response()->json([
+                'message' => 'Produit introuvable'
+            ], 404);
+        }
+
+        $similarProducts = Product::query()
+            ->where('sous_cat_id', $product->sous_cat_id)
+            ->where('id', '!=', $product->id)
+            ->orderBy('created_at', 'desc')
+            ->limit(6)
+            ->get();
+        // dd($similarProducts);
+        return response()->json([
+            'data' => $similarProducts
         ], 200);
     }
 }

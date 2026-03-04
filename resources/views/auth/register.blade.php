@@ -540,7 +540,7 @@
             <div class="invalid-feedback">{{ $message }}</div>
         @enderror
     </div>
-
+ 
     <!-- Phone -->
     <div class="form-group">
         <label for="phone_number">Téléphone</label>

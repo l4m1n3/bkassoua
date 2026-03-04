@@ -61,4 +61,8 @@ class ContactController extends Controller
     {
         //
     }
+    public function privacy()
+    {
+        return view('contact.privacy');
+    }
 }

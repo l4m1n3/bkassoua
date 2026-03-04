@@ -30,7 +30,7 @@ class RegisterController extends Controller
             'phone_number' => 'required|string|regex:/^[0-9]{8}$/|unique:users,phone_number',
             'address'      => 'required|string|max:255',
             'password'     => 'required|string|min:8|confirmed',
-             'type' => 'required|string|in:register,password_reset',
+            'type' => 'required|string|in:register,password_reset',
         ]);
 
         // Stock pending user in session
@@ -65,7 +65,7 @@ class RegisterController extends Controller
         //     'message' => 'Code OTP envoyé.',
         // ]);
         // Après avoir envoyé le code OTP avec succès
-        return redirect()->route('verify.otp.form', ['phone_number' => $request->phone_number,'type' => $request->type])
+        return redirect()->route('verify.otp.form', ['phone_number' => $request->phone_number, 'type' => $request->type])
             ->with('success', 'Code OTP envoyé sur votre téléphone !');
     }
 
@@ -164,7 +164,6 @@ class RegisterController extends Controller
                 $token = $user->createToken('bkassoua_back')->plainTextToken;
                 Auth::login($user);
                 return redirect(route('home'));
-                
             } elseif ($request->type === 'password_reset') {
                 // Handle password reset
                 $user = User::where('phone_number', $request->phone_number)->first();

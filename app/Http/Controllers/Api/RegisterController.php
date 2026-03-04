@@ -148,9 +148,14 @@ class RegisterController extends Controller
                 }
 
                 // Check for duplicates
-                $existingUser = User::where('phone_number', $pendingUser['phone_number'])
-                    ->orWhere('email', $pendingUser['email'] ?? null)
-                    ->first();
+              $existingUserQuery = User::where('phone_number', $userData['phone_number']);
+
+if (!empty($userData['email'])) {
+    $existingUserQuery->orWhere('email', $userData['email']);
+}
+
+$existingUser = $existingUserQuery->first();
+
 
                 if ($existingUser) {
                     return response()->json([
@@ -240,7 +245,7 @@ class RegisterController extends Controller
      *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
-     */
+     */ 
     public function resendOtp(Request $request)
     {
         try {
@@ -280,7 +285,7 @@ class RegisterController extends Controller
             Session::put($sessionKey, $pendingUser);
 
             // Envoie l'OTP
-            $this->sendOTP($request->phone_number, $otp);
+            // $this->sendOTP($request->phone_number, $otp);
 
             return response()->json([
                 'success' => true,
@@ -307,34 +312,34 @@ class RegisterController extends Controller
      * @return void
      * @throws \Exception
      */
-    protected function sendOTP($phoneNumber, $otp)
-    {
-        try {
-            $sid = config('services.twilio.sid');
-            $token = config('services.twilio.token');
-            $from = config('services.twilio.phone_number');
+    // protected function sendOTP($phoneNumber, $otp)
+    // {
+    //     try {
+    //         $sid = config('services.twilio.sid');
+    //         $token = config('services.twilio.token');
+    //         $from = config('services.twilio.phone_number');
 
-            $twilio = new Client($sid, $token);
+    //         $twilio = new Client($sid, $token);
 
-            $twilio->messages->create(
-                $this->formatPhoneNumber($phoneNumber),
-                [
-                    'from' => $from,
-                    'body' => "Votre code de vérification B Kassoua est: $otp"
-                ]
-            );
+    //         $twilio->messages->create(
+    //             $this->formatPhoneNumber($phoneNumber),
+    //             [
+    //                 'from' => $from,
+    //                 'body' => "Votre code de vérification B Kassoua est: $otp"
+    //             ]
+    //         );
 
-            // Stocker l'OTP après envoi réussi
-            $expiresAt = Carbon::now()->addMinutes(15);
-            OtpCode::updateOrCreate(
-                ['phone_number' => $phoneNumber],
-                ['code' => $otp, 'expires_at' => $expiresAt]
-            );
-        } catch (\Exception $e) {
-            Log::error('Erreur Twilio pour phone_number: ' . $phoneNumber . ' - ' . $e->getMessage());
-            throw new \Exception('Échec de l\'envoi SMS: ' . $e->getMessage());
-        }
-    }
+    //         // Stocker l'OTP après envoi réussi
+    //         $expiresAt = Carbon::now()->addMinutes(15);
+    //         OtpCode::updateOrCreate(
+    //             ['phone_number' => $phoneNumber],
+    //             ['code' => $otp, 'expires_at' => $expiresAt]
+    //         );
+    //     } catch (\Exception $e) {
+    //         Log::error('Erreur Twilio pour phone_number: ' . $phoneNumber . ' - ' . $e->getMessage());
+    //         throw new \Exception('Échec de l\'envoi SMS: ' . $e->getMessage());
+    //     }
+    // }
 
     /**
      * Format phone number for Niger (+227)

@@ -58,29 +58,51 @@
             <div class="product-detail-card bg-white rounded shadow-lg overflow-hidden">
                 <div class="row g-0">
                     <!-- Galerie -->
+                    @php
+                        $images = $product->images;
+                        $mainImage = $product->mainImage ?? $images->first();
+                    @endphp
+
                     <div class="col-lg-6">
                         <div class="product-gallery p-4">
+
+                            {{-- IMAGE PRINCIPALE --}}
                             <div class="main-image position-relative mb-4">
-                                <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="img-fluid rounded" id="mainImage">
+                                <img 
+                                    src="{{ $mainImage ? asset('storage/' . $mainImage->path) : asset('images/default-product.jpg') }}"
+                                    alt="{{ $product->name }}"
+                                    class="img-fluid rounded"
+                                    id="mainImage"
+                                >
+
                                 @if($product->discount > 0)
-                                    <span class="product-badge discount position-absolute top-0 start-0 m-3 px-3 py-1 rounded-pill text-white fw-bold" style="background:#e76f51;">-{{ $product->discount }}%</span>
+                                    <span class="product-badge discount position-absolute top-0 start-0 m-3 px-3 py-1 rounded-pill text-white fw-bold" style="background:#e76f51;">
+                                        -{{ $product->discount }}%
+                                    </span>
                                 @endif
+
                                 @if($product->is_new)
-                                    <span class="product-badge new position-absolute top-0 start-0 m-3 px-3 py-1 rounded-pill text-white fw-bold" style="background:#1780d6; margin-top: 50px !important;">Nouveau</span>
+                                    <span class="product-badge new position-absolute top-0 start-0 m-3 px-3 py-1 rounded-pill text-white fw-bold" style="background:#1780d6; margin-top: 50px !important;">
+                                        Nouveau
+                                    </span>
                                 @endif
                             </div>
+
+                            {{-- MINIATURES --}}
                             <div class="thumbnail-gallery d-flex gap-3 justify-content-center">
-                                @for($i = 0; $i < 4; $i++)
-                                    <img src="{{ asset('storage/' . $product->image) }}" 
-                                         alt="Miniature {{ $i+1 }}" 
-                                         class="img-thumbnail cursor-pointer {{ $i === 0 ? 'active' : '' }}"
-                                         style="width:80px; height:80px; object-fit:cover;"
-                                         onclick="changeImage(this)">
-                                @endfor
+                                @foreach($images->take(4) as $index => $image)
+                                    <img 
+                                        src="{{ asset('storage/' . $image->path) }}"
+                                        alt="Miniature {{ $index + 1 }}"
+                                        class="img-thumbnail cursor-pointer {{ $index === 0 ? 'active' : '' }}"
+                                        style="width:80px; height:80px; object-fit:cover;"
+                                        onclick="changeImage(this)"
+                                    >
+                                @endforeach
                             </div>
+
                         </div>
                     </div>
-
                     <!-- Infos produit -->
                     <div class="col-lg-6">
                         <div class="product-info p-4 p-lg-5">

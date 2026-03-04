@@ -62,8 +62,9 @@ class ProductController extends Controller
     public function index()
     {
         // Récupérer les produits avec leurs vendeurs et catégories associés, paginés à 10 par page
-        $products = Product::with(['vendor', 'category'])->paginate(10);
-        $categories = Category::all();
+        $products = Product::with(['vendor', 'sousCat'])->paginate(10);
+        $categories = Category::with('sousCat')->get();
+        // dd($products);
         // Passer les produits paginés à la vue
         return view('admin.product', compact('products', 'categories'));
     }
@@ -127,9 +128,7 @@ class ProductController extends Controller
     public function shop()
     {
         $categories = Category::all();
-        $products = Product::with(['vendor', 'category'])->get();
-        // Passer les produits paginés à la vue
-        // dd($products);
+        $products = Product::with(['images', 'mainImage','vendor', 'category'])->get();
         return view('shop.shop', compact('products', 'categories'));
     }
     public function productPerCategory($categorySlug)
@@ -138,8 +137,8 @@ class ProductController extends Controller
         $categories = Category::all();
 
         // Fetch products filtered by the category slug
-        $products = Product::with(['vendor', 'category'])
-            ->whereHas('category', function ($query) use ($categorySlug) {
+        $products = Product::with(['vendor', 'sousCat'])
+            ->whereHas('sousCat', function ($query) use ($categorySlug) {
                 $query->where('slug', 'LIKE', '%' . $categorySlug . '%');
             })
             ->paginate(10);

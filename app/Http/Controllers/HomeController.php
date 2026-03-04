@@ -24,7 +24,7 @@ class HomeController extends Controller
         // Requête pour les produits ajoutés cette semaine
         $productsThisWeeks = Product::whereBetween('created_at', [$startOfWeek, $endOfWeek])->get();
         $productsCount = Product::count();
-        dd($productsCount);
+        dd($productsThisWeeks);
         // $categories = Category::all();
         $promotions = Promotion::with('category')->get();
         $popularProducts = Product::whereIn('id', OrderItem::pluck('product_id'))
@@ -56,24 +56,20 @@ class HomeController extends Controller
         $endOfWeek = Carbon::now()->endOfWeek();
 
         // Requête pour les produits ajoutés cette semaine
-        $productsThisWeeks = Product::whereBetween('created_at', [$startOfWeek, $endOfWeek])->get();
+        // $productsThisWeek = Product::with(['images', 'mainImage'])->get();
+
+        $productsThisWeeks = Product::with(['images', 'mainImage'])->whereBetween('created_at', [$startOfWeek, $endOfWeek])->get();
+        // dd($productsThisWeeks);
         $productsCount = Product::count();
-        // dd($productsCount);
-        // $categories = Category::all();
         $promotions = Promotion::with('category')->get();
         $popularProducts = Product::whereIn('id', OrderItem::pluck('product_id'))
             ->distinct()
             ->get();
-        // $categories = Category::withCount('products')
-        //     ->having('products_count', '>', 0)
-        //     ->get();
         $categories = Category::whereHas('products')
             ->withCount('products')
             ->get();
 
         $vendor = Vendor::where('user_id', Auth::id())->first();
-        // dd($popularProducts);
-        // return view('layouts.master', compact('categories','vendor'));
         return view('layouts.masters', compact(['categories', 'promotions', 'popularProducts', 'productsThisWeeks', 'vendor','productsCount']));
     }
 }

@@ -601,7 +601,10 @@
                             </div>
                             <div @class(['mb-3'])>
                                 <label @class(['form-label', 'fw-semibold'])>Image du produit</label>
-                                <input type="file" @class(['form-control', 'is-invalid' => $errors->has('image')]) name="image">
+                                <input type="file"
+                                name="images[]"
+                                multiple
+                                accept="image/*"  @class(['form-control', 'is-invalid' => $errors->has('image')]) >
                                 @error('image')
                                     <div @class(['invalid-feedback'])>{{ $message }}</div>
                                 @enderror

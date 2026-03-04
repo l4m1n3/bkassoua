@@ -10,7 +10,9 @@ use App\Models\User;
 use App\Http\Requests\StoreVendorRequest;
 use App\Http\Requests\UpdateVendorRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+
 
 class VendorController extends Controller
 {
@@ -49,13 +51,12 @@ class VendorController extends Controller
         if ($request->hasFile('logo')) {
             $vendor->logo = $request->file('logo')->store('vendor_logos', 'public');
         }
-
         $vendor->save();
 
-        $user = User::where('id',Auth::user()->id)->update(['role'=>'vendor']);
+        $user = User::where('id', Auth::user()->id)->update(['role' => 'vendor']);
         // dd($user);
 
-        return redirect()->back()->with('message','Votre demande a été envoyee avec succes!');
+        return redirect()->back()->with('message', 'Votre demande a été envoyee avec succes!');
     }
 
     // Tableau de bord des vendeurs
@@ -114,58 +115,120 @@ class VendorController extends Controller
     //     return redirect()->route('vendor.dashboard');
     // }
 
+    // public function storeProduct(Request $request)
+    // {
+    //     // Étape 1 : Valider les données entrantes
+    //     try {
+    //         $request->validate([
+    //             'name' => 'required|string|max:255',
+    //             'description' => 'required|string|max:255',
+    //             'price' => 'required|numeric',
+    //             'stock_quantity' => 'required|integer',
+    //             'is_active' => 'required|boolean',
+    //             'category_id' => 'required|integer',
+    //             'images' => 'nullable|array|max:4',
+    //             'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:2048',
+    //         ]);
+    //     } catch (\Illuminate\Validation\ValidationException $e) {
+    //         // Affiche les erreurs de validation
+    //         dd($e->errors());
+    //     }
+
+    //     // Étape 2 : Vérifier si l'utilisateur est authentifié et s'il a un vendeur
+    //     if (!Auth::check()) {
+    //         return back()->withErrors(['error' => 'Utilisateur non authentifié']);
+    //     }
+
+    //     if (!Auth::user()->vendor) {
+    //         return back()->withErrors(['error' => 'Aucun vendeur associé à cet utilisateur']);
+    //     }
+
+    //     // Étape 3 : Créer un produit
+    //     try {
+    //         $product = new Product();
+    //         $product->vendor_id = Auth::user()->vendor->id;
+    //         $product->name = $request->name;
+    //         $product->description = $request->description;
+    //         $product->price = $request->price;
+    //         $product->stock_quantity = $request->stock_quantity;
+    //         $product->is_active = $request->is_active;
+    //         $product->category_id = $request->category_id;
+    //         $product->save();
+    //         // Étape 4 : Gérer l'image du produit
+    //         // if ($request->hasFile('image')) {
+    //         //     $product->image = $request->file('image')->store('product_images', 'public');
+    //         // }
+    //         // 📸 Upload images (max 4)
+    //         if ($request->hasFile('images')) {
+    //             foreach ($request->file('images') as $image) {
+    //                 $path = $image->store('products', 'public');
+
+    //                 $product->images()->create([
+    //                     'path' => $path
+    //                 ]);
+    //             }
+    //         }
+    //         // Sauvegarder le produit
+
+    //     } catch (\Exception $e) {
+    //         // Afficher les erreurs de sauvegarde
+    //         return back()->withErrors(['error' => 'Erreur lors de la sauvegarde du produit : ' . $e->getMessage()]);
+    //     }
+
+    //     // Étape 5 : Rediriger vers le tableau de bord avec un message de succès
+    //     return redirect()->route('vendor.dashboard')->with('success', 'Produit créé avec succès');
+    // }
+
+
     public function storeProduct(Request $request)
     {
-        // Étape 1 : Valider les données entrantes
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'required|string|max:255',
+            'price' => 'required|numeric|min:0',
+            'stock_quantity' => 'required|integer|min:0',
+            'is_active' => 'required|boolean',
+            'category_id' => 'required|exists:categories,id',
+            'images' => 'nullable|array|max:4',
+            'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:2048',
+        ]);
+
+        $vendor = auth()->user()->vendor;
+
+        DB::beginTransaction();
+
         try {
-            $request->validate([
-                'name' => 'required|string|max:255',
-                'description' => 'required|string|max:255',
-                'price' => 'required|numeric',
-                'stock_quantity' => 'required|integer',
-                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-                'is_active' => 'required|boolean',
-                'category_id' => 'required|integer',
+            $product = Product::create([
+                'vendor_id' => $vendor->id,
+                'name' => $request->name,
+                'description' => $request->description,
+                'price' => $request->price,
+                'stock_quantity' => $request->stock_quantity,
+                'is_active' => $request->is_active,
+                'category_id' => $request->category_id,
             ]);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            // Affiche les erreurs de validation
-            dd($e->errors());
-        }
 
-        // Étape 2 : Vérifier si l'utilisateur est authentifié et s'il a un vendeur
-        if (!Auth::check()) {
-            return back()->withErrors(['error' => 'Utilisateur non authentifié']);
-        }
-
-        if (!Auth::user()->vendor) {
-            return back()->withErrors(['error' => 'Aucun vendeur associé à cet utilisateur']);
-        }
-
-        // Étape 3 : Créer un produit
-        try {
-            $product = new Product();
-            $product->vendor_id = Auth::user()->vendor->id;
-            $product->name = $request->name;
-            $product->description = $request->description;
-            $product->price = $request->price;
-            $product->stock_quantity = $request->stock_quantity;
-            $product->is_active = $request->is_active;
-            $product->category_id = $request->category_id;
-
-            // Étape 4 : Gérer l'image du produit
-            if ($request->hasFile('image')) {
-                $product->image = $request->file('image')->store('product_images', 'public');
+            if ($request->hasFile('images') ) {
+                foreach ($request->file('images') as $index => $image) {
+                    $product->images()->create([
+                        'path' => $image->store('products', 'public'),
+                        'is_main' => $index === 0, // la 1ère image est principale
+                    ]);
+                }
             }
 
-            // Sauvegarder le produit
-            $product->save();
-        } catch (\Exception $e) {
-            // Afficher les erreurs de sauvegarde
-            return back()->withErrors(['error' => 'Erreur lors de la sauvegarde du produit : ' . $e->getMessage()]);
-        }
+            DB::commit();
 
-        // Étape 5 : Rediriger vers le tableau de bord avec un message de succès
-        return redirect()->route('vendor.dashboard')->with('success', 'Produit créé avec succès');
+            return redirect()
+                ->route('vendor.dashboard')
+                ->with('success', 'Produit créé avec succès');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            return back()->withErrors([
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 
     public function updateProduct(Request $request, $id)

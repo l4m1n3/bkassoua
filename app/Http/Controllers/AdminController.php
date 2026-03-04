@@ -8,9 +8,11 @@ use App\Models\Order;
 use App\Models\Category;
 use App\Models\Vendor;
 use App\Models\Ad;
+use App\Models\SousCat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Exception;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
@@ -116,7 +118,7 @@ class AdminController extends Controller
             return redirect()->route('admin.categories')->with('success', 'La catégorie a été ajoutée avec succès.');
         } catch (Exception $e) {
             // Redirection avec un message d'erreur
-            dd($e);
+            // dd($e);
             return redirect()->route('admin.categories.create')->with('error', 'Une erreur s\'est produite lors de l\'ajout de la catégorie.');
         }
     }
@@ -334,6 +336,56 @@ class AdminController extends Controller
                 'success' => false,
                 'message' => 'Erreur lors de l\'ajout de la publicité : ' . $e->getMessage(),
             ], 500);
+        }
+    }
+
+    public function showSubCategory()
+    {
+        $Souscategories = SousCat::with('category')->get();
+        // dd($Souscategories);
+        $totalSubCategories = SousCat::count();
+        $totalCategories = Category::count();
+        $totalProducts = Product::count();
+        $categories = Category::all();
+        // $activeCategories = Category::where('status', 'active')->count();
+        $recentCategories = Category::where('created_at', '>=', now()->subMonth())->count();
+
+        return view('admin.sous_categorie', compact(
+            'Souscategories',
+            'totalCategories',
+            'totalProducts',
+            'recentCategories',
+            'categories'
+        ));
+    }
+    public function storeSubCategory(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255|unique:sous_cats,name',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'category_id' => 'required|exists:categories,id',
+        ]);
+
+        try {
+              // Générer le slug à partir du nom
+            $slug = Str::slug($request->name);
+             // Gestion de l'image
+             $imagePath = null;
+             if ($request->hasFile('image')) {
+                 $imagePath = $request->file('image')->store('sous_categories', 'public');
+             }
+            SousCat::create([
+                'name' => $request->name,
+                'slug' => $slug,
+                'image' => $imagePath,
+                'category_id' => $request->category_id,
+            ]);
+
+            return redirect()->route('admin.categories.showSubCategory')->with('success', 'Sous-catégorie ajoutée avec succès.');
+        } catch (Exception $e) {
+            //  Log::error('Erreur lors de la commande : ' . $e->getMessage());
+            Log::error('Erreur lors de l\'ajout de la sous-catégorie : ' . $e->getMessage());
+            return redirect()->route('admin.categories.showSubCategory')->with('error', 'Une erreur s\'est produite lors de l\'ajout de la sous-catégorie.');
         }
     }
 }

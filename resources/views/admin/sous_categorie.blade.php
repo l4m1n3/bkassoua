@@ -1,6 +1,6 @@
 @extends('layouts.app_admin')
 
-@section('title', 'Gestion des Catégories - Admin Bkassoua')
+@section('title', 'Gestion des sous-catégories - Admin Bkassoua')
 
 @section('content')
 <div class="categories-container">
@@ -8,14 +8,14 @@
     <div class="page-header">
         <div class="header-content">
             <div class="header-text">
-                <h1 class="page-title">Gestion des Catégories</h1>
-                <p class="page-subtitle">Organisez et gérez les catégories de votre plateforme</p>
+                <h1 class="page-title">Gestion des Sous-Catégories</h1>
+                <p class="page-subtitle">Organisez et gérez les sous-catégories de votre plateforme</p>
             </div>
             <div class="header-actions">
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
-                    <i class="bi bi-plus-circle me-2"></i>Nouvelle catégorie
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSubCategoryModal">
+                    <i class="bi bi-plus-circle me-2"></i>Nouvelle sous-catégorie
                 </button>
-                <button class="btn btn-outline-primary" onclick="exportCategories()">
+                <button class="btn btn-outline-primary" onclick="exportSubCategories()">
                     <i class="bi bi-download me-2"></i>Exporter
                 </button>
             </div>
@@ -51,8 +51,8 @@
                 <i class="bi bi-tags"></i>
             </div>
             <div class="stat-content">
-                <div class="stat-value">{{ $totalCategories ?? $categories->count() }}</div>
-                <div class="stat-label">Total catégories</div>
+                <div class="stat-value">{{ $totalSubCategories ?? $Souscategories->count() }}</div>
+                <div class="stat-label">Total sous-catégories</div>
             </div>
         </div>
         <div class="stat-card">
@@ -69,8 +69,8 @@
                 <i class="bi bi-eye"></i>
             </div>
             <div class="stat-content">
-                <div class="stat-value">{{ $activeCategories ?? $categories->count() }}</div>
-                <div class="stat-label">Catégories actives</div>
+                {{-- <div class="stat-value">{{ $activeSubCategories ?? $subcategories->count() }}</div> --}}
+                <div class="stat-label">Sous-catégories actives</div>
             </div>
         </div>
         <div class="stat-card">
@@ -78,30 +78,30 @@
                 <i class="bi bi-clock"></i>
             </div>
             <div class="stat-content">
-                <div class="stat-value">{{ $recentCategories ?? 0 }}</div>
+                {{-- <div class="stat-value">{{ $recentSubCategories ?? 0 }}</div> --}}
                 <div class="stat-label">Ajoutées ce mois</div>
             </div>
         </div>
     </div>
 
-    <!-- Tableau des catégories -->
+    <!-- Liste des sous-catégories -->
     <div class="admin-card">
         <div class="card-header">
             <h5 class="card-title">
-                <i class="bi bi-grid me-2"></i>Liste des catégories
+                <i class="bi bi-grid me-2"></i>Liste des sous-catégories
             </h5>
             <div class="card-actions">
-                <span class="text-muted">{{ $categories->count() }} catégorie(s)</span>
+                <span class="text-muted">{{ $Souscategories->count() }} sous-catégorie(s)</span>
             </div>
         </div>
         <div class="card-body p-0">
-            @if($categories->isEmpty())
+            @if($Souscategories->isEmpty())
                 <div class="empty-state text-center py-5">
                     <i class="bi bi-tags display-1 text-muted"></i>
-                    <h4 class="mt-3 text-muted">Aucune catégorie trouvée</h4>
-                    <p class="text-muted mb-4">Commencez par créer votre première catégorie.</p>
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
-                        <i class="bi bi-plus-circle me-2"></i>Créer une catégorie
+                    <h4 class="mt-3 text-muted">Aucune sous-catégorie trouvée</h4>
+                    <p class="text-muted mb-4">Commencez par créer votre première sous-catégorie.</p>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSubCategoryModal">
+                        <i class="bi bi-plus-circle me-2"></i>Créer une sous-catégorie
                     </button>
                 </div>
             @else
@@ -110,8 +110,9 @@
                         <thead>
                             <tr>
                                 <th width="60">ID</th>
-                                <th>Catégorie</th>
+                                <th>Sous-catégorie</th>
                                 <th>Slug</th>
+                                <th>Catégorie parente</th>
                                 <th>Produits</th>
                                 <th>Statut</th>
                                 <th>Création</th>
@@ -119,32 +120,44 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($categories as $category)
-                            <tr class="category-row" data-category-id="{{ $category->id }}">
+                            @foreach ($Souscategories as $subcategory)
+                            <tr class="category-row" data-subcategory-id="{{ $subcategory->id }}">
                                 <td>
-                                    <div class="category-id">#{{ $category->id }}</div>
+                                    <div class="category-id">#{{ $subcategory->id }}</div>
                                 </td>
                                 <td>
                                     <div class="category-info">
                                         <div class="d-flex align-items-center">
-                                            <img src="{{ asset('storage/' . $category->image) }}" 
-                                                 alt="{{ $category->name }}" 
+                                            <img src="{{ asset('storage/' . $subcategory->image) }}" 
+                                                 alt="{{ $subcategory->name }}" 
                                                  class="category-image me-3">
                                             <div>
-                                                <div class="category-name">{{ $category->name }}</div>
-                                                <small class="text-muted">Dernière modif: {{ $category->updated_at->format('d/m/Y') }}</small>
+                                                <div class="category-name">{{ $subcategory->name }}</div>
+                                                <small class="text-muted">Dernière modif: {{ $subcategory->updated_at->format('d/m/Y') }}</small>
                                             </div>
                                         </div>
                                     </div>
                                 </td>
                                 <td>
-                                    <code class="slug-text">{{ $category->slug }}</code>
+                                    <code class="slug-text">{{ $subcategory->slug }}</code>
+                                </td>
+                                <td>
+                                    <div class="parent-category">
+                                        @if($subcategory->category)
+                                            <span class="badge bg-light text-dark">
+                                                <i class="bi bi-folder me-1"></i>
+                                                {{ $subcategory->category->name }}
+                                            </span>
+                                        @else
+                                            <span class="text-muted">—</span>
+                                        @endif
+                                    </div>
                                 </td>
                                 <td>
                                     <div class="products-count">
                                         <span class="badge bg-light text-dark">
                                             <i class="bi bi-box me-1"></i>
-                                            {{ $category->products->count() ?? 0 }}
+                                            {{ $subcategory->products_count ?? 0 }}
                                         </span>
                                     </div>
                                 </td>
@@ -156,34 +169,28 @@
                                 </td>
                                 <td>
                                     <div class="date-info">
-                                        <div>{{ $category->created_at->format('d/m/Y') }}</div>
-                                        <small class="text-muted">{{ $category->created_at->format('H:i') }}</small>
+                                        <div>{{ $subcategory->created_at->format('d/m/Y') }}</div>
+                                        <small class="text-muted">{{ $subcategory->created_at->format('H:i') }}</small>
                                     </div>
                                 </td>
                                 <td>
                                     <div class="action-buttons">
-                                         <button class="btn btn-sm btn-outline-dark" 
-                                                data-bs-toggle="modal" 
-                                                data-bs-target="#addSubCategoryModal{{ $category->id }}"
-                                                title="Ajouter une sous-catégorie">
-                                            <i class="bi bi-plus-circle"></i>
-                                        </button>
                                         <button class="btn btn-sm btn-outline-primary" 
                                                 data-bs-toggle="modal" 
-                                                data-bs-target="#viewCategoryModal{{ $category->id }}"
+                                                data-bs-target="#viewSubCategoryModal{{ $subcategory->id }}"
                                                 title="Voir les détails">
                                             <i class="bi bi-eye"></i>
                                         </button>
                                         
                                         <button class="btn btn-sm btn-outline-warning" 
                                                 data-bs-toggle="modal" 
-                                                data-bs-target="#updateCategoryModal{{ $category->id }}"
+                                                data-bs-target="#updateSubCategoryModal{{ $subcategory->id }}"
                                                 title="Modifier">
                                             <i class="bi bi-pencil"></i>
                                         </button>
 
                                         <button class="btn btn-sm btn-danger" 
-                                                onclick="confirmDelete({{ $category->id }}, '{{ $category->name }}')"
+                                                onclick="confirmDeleteSub({{ $subcategory->id }}, '{{ $subcategory->name }}')"
                                                 title="Supprimer">
                                             <i class="bi bi-trash"></i>
                                         </button>
@@ -199,43 +206,53 @@
     </div>
 </div>
 
-<!-- Modal Ajout Catégorie -->
-<div class="modal fade" id="addCategoryModal" tabindex="-1" aria-hidden="true">
+<!-- Modal Ajout Sous-Catégorie -->
+<div class="modal fade" id="addSubCategoryModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title">
-                    <i class="bi bi-plus-circle me-2"></i>Nouvelle catégorie
+                    <i class="bi bi-plus-circle me-2"></i>Nouvelle sous-catégorie
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <form action="{{ route('admin.categories.storeCategory') }}" method="POST" enctype="multipart/form-data" id="addCategoryForm">
+                <form action="" method="POST" enctype="multipart/form-data" id="addSubCategoryForm">
                     @csrf
                     <div class="row">
                         <div class="col-md-8">
                             <div class="mb-3">
-                                <label for="name" class="form-label">Nom de la catégorie <span class="text-danger">*</span></label>
+                                <label for="name" class="form-label">Nom de la sous-catégorie <span class="text-danger">*</span></label>
                                 <input type="text" name="name" class="form-control" id="name" required 
-                                       placeholder="Ex: Électronique, Mode, Maison...">
+                                       placeholder="Ex: Smartphones, Robes, Canapés...">
                                 <div class="form-text">Le nom doit être unique et descriptif.</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="category_id" class="form-label">Catégorie parente <span class="text-danger">*</span></label>
+                                <select name="category_id" id="category_id" class="form-select" required>
+                                    <option value="">Sélectionnez une catégorie</option>
+                                    @foreach($categories as $category)
+                                        <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                    @endforeach
+                                </select>
+                                <div class="form-text">La catégorie à laquelle cette sous-catégorie appartient.</div>
                             </div>
                             <div class="mb-3">
                                 <label for="description" class="form-label">Description</label>
                                 <textarea name="description" class="form-control" id="description" rows="3" 
-                                          placeholder="Description optionnelle de la catégorie..."></textarea>
+                                          placeholder="Description optionnelle de la sous-catégorie..."></textarea>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="mb-3">
-                                <label for="image" class="form-label">Image de la catégorie <span class="text-danger">*</span></label>
+                                <label for="image" class="form-label">Image de la sous-catégorie <span class="text-danger">*</span></label>
                                 <div class="image-upload-container">
-                                    <div class="image-preview mb-3 text-center" id="imagePreview">
+                                    <div class="image-preview mb-3 text-center" id="imagePreviewAdd">
                                         <i class="bi bi-image display-1 text-muted"></i>
                                         <div class="mt-2 text-muted">Aperçu de l'image</div>
                                     </div>
                                     <input type="file" name="image" class="form-control" id="image" required 
-                                           accept="image/*" onchange="previewImage(this, 'imagePreview')">
+                                           accept="image/*" onchange="previewImage(this, 'imagePreviewAdd')">
                                 </div>
                                 <div class="form-text">Format: JPG, PNG, WEBP. Max: 2MB</div>
                             </div>
@@ -245,23 +262,23 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                <button type="submit" form="addCategoryForm" class="btn btn-primary">
-                    <i class="bi bi-plus-circle me-2"></i>Créer la catégorie
+                <button type="submit" form="addSubCategoryForm" class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-2"></i>Créer la sous-catégorie
                 </button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modals pour chaque catégorie -->
-@foreach ($categories as $category)
-<!-- Modal Détails Catégorie -->
-<div class="modal fade" id="viewCategoryModal{{ $category->id }}" tabindex="-1" aria-hidden="true">
+<!-- Modals pour chaque sous-catégorie -->
+@foreach ($Souscategories as $subcategory)
+<!-- Modal Détails Sous-Catégorie -->
+<div class="modal fade" id="viewSubCategoryModal{{ $subcategory->id }}" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header bg-info text-white">
                 <h5 class="modal-title">
-                    <i class="bi bi-info-circle me-2"></i>Détails de la catégorie
+                    <i class="bi bi-info-circle me-2"></i>Détails de la sous-catégorie
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
@@ -269,12 +286,12 @@
                 <div class="row">
                     <div class="col-md-4 text-center">
                         <div class="category-image-large mb-4">
-                            <img src="{{ asset('storage/' . $category->image) }}" 
-                                 alt="{{ $category->name }}" 
+                            <img src="{{ asset('storage/' . $subcategory->image) }}" 
+                                 alt="{{ $subcategory->name }}" 
                                  class="img-fluid rounded shadow">
                         </div>
-                        <h4>{{ $category->name }}</h4>
-                        <code class="text-muted">{{ $category->slug }}</code>
+                        <h4>{{ $subcategory->name }}</h4>
+                        <code class="text-muted">{{ $subcategory->slug }}</code>
                     </div>
                     <div class="col-md-8">
                         <div class="info-section">
@@ -282,31 +299,41 @@
                             <div class="info-grid">
                                 <div class="info-item">
                                     <label>ID</label>
-                                    <div>#{{ $category->id }}</div>
+                                    <div>#{{ $subcategory->id }}</div>
+                                </div>
+                                <div class="info-item">
+                                    <label>Catégorie parente</label>
+                                    <div>
+                                        @if($subcategory->category)
+                                            <span class="badge bg-primary">{{ $subcategory->category->name }}</span>
+                                        @else
+                                            <span class="text-muted">—</span>
+                                        @endif
+                                    </div>
                                 </div>
                                 <div class="info-item">
                                     <label>Produits associés</label>
                                     <div>
                                         <span class="badge bg-primary">
-                                             {{ $category->products->count() ?? 0 }} produit(s)
+                                             {{ $subcategory->products_count ?? 0 }} produit(s)
                                         </span>
                                     </div>
                                 </div>
                                 <div class="info-item">
                                     <label>Date de création</label>
-                                    <div>{{ $category->created_at->format('d/m/Y à H:i') }}</div>
+                                    <div>{{ $subcategory->created_at->format('d/m/Y à H:i') }}</div>
                                 </div>
                                 <div class="info-item">
                                     <label>Dernière modification</label>
-                                    <div>{{ $category->updated_at->format('d/m/Y à H:i') }}</div>
+                                    <div>{{ $subcategory->updated_at->format('d/m/Y à H:i') }}</div>
                                 </div>
                             </div>
                         </div>
                         
-                        @if($category->description)
+                        @if($subcategory->description)
                         <div class="info-section mt-4">
                             <h6 class="section-title">Description</h6>
-                            <p class="mb-0">{{ $category->description }}</p>
+                            <p class="mb-0">{{ $subcategory->description }}</p>
                         </div>
                         @endif
                     </div>
@@ -316,7 +343,7 @@
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
                 <button type="button" class="btn btn-warning" 
                         data-bs-toggle="modal" 
-                        data-bs-target="#updateCategoryModal{{ $category->id }}"
+                        data-bs-target="#updateSubCategoryModal{{ $subcategory->id }}"
                         data-bs-dismiss="modal">
                     <i class="bi bi-pencil me-2"></i>Modifier
                 </button>
@@ -325,44 +352,55 @@
     </div>
 </div>
 
-<!-- Modal Modification Catégorie -->
-<div class="modal fade" id="updateCategoryModal{{ $category->id }}" tabindex="-1" aria-hidden="true">
+<!-- Modal Modification Sous-Catégorie -->
+<div class="modal fade" id="updateSubCategoryModal{{ $subcategory->id }}" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header bg-warning text-white">
                 <h5 class="modal-title">
-                    <i class="bi bi-pencil me-2"></i>Modifier la catégorie
+                    <i class="bi bi-pencil me-2"></i>Modifier la sous-catégorie
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <form action="{{ route('admin.categories.updateCategory', $category->id) }}" method="POST" enctype="multipart/form-data" id="updateCategoryForm{{ $category->id }}">
+                <form action="" method="POST" enctype="multipart/form-data" id="updateSubCategoryForm{{ $subcategory->id }}">
                     @csrf
                     @method('PUT')
                     <div class="row">
                         <div class="col-md-8">
                             <div class="mb-3">
-                                <label for="name{{ $category->id }}" class="form-label">Nom de la catégorie <span class="text-danger">*</span></label>
-                                <input type="text" name="name" class="form-control" id="name{{ $category->id }}" 
-                                       value="{{ $category->name }}" required>
+                                <label for="name{{ $subcategory->id }}" class="form-label">Nom de la sous-catégorie <span class="text-danger">*</span></label>
+                                <input type="text" name="name" class="form-control" id="name{{ $subcategory->id }}" 
+                                       value="{{ $subcategory->name }}" required>
                             </div>
                             <div class="mb-3">
-                                <label for="description{{ $category->id }}" class="form-label">Description</label>
-                                <textarea name="description" class="form-control" id="description{{ $category->id }}" rows="3">{{ $category->description ?? '' }}</textarea>
+                                <label for="category_id{{ $subcategory->id }}" class="form-label">Catégorie parente <span class="text-danger">*</span></label>
+                                <select name="category_id" id="category_id{{ $subcategory->id }}" class="form-select" required>
+                                    <option value="">Sélectionnez une catégorie</option>
+                                    @foreach($categories as $category)
+                                        <option value="{{ $category->id }}" {{ $subcategory->category_id == $category->id ? 'selected' : '' }}>
+                                            {{ $category->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="description{{ $subcategory->id }}" class="form-label">Description</label>
+                                <textarea name="description" class="form-control" id="description{{ $subcategory->id }}" rows="3">{{ $subcategory->description ?? '' }}</textarea>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="mb-3">
-                                <label for="image{{ $category->id }}" class="form-label">Image de la catégorie</label>
+                                <label for="image{{ $subcategory->id }}" class="form-label">Image de la sous-catégorie</label>
                                 <div class="image-upload-container">
-                                    <div class="image-preview mb-3 text-center" id="imagePreview{{ $category->id }}">
-                                        <img src="{{ asset('storage/' . $category->image) }}" 
-                                             alt="{{ $category->name }}" 
+                                    <div class="image-preview mb-3 text-center" id="imagePreview{{ $subcategory->id }}">
+                                        <img src="{{ asset('storage/' . $subcategory->image) }}" 
+                                             alt="{{ $subcategory->name }}" 
                                              class="img-fluid rounded shadow">
                                         <div class="mt-2 text-muted">Image actuelle</div>
                                     </div>
-                                    <input type="file" name="image" class="form-control" id="image{{ $category->id }}" 
-                                           accept="image/*" onchange="previewImage(this, 'imagePreview{{ $category->id }}')">
+                                    <input type="file" name="image" class="form-control" id="image{{ $subcategory->id }}" 
+                                           accept="image/*" onchange="previewImage(this, 'imagePreview{{ $subcategory->id }}')">
                                 </div>
                                 <div class="form-text">Laissez vide pour conserver l'image actuelle.</div>
                             </div>
@@ -372,7 +410,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                <button type="submit" form="updateCategoryForm{{ $category->id }}" class="btn btn-primary">
+                <button type="submit" form="updateSubCategoryForm{{ $subcategory->id }}" class="btn btn-primary">
                     <i class="bi bi-check-lg me-2"></i>Enregistrer
                 </button>
             </div>
@@ -382,7 +420,7 @@
 @endforeach
 
 <!-- Modal de confirmation de suppression -->
-<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="deleteSubConfirmModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-danger text-white">
@@ -392,7 +430,7 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <p>Êtes-vous sûr de vouloir supprimer la catégorie <strong id="deleteCategoryName"></strong> ?</p>
+                <p>Êtes-vous sûr de vouloir supprimer la sous-catégorie <strong id="deleteSubCategoryName"></strong> ?</p>
                 <p class="text-danger mb-0">
                     <i class="bi bi-info-circle me-1"></i>
                     Cette action est irréversible. Tous les produits associés seront affectés.
@@ -400,34 +438,21 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-
-                <!-- Formulaire dynamique pour DELETE -->
-                <form id="deleteCategoryForm" method="POST">
+                <form id="deleteSubCategoryForm" method="POST">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="btn btn-danger">
                         <i class="bi bi-trash me-2"></i>Supprimer
                     </button>
                 </form>
-
             </div>
         </div>
     </div>
 </div>
 
 <script>
-window.confirmDelete = function(categoryId, categoryName) {
-    document.getElementById('deleteCategoryName').textContent = categoryName;
-    let form = document.getElementById('deleteCategoryForm');
-    form.action = `/admin/categories/${categoryId}`; // Assurez-vous que c'est le bon URL
-    new bootstrap.Modal(document.getElementById('deleteConfirmModal')).show();
-};
-</script>
-
-
-<script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Gestion de la prévisualisation d'image
+    // Prévisualisation d'image
     window.previewImage = function(input, previewId) {
         const preview = document.getElementById(previewId);
         const file = input.files[0];
@@ -444,31 +469,36 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
-    // Confirmation de suppression
-    // window.confirmDelete = function(categoryId, categoryName) {
-    //     document.getElementById('deleteCategoryName').textContent = categoryName;
-    //     document.getElementById('confirmDeleteButton').href = "{{ route('admin.categories.destroy', '') }}/" + categoryId;
-    //     new bootstrap.Modal(document.getElementById('deleteConfirmModal')).show();
-    // };
+    // Génération automatique du slug pour le champ name du modal d'ajout
+    const nameInput = document.getElementById('name');
+    if (nameInput) {
+        nameInput.addEventListener('input', function(e) {
+            // Si vous avez un champ slug, décommentez
+            // const slugInput = document.getElementById('slug');
+            // if (slugInput) {
+            //     slugInput.value = e.target.value
+            //         .toLowerCase()
+            //         .trim()
+            //         .replace(/[^a-z0-9\s-]/g, '')
+            //         .replace(/\s+/g, '-');
+            // }
+        });
+    }
 
-    // Export des catégories
-    window.exportCategories = function() {
-        showToast('Export des catégories en cours...', 'info');
+    // Export des sous-catégories
+    window.exportSubCategories = function() {
+        showToast('Export des sous-catégories en cours...', 'info');
         // Implémentation réelle de l'export
     };
-
-    // Génération automatique du slug
-    document.getElementById('name')?.addEventListener('input', function(e) {
-        const slugInput = document.getElementById('slug');
-        if (slugInput) {
-            slugInput.value = e.target.value
-                .toLowerCase()
-                .trim()
-                .replace(/[^a-z0-9\s-]/g, '')
-                .replace(/\s+/g, '-');
-        }
-    });
 });
+
+// Confirmation de suppression
+window.confirmDeleteSub = function(subcategoryId, subcategoryName) {
+    document.getElementById('deleteSubCategoryName').textContent = subcategoryName;
+    let form = document.getElementById('deleteSubCategoryForm');
+    form.action = `/admin/subcategories/${subcategoryId}`; // À adapter selon vos routes
+    new bootstrap.Modal(document.getElementById('deleteSubConfirmModal')).show();
+};
 
 // Fonction utilitaire pour les notifications
 function showToast(message, type = 'info') {
@@ -488,6 +518,7 @@ function showToast(message, type = 'info') {
 </script>
 
 <style>
+/* Les mêmes styles que pour les catégories, à copier si nécessaire */
 .categories-container {
     padding: 0;
 }

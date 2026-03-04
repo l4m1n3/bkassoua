@@ -123,7 +123,7 @@
                     <i class="bi bi-box display-1 text-muted"></i>
                     <h4 class="mt-3 text-muted">Aucun produit trouvé</h4>
                     <p class="text-muted mb-4">Aucun produit ne correspond à vos critères de recherche.</p>
-                    <a href="{{ route('products.create') }}" class="btn btn-primary me-2">
+                    <a href="" class="btn btn-primary me-2">
                         <i class="bi bi-plus-circle me-2"></i>Créer un produit
                     </a>
                     <button class="btn btn-outline-primary" onclick="resetFilters()">

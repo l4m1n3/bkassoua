@@ -15,7 +15,7 @@
             <a href="#new-arrivals" @class(['btn', 'btn-outline-light'])>
                 <i @class(['bi', 'bi-arrow-down', 'me-2'])></i> Découvrir
             </a>
-        </div>
+        </div> 
     </div>
     
     <!-- Indicateurs de statistiques -->
@@ -39,34 +39,49 @@
     <div @class(['row'])>
         <!-- Sidebar améliorée -->
         <div @class(['col-lg-3', 'col-md-4', 'mb-4'])>
-            <div @class(['sidebar'])>
-                <h5 @class(['sidebar-title'])>
-                    <i @class(['bi', 'bi-list-ul'])></i>
-                    Catégories
-                </h5>
-                
-                <div @class(['filter-section'])>
-                    <div @class(['filter-options'])>
-                        @foreach ($categories as $categorie)
-                        <div @class(['filter-option'])>
-                            <a href="/shop/{{ $categorie->slug }}" @class(['d-flex', 'align-items-center', 'justify-content-between', 'text-decoration-none', 'text-dark'])>
-                                <span>{{ $categorie->name }}</span>
-                                {{-- <i @class(['bi', 'bi-chevron-right', 'text-muted'])></i> --}}
-                            </a>
-                        </div>
-                        @endforeach
-                    </div>
-                </div>
+            <div class="sidebar">
+    <h5 class="sidebar-title">
+        <i class="bi bi-list-ul"></i>
+        Catégories
+    </h5>
 
-                <!-- Bannière promotionnelle -->
-                {{-- <div @class(['promo-banner', 'mt-4', 'p-3', 'rounded', 'text-white', 'text-center']) 
-                     style="background: linear-gradient(135deg, var(--primary), var(--accent));">
-                    <i @class(['bi', 'bi-lightning', 'display-6', 'mb-2'])></i>
-                    <h6 @class(['mb-2'])>Soldes d'Été</h6>
-                    <p @class(['small', 'mb-2'])>Jusqu'à -50% sur toute la collection</p>
-                    <a href="{{ route('shop') }}" @class(['btn', 'btn-sm', 'btn-light'])>Profiter</a>
-                </div> --}}
-            </div>
+    <div class="filter-section">
+        <div class="filter-options">
+            @foreach ($categories as $categorie)
+                <div class="filter-option">
+                    <a href="/shop/{{ $categorie->slug }}" 
+                       class="d-flex align-items-center justify-content-between text-decoration-none text-dark">
+                        
+                        <!-- Image de la catégorie -->
+                        <div class="d-flex align-items-center gap-3">
+                            @if ($categorie->image)
+                                <img src="{{ $categorie->image }}" 
+                                     alt="{{ $categorie->name }}" 
+                                     class="category-icon" 
+                                     loading="lazy"
+                                     width="36" 
+                                     height="36">
+                            @else
+                                <!-- Image par défaut ou icône si pas d'image -->
+                                <div class="category-icon-default">
+                                    <i class="bi bi-tag-fill"></i>
+                                </div>
+                            @endif
+                            
+                            <span>{{ $categorie->name }}</span>
+                        </div>
+
+                        <!-- Chevron (optionnel, décommenter si voulu) -->
+                        <!-- <i class="bi bi-chevron-right text-muted"></i> -->
+                    </a>
+                </div>
+            @endforeach
+        </div>
+    </div>
+
+    <!-- Bannière promotionnelle -->
+    <!-- ... ton code de bannière ici ... -->
+</div>
 
             <!-- Services -->
             <div @class(['sidebar', 'mt-4'])>
@@ -79,16 +94,9 @@
                         <i @class(['bi', 'bi-truck', 'text-primary', 'me-3'])></i>
                         <div>
                             <div @class(['fw-semibold'])>Livraison Rapide</div>
-                            <small @class(['text-muted'])>Sous 24-48h</small>
+                            <small @class(['text-muted'])>Sous h</small>
                         </div>
                     </div>
-                    {{-- <div @class(['service-item', 'd-flex', 'align-items-center'])>
-                        <i @class(['bi', 'bi-lock', 'text-primary', 'me-3'])></i>
-                        <div>
-                            <div @class(['fw-semibold'])>Paiement Sécurisé</div>
-                            <small @class(['text-muted'])>Cryptage SSL</small>
-                        </div>
-                    </div> --}}
                 </div>
             </div>
         </div>
@@ -105,19 +113,26 @@
                 <div @class(['products-grid'])>
                     @foreach ($productsThisWeeks as $productsThisWeek)
                     <div @class(['product-card', 'fade-in'])>
-                        <div @class(['product-image'])>
-                            <img src="{{ $productsThisWeek->image ? asset('storage/' . $productsThisWeek->image) : asset('images/default-product.jpg') }}" 
-                                 alt="{{ $productsThisWeek->name }}">
-                            <span @class(['product-badge', 'new'])>Nouveau</span>
-                            <div @class(['product-actions'])>
-                                <button @class(['action-btn']) title="Ajouter aux favoris">
-                                    <i @class(['bi', 'bi-heart'])></i>
-                                </button>
-                                <button @class(['action-btn']) title="Vue rapide">
-                                    <i @class(['bi', 'bi-eye'])></i>
-                                </button>
-                            </div>
+                    <div class="product-image">
+                        <img 
+                            src="{{ 
+                                $productsThisWeek->mainImage 
+                                    ? asset('storage/' . $productsThisWeek->mainImage->path) 
+                                    : asset('images/default-product.jpg') 
+                            }}"
+                            alt="{{ $productsThisWeek->name }}"
+                        >
+                        <span class="product-badge new">Nouveau</span>
+
+                        <div class="product-actions">
+                            <button class="action-btn">
+                                <i class="bi bi-heart"></i>
+                            </button>
+                            <button class="action-btn">
+                                <i class="bi bi-eye"></i>
+                            </button>
                         </div>
+                    </div>
                         <div @class(['product-info'])>
                             <div @class(['product-category'])>{{ $productsThisWeek->category->name ?? 'Nouveauté' }}</div>
                             <h3 @class(['product-title'])>{{ $productsThisWeek->name }}</h3>

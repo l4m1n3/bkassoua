@@ -12,6 +12,7 @@
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Bootstrap Icons -->
@@ -652,10 +653,17 @@
                     </a>
                 </div>
                 <div class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('admin.categories*') ? 'active' : '' }}" 
+                    <a class="nav-link {{ request()->routeIs('admin.categories') ? 'active' : '' }}" 
                        href="{{ route('admin.categories') }}">
                         <i class="bi bi-tags"></i>
                         <span class="nav-text">Catégories</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('admin.categories.showSubCategory*') ? 'active' : '' }}" 
+                       href="{{ route('admin.categories.showSubCategory') }}">
+                        <i class="bi bi-tags"></i>
+                        <span class="nav-text">Sous Catégories</span>
                     </a>
                 </div>
             </div>
