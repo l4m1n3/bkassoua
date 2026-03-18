@@ -61,7 +61,7 @@ class HomeController extends Controller
         $productsThisWeeks = Product::with(['images', 'mainImage'])->whereBetween('created_at', [$startOfWeek, $endOfWeek])->get();
         // dd($productsThisWeeks);
         $productsCount = Product::count();
-        $promotions = Promotion::with('category')->get();
+        $promotions = Promotion::with('sousCat')->get();
         $popularProducts = Product::whereIn('id', OrderItem::pluck('product_id'))
             ->distinct()
             ->get();

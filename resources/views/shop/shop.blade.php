@@ -21,12 +21,12 @@
                     
                     <!-- Icône / Image de la catégorie -->
                     @if ($categorie->icon || $categorie->image)
-                        <img src="{{ asset('storage/' . $categorie->image)  }}" 
+                        {{-- <img src="{{ asset('storage/' . $categorie->image)  }}" 
                              alt="{{ $categorie->name }}" 
                              class="category-icon rounded" 
                              width="32" 
                              height="32" 
-                             loading="lazy">
+                             loading="lazy"> --}}
                     @else
                         <!-- Icône par défaut selon le nom (exemple simple) -->
                         <div class="category-icon-default rounded bg-light d-flex align-items-center justify-content-center" 
@@ -123,7 +123,7 @@
                                 </div>
                             </div>
                             <div @class(['product-info'])>
-                                <div @class(['product-category'])>{{ $product->category->name ?? 'Non catégorisé' }}</div>
+                                <div @class(['product-category'])>{{ $product->sousCat->name ?? 'Non catégorisé' }}</div>
                                 <h3 @class(['product-title'])>{{ $product->name }}</h3>
                                 
                                 <!-- Évaluation -->

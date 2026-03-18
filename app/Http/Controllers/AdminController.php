@@ -9,6 +9,7 @@ use App\Models\Category;
 use App\Models\Vendor;
 use App\Models\Ad;
 use App\Models\SousCat;
+use App\Models\Attribute;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Exception;
@@ -17,6 +18,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 
+use function Symfony\Component\String\b;
 
 class AdminController extends Controller
 {
@@ -62,7 +64,7 @@ class AdminController extends Controller
     {
         $totalUsers = User::count();
         $activeUsers = User::where('status', 'active')->count();
-        $vendors = Vendor::with('user','products')
+        $vendors = Vendor::with('user', 'products')
             ->paginate(10);
         $users = User::paginate(10);
         $totalVendors = Vendor::count();
@@ -290,21 +292,17 @@ class AdminController extends Controller
 
 
     // Ajouter une nouvelle publicité via un formulaire
-    public function storeAds(Request $request)
+    public function storeAd(Request $request)
     {
         // Validation des données du formulaire
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048', // Fichier image
-            'url' => 'required|url',
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors(),
-            ], 422);
+            return back()->withErrors($validator)->withInput();
         }
 
         try {
@@ -323,19 +321,71 @@ class AdminController extends Controller
                 'title' => $request->input('title'),
                 'description' => $request->input('description'),
                 'image_url' => $imageUrl,
-                'url' => $request->input('url'),
             ]);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Publicité ajoutée avec succès',
-                'data' => $ad,
-            ], 201);
+            return back()->with('success', 'Publicité ajoutée avec succès');
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Erreur lors de l\'ajout de la publicité : ' . $e->getMessage(),
-            ], 500);
+            Log::error('Erreur lors de l\'ajout de la publicité : ' . $e->getMessage());
+            return back()->with('error', 'Erreur lors de l\'ajout de la publicité : ' . $e->getMessage());
+        }
+    }
+    public function ads()
+    {
+        $ads = Ad::all();
+        return view('admin.ads', compact('ads'));
+    }
+    public function destroyAd($id)
+    {
+        $ad = Ad::findOrFail($id);
+        // Supprimer l'image associée
+        if ($ad->image_url) {
+            $imagePath = str_replace('/storage/', '', $ad->image_url); // Convertir l'URL en chemin de stockage
+            Storage::disk('public')->delete($imagePath);
+        }
+        $ad->delete();
+        return redirect()->back()->with('success', 'Annonce supprimée avec succès');
+    }
+    public function updateAd(Request $request, $id)
+    {
+        $ad = Ad::findOrFail($id);
+
+        // Validation des données du formulaire
+        $validator = Validator::make($request->all(), [
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Fichier image
+            'is_active' => 'nullable|boolean',
+        ]);
+
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput();
+        }
+
+        try {
+            // Gestion de l'upload de l'image
+            if ($request->hasFile('image')) {
+                // Supprimer l'ancienne image si elle existe
+                if ($ad->image_url) {
+                    $oldImagePath = str_replace('/storage/', '', $ad->image_url);
+                    Storage::disk('public')->delete($oldImagePath);
+                }
+
+                $image = $request->file('image');
+                $imageName = time() . '.' . $image->getClientOriginalExtension();
+                $imagePath = $image->storeAs('ads', $imageName, 'public');
+                $ad->image_url = Storage::url($imagePath);
+            }
+
+            // Mise à jour des autres champs
+            $ad->title = $request->input('title');
+            $ad->description = $request->input('description');
+            $ad->is_active = $request->input('is_active');
+            $ad->save();
+
+            return back()->with('success', 'Publicité mise à jour avec succès');
+        } catch (\Exception $e) {
+            Log::error('Erreur lors de la mise à jour de la publicité : ' . $e->getMessage());
+            return back()->with('error', 'Erreur lors de la mise à jour de la publicité : ' . $e->getMessage());
         }
     }
 
@@ -367,13 +417,13 @@ class AdminController extends Controller
         ]);
 
         try {
-              // Générer le slug à partir du nom
+            // Générer le slug à partir du nom
             $slug = Str::slug($request->name);
-             // Gestion de l'image
-             $imagePath = null;
-             if ($request->hasFile('image')) {
-                 $imagePath = $request->file('image')->store('sous_categories', 'public');
-             }
+            // Gestion de l'image
+            $imagePath = null;
+            if ($request->hasFile('image')) {
+                $imagePath = $request->file('image')->store('sous_categories', 'public');
+            }
             SousCat::create([
                 'name' => $request->name,
                 'slug' => $slug,
@@ -387,5 +437,79 @@ class AdminController extends Controller
             Log::error('Erreur lors de l\'ajout de la sous-catégorie : ' . $e->getMessage());
             return redirect()->route('admin.categories.showSubCategory')->with('error', 'Une erreur s\'est produite lors de l\'ajout de la sous-catégorie.');
         }
+    }
+    public function showAttributes()
+    {
+        $attributes = Attribute::with('options', 'sousCategorie')->get();
+        $sousCategories = SousCat::all();
+        return view('admin.attribut', compact('attributes', 'sousCategories'));
+    }
+    public function storeAttribute(Request $request)
+    {
+        try {
+            $request->validate([
+                'name'               => 'required|string|max:255|unique:attributes,name',
+                'sous_cat_id' => 'required|exists:sous_cats,id',
+                // 'type'              => 'required|in:texte,couleur,nombre,booleen',
+                'value'           => 'nullable|string',
+
+            ]);
+
+            $attribute = Attribute::create([
+                'name'            => $request->name,
+                'sous_cat_id' => $request->sous_cat_id,
+                // 'type'            => $request->type,
+            ]);
+
+            // Créer les options si des valeurs sont fournies
+            if ($request->filled('value')) {
+                $valeurs = array_map('trim', explode(',', $request->value));
+                foreach ($valeurs as $valeur) {
+                    if (!empty($valeur)) {
+                        $attribute->options()->create(['value' => $valeur]);
+                    }
+                }
+            }
+
+            return redirect()->back()->with('success', 'Attribut créé avec succès.');
+        } catch (\Throwable $th) {
+            Log::error('Erreur lors de la création de l\'attribut : ' . $th->getMessage());
+            return redirect()->back()->with('error', 'Une erreur s\'est produite lors de la création de l\'attribut : ' . $th->getMessage());
+        }
+    }
+
+    public function updateAttribute(Request $request, $id)
+    {
+        $attribute = Attribute::findOrFail($id);
+
+        $request->validate([
+            'nom'               => 'required|string|max:255|unique:attributes,name,' . $id,
+            'sous_categorie_id' => 'required|exists:sub_categories,id',
+            'type'              => 'required|in:texte,couleur,nombre,booleen',
+            'statut'            => 'required|in:actif,inactif',
+            'valeurs'           => 'nullable|string',
+            'description'       => 'nullable|string',
+        ]);
+
+        $attribute->update([
+            'name'            => $request->nom,
+            'sub_category_id' => $request->sous_categorie_id,
+            'type'            => $request->type,
+            'statut'          => $request->statut,
+            'description'     => $request->description,
+        ]);
+
+        // Resynchroniser les options
+        if ($request->filled('valeurs')) {
+            $attribute->options()->delete();
+            $valeurs = array_map('trim', explode(',', $request->valeurs));
+            foreach ($valeurs as $valeur) {
+                if (!empty($valeur)) {
+                    $attribute->options()->create(['value' => $valeur]);
+                }
+            }
+        }
+
+        return redirect()->back()->with('success', 'Attribut mis à jour avec succès.');
     }
 }

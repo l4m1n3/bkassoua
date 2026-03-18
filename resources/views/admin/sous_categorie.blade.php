@@ -62,7 +62,7 @@
             <div class="stat-content">
                 <div class="stat-value">{{ $totalProducts ?? 0 }}</div>
                 <div class="stat-label">Produits associés</div>
-            </div>
+            </div> 
         </div>
         <div class="stat-card">
             <div class="stat-icon bg-info">

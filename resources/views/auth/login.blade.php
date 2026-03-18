@@ -591,6 +591,13 @@
                             Se connecter
                         </button>
                     </div>
+
+                    {{-- <div class="fade-in" style="animation-delay: 0.3s;">
+                        <a href="{{ route('google.redirect') }}" class="btn-login">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>
+                            Se connecter avec Google
+                        </a>
+                    </div> --}}
                 </form>
 
                 <div class="divider fade-in" style="animation-delay: 0.4s;">

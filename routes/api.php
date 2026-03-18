@@ -19,6 +19,8 @@ Route::post('/resend-otp', [RegisterController::class, 'resendOtp']);
 Route::post('/forgot-password', [RegisterController::class, 'forgotPassword']);
 // Route::post('/send-otp', [RegisterController::class, 'sendOtp']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::get('/auth/google/redirect', [AuthController::class, 'redirectToGoogle'])->name('google.redirect');
+Route::get('/auth/google/callback', [AuthController::class, 'handleGoogleCallback'])->name('google.callback');
 Route::get('/test', function () {
     return response()->json(['message' => 'api laravel marche'], 200);
 });

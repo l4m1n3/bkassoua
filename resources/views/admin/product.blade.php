@@ -2,7 +2,7 @@
 
 @section('title', 'Gestion des Produits - Admin Bkassoua')
 
-@section('content')
+@section('content') 
 <div class="products-container">
     <!-- En-tête de la page -->
     <div class="page-header">
@@ -195,7 +195,7 @@
                                 </td>
                                 <td>
                                     <span class="category-badge">
-                                        {{ $product->category ? $product->category->name : 'Sans catégorie' }}
+                                        {{ $product->sousCat ? $product->sousCat->name : 'Sans catégorie' }}
                                     </span>
                                 </td>
                                 <td>

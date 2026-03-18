@@ -128,7 +128,7 @@ class ProductController extends Controller
     public function shop()
     {
         $categories = Category::all();
-        $products = Product::with(['images', 'mainImage','vendor', 'category'])->get();
+        $products = Product::with(['images', 'mainImage','vendor', 'sousCat'])->get();
         return view('shop.shop', compact('products', 'categories'));
     }
     public function productPerCategory($categorySlug)

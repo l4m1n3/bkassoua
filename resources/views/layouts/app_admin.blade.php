@@ -8,7 +8,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="author" content="Bkassoua">
     <link href="{{ asset('assets/img/logo.png') }}" rel="icon">
-    <title>Admin - Bkassoua</title>
+    <title>@yield('title', 'Admin - Bkassoua')</title>
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -634,7 +634,7 @@
                        href="{{ route('admin.orders') }}">
                         <i class="bi bi-cart-check"></i>
                         <span class="nav-text">Commandes</span>
-                        <span class="nav-badge">5</span>
+                        <span class="nav-badge"></span>
                     </a>
                 </div>
                 <div class="nav-item">
@@ -642,7 +642,7 @@
                        href="/admin/products">
                         <i class="bi bi-box-seam"></i>
                         <span class="nav-text">Produits</span>
-                        <span class="nav-badge">12</span>
+                        <span class="nav-badge"></span>
                     </a>
                 </div>
                 <div class="nav-item">
@@ -659,11 +659,45 @@
                         <span class="nav-text">Catégories</span>
                     </a>
                 </div>
-                <div class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('admin.categories.showSubCategory*') ? 'active' : '' }}" 
-                       href="{{ route('admin.categories.showSubCategory') }}">
+               <div class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('admin.categories.showSubCategory*') || request()->routeIs('admin.attributes*') ? 'active' : '' }}" 
+                    href="#subCategorySubmenu"
+                    data-bs-toggle="collapse"
+                    aria-expanded="{{ request()->routeIs('admin.categories.showSubCategory*') || request()->routeIs('admin.attributes*') ? 'true' : 'false' }}">
                         <i class="bi bi-tags"></i>
                         <span class="nav-text">Sous Catégories</span>
+                        <i class="bi bi-chevron-down ms-auto nav-text submenu-arrow"></i>
+                    </a>
+                    <div class="collapse {{ request()->routeIs('admin.categories.showSubCategory*') || request()->routeIs('admin.attributes*') ? 'show' : '' }}" 
+                        id="subCategorySubmenu">
+                        <div class="nav-item">
+                            <a class="nav-link nav-sublink {{ request()->routeIs('admin.categories.showSubCategory') ? 'active' : '' }}" 
+                            href="{{ route('admin.categories.showSubCategory') }}">
+                                <i class="bi bi-diagram-2"></i>
+                                <span class="nav-text">Liste des sous-catégories</span>
+                            </a>
+                        </div>
+                        <div class="nav-item">
+                            <a class="nav-link nav-sublink {{ request()->routeIs('admin.Subcategories.showAttributes') ? 'active' : '' }}" 
+                            href="{{ route('admin.Subcategories.showAttributes') }}">
+                                <i class="bi bi-sliders"></i>
+                                <span class="nav-text">Attributs</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('promotioins*') ? 'active' : '' }}" 
+                       href="{{ route('promotions.index') }}">
+                        <i class="bi bi-tags"></i>
+                        <span class="nav-text">Promotions</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('admin.ads*') ? 'active' : '' }}" 
+                       href="{{ route('admin.ads.index') }}">
+                        <i class="bi bi-tags"></i>
+                        <span class="nav-text">Annonces</span>
                     </a>
                 </div>
             </div>

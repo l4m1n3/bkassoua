@@ -26,7 +26,9 @@ class User extends Authenticatable
         'phone_number',
         'order_history',
         'latitude',
-        'longitude'
+        'longitude',
+        'is_verified',
+        'google_id'
     ];
     
     /**

@@ -11,12 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('ads', function (Blueprint $table) {
+        Schema::create('attribute_options', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
-            $table->text('description');
-            $table->string('image_url'); // URL de l'image stockée localement ou sur un CDN
-            $table->boolean('is_active')->default(true); // Pour activer/désactiver l'annonce
+            $table->foreignId('attribute_id')->constrained()->cascadeOnDelete();
+            $table->string('value'); // S, M, L ou 64GB, 128GB
             $table->timestamps();
         });
     }
@@ -26,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('ads');
+        Schema::dropIfExists('attribute_options');
     }
 };

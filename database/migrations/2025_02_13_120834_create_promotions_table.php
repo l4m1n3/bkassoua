@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->integer('discount_percentage');
-            $table->foreignId('category_id')->constrained('categories')->onDelete('cascade');// La catégorie de produits concernée
+            $table->foreignId('sous_cat_id')->constrained('sous_cats')->onDelete('cascade');// La sous catégorie de produits concernée
             $table->timestamp('start_date')->nullable();
             $table->timestamp('end_date')->nullable();
             $table->timestamps();

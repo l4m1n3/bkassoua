@@ -17,10 +17,12 @@ use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\AboutController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\WishlistController;
+use App\Http\Controllers\PromotionController;
+use App\Http\Controllers\Auth\GoogleController;
 
 Route::get('/dashboard', function () {
     return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+})->middleware(['auth'])->name('dashboard');
 
 Route::get('/', [HomeController::class, 'home'])->name('home');
 Route::get('shop', [ProductController::class, 'shop'])->name('shop');
@@ -34,6 +36,15 @@ Route::get('/contact/privacy', [ContactController::class, 'privacy'])->name('con
 Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist');
 
 Route::middleware('auth')->get('/notifications', [NotificationController::class, 'index']);
+
+//promotions et ads routes
+Route::get('/promotions', [PromotionController::class, 'index'])->name('promotions.index');
+Route::post('/promotions', [PromotionController::class, 'store'])->name('promotions.store');
+Route::get('/promotions/{id}', [PromotionController::class, 'show'])->name('promotions.show');
+Route::put('/promotions/{id}', [PromotionController::class, 'update'])->name('promotions.update');
+Route::delete('/promotions/{id}', [PromotionController::class, 'destroy'])->name('promotions.destroy');
+
+
 // Checkout
 Route::get('/cart/checkout/show', [OrderController::class, 'showCheckout'])->name('orders.show.checkout');
 Route::post('/cart/checkout/order', [OrderController::class, 'placeOrder'])->name('checkout.process');
@@ -41,7 +52,12 @@ Route::post('/cart/checkout/order', [OrderController::class, 'placeOrder'])->nam
 // Admin routes group
 Route::prefix('admin')->middleware(['auth'])->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
-
+    Route::get('/ads', [AdminController::class, 'ads'])->name('ads.index');
+    Route::get('/ads/create', [AdminController::class, 'createAd'])->name('ads.create');
+    Route::post('/ads', [AdminController::class, 'storeAd'])->name('ads.store');
+    Route::get('/ads/{id}', [AdminController::class, 'showAd'])->name('ads.show');
+    Route::put('/ads/{id}', [AdminController::class, 'updateAd'])->name('ads.update');
+    Route::delete('/ads/{id}', [AdminController::class, 'destroyAd'])->name('ads.destroy');
     // Vendors
     Route::get('/vendors/{vendorId}', [AdminController::class, 'changeVendorStatus'])->name('changeVendorStatus');
 
@@ -54,8 +70,13 @@ Route::prefix('admin')->middleware(['auth'])->name('admin.')->group(function () 
     Route::get('/users', [AdminController::class, 'users'])->name('users');
     Route::get('/users/{id}', [AdminController::class, 'showUser'])->name('showUser');
     Route::get('categories', [AdminController::class, 'categories'])->name('categories');
-     Route::get('categories/sub', [AdminController::class, 'showSubCategory'])
+    Route::get('categories/sub', [AdminController::class, 'showSubCategory'])
         ->name('categories.showSubCategory');
+
+    Route::get('categories/sub/attributes', [AdminController::class, 'showAttributes'])
+        ->name('Subcategories.showAttributes');
+    Route::post('categories/sub/attributes',        [AdminController::class, 'storeAttribute'])->name('attributes.store');
+    Route::put('categories/sub/attributes/{id}',    [AdminController::class, 'updateAttribute'])->name('attributes.update');
     // Categories - Use resource for consistency
     // Route::resource('categories', AdminController::class)->only(['storeCategory', 'updateCategory', 'destroy']);
     Route::post('categories', [AdminController::class, 'storeCategory'])
@@ -142,4 +163,6 @@ Route::prefix('orders')->name('orders.')->group(function () {
     Route::get('/export', [OrderController::class, 'export'])->name('export');
 });
 
+Route::get('/auth/google/redirect', [GoogleController::class, 'redirectToGoogle'])->name('google.redirect');
+Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
 require __DIR__ . '/auth.php';

@@ -243,15 +243,29 @@
                 
                 <div @class(['categories-grid'])>
                     @foreach ($categories as $categorie)
-                    <a href="/shop/{{ $categorie->slug }}" @class(['category-card', 'text-decoration-none'])>
-                        <div @class(['category-image'])>
-                            <img src="{{ asset('storage/' . $categorie->image) }}" alt="{{ $categorie->name }}">
-                            <div @class(['category-overlay'])>
-                                <h5 @class(['category-title'])>{{ $categorie->name }}</h5>
-                                <span @class(['category-link'])>Explorer <i @class(['bi', 'bi-arrow-right'])></i></span>
-                            </div>
+
+                    <div class="filter-option">
+
+                        <!-- Catégorie -->
+                        <div class="fw-bold d-flex justify-content-between align-items-center">
+                            <a href="/shop/{{ $categorie->slug }}" class="text-dark text-decoration-none">
+                                {{ $categorie->name }}
+                            </a>
                         </div>
-                    </a>
+                        <!-- Sous catégories -->
+                        @if($categorie->sousCat->count())
+                        <ul class="list-unstyled ms-3 mt-2">
+                            @foreach ($categorie->sousCat as $sousCat)
+                            <li class="mb-1">
+                                <a href="/shop/sous-categorie/{{ $sousCat->slug }}" class="text-muted text-decoration-none small">
+                                    <i class="bi bi-chevron-right me-1"></i>
+                                    {{ $sousCat->name }}
+                                </a>
+                            </li>
+                            @endforeach
+                        </ul>
+                        @endif
+                    </div>
                     @endforeach
                 </div>
             </section>

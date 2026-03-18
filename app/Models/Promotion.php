@@ -14,11 +14,14 @@ class Promotion extends Model
         'discount_percentage',
         'start_date',
         'end_date',
-        'category_id',
+        'sous_cat_id',
     ];
-
-    public function category()
+    protected $casts = [
+        'start_date' => 'date',
+        'end_date' => 'date'
+    ];
+    public function sousCat()
     {
-        return $this->belongsTo(Category::class);
+        return $this->belongsTo(SousCat::class);
     }
 }

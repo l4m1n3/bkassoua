@@ -11,12 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('ads', function (Blueprint $table) {
+        Schema::create('delivery_regions', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
-            $table->text('description');
-            $table->string('image_url'); // URL de l'image stockée localement ou sur un CDN
-            $table->boolean('is_active')->default(true); // Pour activer/désactiver l'annonce
+            $table->string('name'); 
+            $table->integer('fee'); 
             $table->timestamps();
         });
     }
@@ -26,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('ads');
+        Schema::dropIfExists('delivery_regions');
     }
 };
