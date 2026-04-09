@@ -86,7 +86,7 @@
                     <tr>
                         <th style="width:50px">#</th>
                         <th>Nom de l'attribut</th>
-                        <th>Sous-catégorie</th>
+                        {{-- <th>Sous-catégorie</th> --}}
                         <th>Type</th>
                         <th>Valeurs</th>
                         <th>Statut</th>
@@ -108,11 +108,11 @@
                                 </div>
                             </div>
                         </td>
-                        <td>
+                        {{-- <td>
                             <span class="badge bg-light text-dark border">
                                 {{ $attribut->sousCategorie->name ?? '—' }}
                             </span>
-                        </td>
+                        </td> --}}
                         <td>
                             <span class="type-badge type-{{ $attribut->type ?? 'texte' }}">
                                 {{ ucfirst($attribut->type ?? 'Texte') }}
@@ -207,7 +207,7 @@
                             <label class="form-label fw-600">Nom de l'attribut <span class="text-danger">*</span></label>
                             <input type="text" name="name" class="form-control" placeholder="Ex: Couleur, Taille..." required>
                         </div>
-                        <div class="col-md-6">
+                        {{-- <div class="col-md-6">
                             <label class="form-label fw-600">Sous-catégorie <span class="text-danger">*</span></label>
                             <select name="sous_cat_id" class="form-select" required>
                                 <option value="">Sélectionner une sous-catégorie</option>
@@ -215,7 +215,7 @@
                                     <option value="{{ $sc->id }}">{{ $sc->name }}</option>
                                 @endforeach
                             </select>
-                        </div>
+                        </div> --}}
                         <div class="col-md-6">
                             <label class="form-label fw-600">Type d'attribut</label>
                             <select name="type" class="form-select" id="typeAttribut">

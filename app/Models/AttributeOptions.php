@@ -9,8 +9,8 @@ class AttributeOptions extends Model
 {
     use HasFactory;
     protected $fillable = ['attribute_id', 'value'];
-    
- public function attribute()
+
+    public function attribute()
     {
         return $this->belongsTo(Attribute::class);
     }

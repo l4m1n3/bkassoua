@@ -3,7 +3,7 @@
 @section('title', 'Gestion des Commandes - Admin Bkassoua')
 
 @section('content')
-<div class="orders-container">
+
     <!-- En-tête de la page -->
     <div class="page-header">
         <div class="header-content">
@@ -64,7 +64,7 @@
                 <i class="bi bi-cart"></i>
             </div>
             <div class="stat-content">
-                <div class="stat-value">{{ $totalOrders ?? 0 }}</div>
+            <div class="stat-value" id="totalOrdersCount">{{ $totalOrders ?? 0 }}</div>
                 <div class="stat-label">Total commandes</div>
             </div>
         </div>
@@ -118,8 +118,9 @@
                     </button>
                 </div>
             @else
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
+            <div class="toast-container position-fixed top-0 end-0 p-3" id="toastContainer" style="z-index: 9999;"></div>
+               <div class="table-responsive">
+                    <table class="table table-hover mb-0" id="ordersTable">
                         <thead>
                             <tr>
                                 <th>
@@ -136,98 +137,9 @@
                                 <th>Actions</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            @foreach ($orders as $order)
-                            <tr class="order-row" data-order-id="{{ $order->id }}">
-                                <td>
-                                    <div class="form-check">
-                                        <input class="form-check-input order-checkbox" type="checkbox" value="{{ $order->id }}">
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="order-info">
-                                        <div class="order-id">#{{ $order->id }}</div>
-                                        <small class="text-muted">{{ $order->items_count }} article(s)</small>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="customer-info">
-                                        <div class="customer-name">{{ $order->user->name }}</div>
-                                        <small class="text-muted">{{ $order->user->email }}</small>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="amount">{{ number_format($order->total_amount, 0, ',', ' ') }} fcfa</div>
-                                </td>
-                                <td>
-                                    <span class="status-badge status-{{ $order->status }}">
-                                        <i class="bi bi-circle-fill me-1"></i>
-                                        {{ ucfirst($order->status) }}
-                                    </span>
-                                </td>
-                                <td>
-                                    @if($order->payment)
-                                        <span class="payment-badge payment-{{ $order->payment->status }}">
-                                            <i class="bi bi-{{ $order->payment->status == 'paid' ? 'check-circle' : 'clock' }} me-1"></i>
-                                            {{ ucfirst($order->payment->status) }}
-                                        </span>
-                                    @else
-                                        <span class="payment-badge payment-none">
-                                            <i class="bi bi-x-circle me-1"></i>
-                                            Non payé
-                                        </span>
-                                    @endif
-                                </td>
-                                <td>
-                                    <div class="date-info">
-                                        <div>{{ $order->created_at->format('d/m/Y') }}</div>
-                                        <small class="text-muted">{{ $order->created_at->format('H:i') }}</small>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="action-buttons">
-                                        <button class="btn btn-sm btn-outline-primary" 
-                                                data-bs-toggle="modal" 
-                                                data-bs-target="#orderDetailModal{{ $order->id }}"
-                                                title="Voir les détails">
-                                            <i class="bi bi-eye"></i>
-                                        </button>
-                                        
-                                        @if($order->status == 'pending')
-                                            @if($order->payment && $order->payment->status === 'pending')
-                                                <button class="btn btn-sm btn-success" 
-                                                        onclick="validatePayment({{ $order->id }})"
-                                                        title="Valider le paiement">
-                                                    <i class="bi bi-check-lg"></i>
-                                                </button>
-                                            @endif
-                                            
-                                            <button class="btn btn-sm btn-danger" 
-                                                    onclick="cancelOrder({{ $order->id }})"
-                                                    title="Annuler la commande">
-                                                <i class="bi bi-x-lg"></i>
-                                            </button>
-                                        @endif
 
-                                        @if($order->status == 'processing')
-                                            <button class="btn btn-sm btn-info" 
-                                                    onclick="updateOrderStatus({{ $order->id }}, 'shipped')"
-                                                    title="Marquer comme expédiée">
-                                                <i class="bi bi-truck"></i>
-                                            </button>
-                                        @endif
-
-                                        @if($order->status == 'shipped')
-                                            <button class="btn btn-sm btn-success" 
-                                                    onclick="updateOrderStatus({{ $order->id }}, 'delivered')"
-                                                    title="Marquer comme livrée">
-                                                <i class="bi bi-check-circle"></i>
-                                            </button>
-                                        @endif
-                                    </div>
-                                </td>
-                            </tr>
-                            @endforeach
+                        <tbody id="ordersBody">
+                            @include('admin.order_rows')
                         </tbody>
                     </table>
                 </div>
@@ -485,88 +397,179 @@
     </div>
 </div>
 
+
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    let lastId = {{ $orders->max('id') ?? 0 }};
+    const ordersBody = document.querySelector('#ordersBody');
 
-    const token = document.querySelector('meta[name="csrf-token"]').content;
+    // ====================== FETCH AUTOMATIQUE ======================
+    function fetchOrders() {
+        console.log("🔄 Fetch... Last ID:", lastId);
 
-    function csrfFetch(url, options = {}) {
-        return fetch(url, {
-            headers: {
-                'X-CSRF-TOKEN': token,
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            credentials: 'same-origin',
-            ...options
-        }).then(res => res.json());
+        fetch(`/orders/latest?last_id=${lastId}`)
+            .then(res => res.json())
+            .then(data => {
+                console.log("📦 DATA:", data);
+
+                if (!data.html || data.html.trim() === '') return;
+
+                const temp = document.createElement('tbody');
+                temp.innerHTML = data.html;
+
+                const rows = temp.querySelectorAll('tr');
+                let newOrderCount = 0;
+
+                rows.forEach(row => {
+                    if (!document.getElementById(row.id)) {
+                        ordersBody.prepend(row);
+                        newOrderCount++;
+                    }
+                });
+
+                // 🔔 Toast si nouvelles commandes
+                if (newOrderCount > 0) {
+                    showToast(`${newOrderCount} nouvelle(s) commande(s) reçue(s) 🛒`);
+                }
+
+                // 🔁 mise à jour lastId
+                if (data.last_id) {
+                    lastId = data.last_id;
+                    console.log("✅ lastId updated:", lastId);
+                }
+            })
+            .catch(err => console.error(err));
     }
 
-    // ✅ Annuler une commande
-    window.cancelOrder = function (id) {
-        if (!confirm('Annuler cette commande ?')) return;
+    setInterval(fetchOrders, 5000);
 
-        csrfFetch(`/admin/orders/${id}/cancel`, { method: 'POST' })
-            .then(r => {
-                showToast(r.message, r.success ? 'success' : 'error');
-                if (r.success) location.reload();
-            });
-    };
-
-    // ✅ Valider paiement
-    window.validatePayment = function (id) {
-        if (!confirm('Valider le paiement ?')) return;
-
-        csrfFetch(`/admin/orders/${id}/validate-payment`, { method: 'POST' })
-            .then(r => {
-                showToast(r.message, r.success ? 'success' : 'error');
-                if (r.success) location.reload();
-            });
-    };
-
-    // ✅ Changer statut
-   window.updateOrderStatus = function (orderId, status) {
-    if (!confirm('Confirmer ce changement de statut ?')) return;
-
-    csrfFetch(`/admin/orders/${orderId}/status`, {
-        method: 'POST',
-        body: JSON.stringify({ status })
-    })
-    .then(res => {
-        showToast(res.message, res.success ? 'success' : 'error');
-        if (res.success) location.reload();
-    })
-    .catch(() => {
-        showToast('Erreur serveur', 'error');
-    });
-};
-
-
-    // ✅ Action groupée
-    window.applyBulkAction = function () {
-        const ids = [...document.querySelectorAll('.order-checkbox:checked')]
-            .map(cb => cb.value);
-
-        const action = document.getElementById('bulkAction').value;
-
-        if (!ids.length || !action) {
-            showToast('Sélection ou action manquante', 'warning');
-            return;
-        }
-
-        csrfFetch('/admin/orders/bulk-action', {
-            method: 'POST',
-            body: JSON.stringify({ ids, action })
-        }).then(r => {
-            showToast(r.message, r.success ? 'success' : 'error');
-            if (r.success) location.reload();
+    // ====================== ABLY DEBUG ======================
+    if (window.Echo?.connector?.ably) {
+        window.Echo.connector.ably.connection.on('stateChange', (stateChange) => {
+            console.log('Ably connection state changed:', stateChange.current);
+            if (stateChange.current === 'connected') {
+                console.log('✅ Ably connecté avec succès (solution native)');
+            }
         });
-    };
+    }
 });
 
-// 🔔 Toast simple (à remplacer par SweetAlert / Toastr)
-function showToast(message, type = 'info') {
-    alert(message);
+// ====================== AJOUT DYNAMIQUE DE LA NOUVELLE COMMANDE ======================
+function prependNewOrderRow(order) {
+    const tbody = document.querySelector('#ordersBody');
+    if (!tbody) return;
+
+    const row = document.createElement('tr');
+    row.classList.add('order-row');
+    row.id = `order-${order.id}`;
+    row.setAttribute('data-order-id', order.id);
+
+    row.innerHTML = `
+        <td>
+            <div class="form-check">
+                <input class="form-check-input order-checkbox" type="checkbox" value="${order.id}">
+            </div>
+        </td>
+        <td>
+            <div class="order-info">
+                <div class="order-id">#${order.id}</div>
+                <small class="text-muted">${order.reference || 'CMD-' + order.id}</small>
+            </div>
+        </td>
+        <td>
+            <div class="customer-info">
+                <div class="customer-name">${order.customer || 'Client inconnu'}</div>
+            </div>
+        </td>
+        <td>
+            <div class="amount">${formatMoney(order.total)} fcfa</div>
+        </td>
+        <td>
+            <span class="status-badge status-${order.status}">
+                <i class="bi bi-circle-fill me-1"></i>
+                ${capitalize(order.status)}
+            </span>
+        </td>
+        <td>
+            <span class="payment-badge payment-${order.paymentStatus || 'pending'}">
+                <i class="bi bi-${order.paymentStatus === 'paid' ? 'check-circle' : 'clock'} me-1"></i>
+                ${capitalize(order.paymentStatus || 'En attente')}
+            </span>
+        </td>
+        <td>
+            <div class="date-info">
+                <div>${new Date(order.created_at).toLocaleDateString('fr-FR')}</div>
+                <small class="text-muted">${new Date(order.created_at).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'})}</small>
+            </div>
+        </td>
+        <td>
+            <div class="action-buttons">
+                <button class="btn btn-sm btn-outline-primary" 
+                        onclick="viewOrder(${order.id})" title="Voir détails">
+                    <i class="bi bi-eye"></i>
+                </button>
+            </div>
+        </td>
+    `;
+
+    tbody.prepend(row);
+}
+
+// ====================== FONCTIONS UTILITAIRES ======================
+function formatMoney(amount) {
+    return new Intl.NumberFormat('fr-FR').format(amount || 0);
+}
+
+function capitalize(str) {
+    if (!str) return '';
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+// ====================== TOAST BOOTSTRAP ======================
+function showToast(message) {
+    const toastContainer = document.getElementById('toastContainer');
+    const toastId = 'toast-' + Date.now();
+
+    const toastHtml = `
+        <div id="${toastId}" class="toast align-items-center text-bg-success border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    `;
+
+    toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+
+    const toastElement = document.getElementById(toastId);
+    const toast = new bootstrap.Toast(toastElement, { delay: 3000 });
+    toast.show();
+
+    toastElement.addEventListener('hidden.bs.toast', () => toastElement.remove());
+}
+
+// ====================== MODAL DETAILS ======================
+function viewOrder(id) {
+    const modal = document.getElementById(`orderDetailModal${id}`);
+    if (modal) {
+        const bsModal = new bootstrap.Modal(modal);
+        bsModal.show();
+    } else {
+        alert('Modal de détail non trouvé pour la commande #' + id);
+    }
+}
+
+// Fonction pour voir les détails (tu peux l'améliorer)
+function viewOrder(id) {
+    const modal = document.getElementById(`orderDetailModal${id}`);
+    if (modal) {
+        const bsModal = new bootstrap.Modal(modal);
+        bsModal.show();
+    } else {
+        alert('Modal de détail non trouvé pour la commande #' + id);
+    }
 }
 </script>
 

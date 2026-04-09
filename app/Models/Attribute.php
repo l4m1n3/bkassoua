@@ -8,14 +8,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Attribute extends Model
 {
     use HasFactory;
-    protected $fillable = ['sous_cat_id', 'name', 'type'];
+    protected $fillable = ['name', 'type'];
 
     public function options()
     {
         return $this->hasMany(AttributeOptions::class);
     }
-    public function sousCategorie()
+    public function values()
     {
-        return $this->belongsTo(SousCat::class, 'sous_cat_id');
+        return $this->hasMany(AttributeValueProduct::class);
     }
 }

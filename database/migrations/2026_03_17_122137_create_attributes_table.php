@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('attributes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('sous_cat_id')->constrained('sous_cats')->cascadeOnDelete();
-            $table->string('name')->nullable(); // Taille, RAM, Couleur
+            $table->string('name'); // ex: 'Couleur', 'Taille'
+            $table->string('type')->default('text'); // ex: 'color', 'select', 'radio'
             $table->timestamps();
         });
     }

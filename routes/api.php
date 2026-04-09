@@ -41,7 +41,7 @@ Route::middleware('auth:sanctum')->get('/cart', [CartController::class, 'cart'])
 Route::middleware('auth:sanctum')->delete('/cart/{id}', [CartController::class, 'cartDelete']);
 Route::middleware('auth:sanctum')->post('/place-order', [OrderController::class, 'placeOrder']);
 Route::middleware('auth:sanctum')->get('/user/profile', [UserController::class, 'getUserProfile']);
- 
+
 Route::middleware('auth:sanctum')->group(function () {
 
     Route::put('/user/profile', [UserController::class, 'updateProfile']);
@@ -49,18 +49,20 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/products/add', [ProductController::class, 'addProduct']);
     Route::delete('/products/{id}', [ProductController::class, 'destroy']);
     Route::put('/products/{id}', [ProductController::class, 'update']);
+    // Dans le groupe middleware auth:sanctum existant
+    Route::delete('/profile', [UserController::class, 'destroy']);
     //products similar
-    });
+});
 
-    Route::get('/popular/products', [ProductController::class, 'getPopularProduct']);
-    Route::get('/new/products', [ProductController::class, 'getNewProduct']);
-    Route::get('/promotions', [PromotionController::class, 'index']);
-    Route::get('/order/history/{id}', [ProductController::class, 'getHistory']);
-    Route::get('/popular/categories', [ProductController::class, 'getPopularCategory']);
+Route::get('/popular/products', [ProductController::class, 'getPopularProduct']);
+Route::get('/new/products', [ProductController::class, 'getNewProduct']);
+Route::get('/promotions', [PromotionController::class, 'index']);
+Route::get('/order/history/{id}', [ProductController::class, 'getHistory']);
+Route::get('/popular/categories', [ProductController::class, 'getPopularCategory']);
 
-    Route::get('/categories', [CategoryController::class, 'categories']);
-    Route::get('/subcategories', [CategoryController::class, 'showSubCategory']);
-    Route::get('/products/{productId}', [ProductController::class, 'show']);
-    Route::get('/products', [ProductController::class, 'index']);
+Route::get('/categories', [CategoryController::class, 'categories']);
+Route::get('/subcategories', [CategoryController::class, 'showSubCategory']);
+Route::get('/products/{productId}', [ProductController::class, 'show']);
+Route::get('/products', [ProductController::class, 'index']);
 
 Route::get('/vendor/{vendorId}/products', [ProductController::class, 'getProducts']);

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\OtpCode;
+use App\Models\PendingRegistration;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Twilio\Rest\Client;
@@ -16,6 +17,13 @@ use Carbon\Carbon;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Validator;
+// use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\OtpMail;
+// use Illuminate\Support\Facades\Log;
+// use Illuminate\Support\Facades\Http;
+
 
 
 class RegisterController extends Controller
@@ -27,283 +35,505 @@ class RegisterController extends Controller
      * @return \Illuminate\Http\JsonResponse
      * @throws ValidationException
      */
-    public function register(Request $request)
-    {
+     
+     
+//   
+  public function register(Request $request)
+{
+    try {
+        $phoneNumber = preg_replace('/^\+?227/', '', $request->phone_number);
+        $request->merge(['phone_number' => $phoneNumber]);
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'nullable|email|max:255|unique:users',
+            'name'         => 'required|string|max:255',
+            'email'        => 'nullable|email|max:255|unique:users,email',
             'phone_number' => 'required|string|regex:/^[0-9]{8}$/|unique:users,phone_number',
-            'address' => 'required|string|max:255',
-            'password' => 'required|string|min:8|confirmed',
+            'address'      => 'required|string|max:255',
+            'password'     => 'required|string|min:8|confirmed',
         ]);
 
-        $pendingUser = [
-            'name' => $request->name,
-            'email' => $request->email,
+        $otp = sprintf("%06d", rand(0, 999999));
+
+        // Supprimer ancien pending + OTP
+        PendingRegistration::where('phone_number', $request->phone_number)->delete();
+        OtpCode::where('phone_number', $request->phone_number)->delete();
+
+        // Créer l'enregistrement pending
+        PendingRegistration::create([
             'phone_number' => $request->phone_number,
-            'address' => $request->address,
-            'password' => Hash::make($request->password),
-            'expires_at' => now()->addMinutes(30),
-        ];
+            'name'         => $request->name,
+            'email'        => $request->email,
+            'address'      => $request->address,
+            'password'     => Hash::make($request->password),
+            'expires_at'   => now()->addMinutes(30),
+        ]);
 
-        Session::put('pending_user_' . $request->phone_number, $pendingUser);
-
-        $code = sprintf("%06d", rand(0, 999999)); 
-
+        // Créer OTP
         OtpCode::create([
             'phone_number' => $request->phone_number,
-            'code' => $code,
-            'expires_at' => now()->addMinutes(3),
+            'code'         => $otp,
+            'expires_at'   => now()->addMinutes(10),
         ]);
 
-        // Envoi de l'OTP via l'API BkassouaSMS
+        // Envoi SMS + Email
+        $smsSuccess = false;
+        $emailSuccess = false;
+
         try {
             $response = Http::withBasicAuth(env('SMS_API_USERNAME'), env('SMS_API_PASSWORD'))
                 ->post(env('SMS_API_URL'), [
-                    'to' => '227' . $request->phone_number,
-                    'from' => env('SMS_SENDER'),
-                    'content' => "Votre code OTP est : $code",
-                    'dlr' => 'yes',
-                    'dlr-level' => 3,
-                    'dlr-method' => 'GET',
-                    'dlr-url' => env('SMS_DLR_URL'),
+                    'to'      => '227' . $request->phone_number,
+                    'from'    => env('SMS_SENDER'),
+                    'content' => "Votre code OTP est : $otp. Valable 3 minutes.",
                 ]);
-
-            if ($response->successful()) {
-                return response()->json(['success' => true, 'message' => 'Code OTP envoyé.']);
-            } else {
-                // Gérer l'échec de l'envoi du SMS
-                return response()->json(['success' => false, 'message' => 'Erreur lors de l\'envoi de l\'OTP.'], 500);
-            }
+            $smsSuccess = $response->successful();
         } catch (\Exception $e) {
-            // Gérer les erreurs de connexion ou autres exceptions
-            return response()->json(['success' => false, 'message' => 'Erreur lors de l\'envoi de l\'OTP : ' . $e->getMessage()], 500);
+            Log::error('SMS failed', ['phone' => $request->phone_number]);
         }
+
+        if ($request->filled('email')) {
+            try {
+                Mail::to($request->email)->send(new OtpMail($otp, $request->name, $request->phone_number));
+                $emailSuccess = true;
+            } catch (\Exception $e) {
+                Log::error('Email failed', ['email' => $request->email]);
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => $smsSuccess && $emailSuccess 
+                ? 'Code OTP envoyé par SMS et email.' 
+                : 'Code OTP envoyé avec succès.',
+            'phone_number' => $request->phone_number
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Register error', ['error' => $e->getMessage()]);
+        return response()->json(['success' => false, 'message' => 'Erreur lors de l\'inscription.'], 500);
     }
-
-    /**
-     * Verify OTP and complete registration (Step 2)
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function verifyOtp(Request $request)
-    {
-        try {
-            // Validate request
-            $request->validate([
-                'phone_number' => 'required|string|regex:/^[0-9]{8}$/',
-                'otp' => 'required|numeric|digits:6',
-                'type' => 'required|string|in:register,password_reset',
-            ]);
-
-            // Log for debugging
-            Log::info('Verifying OTP', [
-                'phone_number' => $request->phone_number,
-                'type' => $request->type,
-                'session_exists' => Session::has('pending_user_' . $request->phone_number),
-            ]);
-
-            // Find OTP record
-            $otpRecord = OtpCode::where('phone_number', $request->phone_number)
-                ->where('code', $request->otp)
-                ->first();
-
-            if (!$otpRecord) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Code OTP invalide.',
-                ], 422);
-            }
-
-            // Check if OTP is expired
-            if (Carbon::now()->gt($otpRecord->expires_at)) {
-                $otpRecord->delete();
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Le code OTP a expiré. Veuillez demander un nouvel OTP.',
-                ], 422);
-            }
-
-            if ($request->type === 'register') {
-                // Handle registration
-                $sessionKey = 'pending_user_' . $request->phone_number;
-                $pendingUser = Session::get($sessionKey);
-
-                if (!$pendingUser) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Aucune inscription en attente pour ce numéro. Veuillez vous inscrire à nouveau.',
-                    ], 404);
-                }
-
-                // Check session expiration
-                if (Carbon::now()->gt(Carbon::parse($pendingUser['expires_at']))) {
-                    Session::forget($sessionKey);
-                    $otpRecord->delete();
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Votre session d’inscription a expiré. Veuillez recommencer l’inscription.',
-                    ], 422);
-                }
-
-                // Check for duplicates
-              $existingUserQuery = User::where('phone_number', $userData['phone_number']);
-
-if (!empty($userData['email'])) {
-    $existingUserQuery->orWhere('email', $userData['email']);
 }
+    
+/**
+ * Vérification de l'OTP - Version Finale avec PendingRegistration (DB)
+ */
+public function verifyOtp(Request $request)
+{
+    try {
+        // Nettoyage du numéro
+        $phoneNumber = preg_replace('/^\+?227/', '', $request->phone_number);
+        $request->merge(['phone_number' => $phoneNumber]);
 
-$existingUser = $existingUserQuery->first();
+        $request->validate([
+            'phone_number' => 'required|string|regex:/^[0-9]{8}$/',
+            'otp'          => 'required|numeric|digits:6',
+            'type'         => 'required|string|in:register,password_reset,login',
+        ]);
 
+        Log::info('=== VÉRIFICATION OTP DÉBUT ===', [
+            'phone_number' => $request->phone_number,
+            'otp'          => $request->otp,
+            'type'         => $request->type,
+        ]);
 
-                if ($existingUser) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Ce numéro ou cet email est déjà utilisé.',
-                    ], 409);
-                }
+        // Récupérer l'OTP
+        $otpRecord = OtpCode::where('phone_number', $request->phone_number)->first();
 
-                // Create user
-                $user = User::create([
-                    'name' => $pendingUser['name'],
-                    'email' => $pendingUser['email'],
-                    'phone_number' => $pendingUser['phone_number'],
-                    'address' => $pendingUser['address'],
-                    'password' => $pendingUser['password'], // Pre-hashed
-                    'is_verified' => true,
-                ]);
-
-                // Clean up
-                Session::forget($sessionKey);
-                $otpRecord->delete();
-
-                // Generate token and login
-                $token = $user->createToken('bkassoua_back')->plainTextToken;
-                Auth::login($user);
-
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Inscription réussie !',
-                    'data' => [
-                        'user' => $user,
-                        'token' => $token,
-                    ],
-                ], 201);
-            } elseif ($request->type === 'password_reset') {
-                // Handle password reset
-                $user = User::where('phone_number', $request->phone_number)->first();
-
-                if (!$user) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Utilisateur non trouvé.',
-                    ], 404);
-                }
-
-                // Clean up OTP
-                $otpRecord->delete();
-
-                // Generate temporary token for password reset
-                $resetToken = Str::random(60);
-                Cache::put('password_reset_token_' . $user->id, $resetToken, now()->addMinutes(30));
-
-                return response()->json([
-                    'success' => true,
-                    'message' => 'OTP vérifié. Vous pouvez réinitialiser votre mot de passe.',
-                    'data' => [
-                        'reset_token' => $resetToken,
-                        'phone_number' => $user->phone_number,
-                    ],
-                ], 200);
-            }
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            Log::warning('Validation error during OTP verification', [
-                'phone_number' => $request->phone_number,
-                'errors' => $e->errors(),
-            ]);
+        if (!$otpRecord || $request->otp !== $otpRecord->code) {
+            Log::warning('OTP invalide', ['phone_number' => $request->phone_number, 'otp_submitted' => $request->otp]);
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur de validation.',
-                'errors' => $e->errors(),
+                'message' => 'Code OTP invalide.',
             ], 422);
-        } catch (\Exception $e) {
-            Log::error('OTP verification failed', [
-                'phone_number' => $request->phone_number,
-                'error' => $e->getMessage(),
-            ]);
+        }
+
+        if (Carbon::now()->gt($otpRecord->expires_at)) {
+            $otpRecord->delete();
             return response()->json([
                 'success' => false,
-                'message' => 'Une erreur est survenue lors de la vérification de l’OTP.',
-            ], 500);
+                'message' => 'Le code OTP a expiré. Veuillez demander un nouvel OTP.',
+            ], 422);
         }
-    }
 
+        // ====================== TYPE REGISTER ======================
+        if ($request->type === 'register') {
 
-    /**
-     * Resend OTP
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */ 
-    public function resendOtp(Request $request)
-    {
-        try {
-            // Validate request
-            $request->validate([
-                'phone_number' => 'required|string|regex:/^[0-9]{8}$/',
+            $pending = PendingRegistration::where('phone_number', $request->phone_number)->first();
+
+            Log::info('Recherche PendingRegistration', [
+                'phone_number' => $request->phone_number,
+                'found'        => $pending ? true : false,
+                'expires_at'   => $pending ? $pending->expires_at : null,
             ]);
-
-            // Vérifier si les données existent dans la session
-            $sessionKey = 'pending_user_' . $request->phone_number;
-            $pendingUser = Session::get($sessionKey);
-
-            if (!$pendingUser) {
+            Log::info('CHECK PENDING', [
+                'phone' => $request->phone_number,
+                'exists' => PendingRegistration::where('phone_number', $request->phone_number)->exists()
+            ]);
+            if (!$pending) {
+                $otpRecord->delete();
+                Log::warning('Aucune PendingRegistration trouvée', ['phone' => $request->phone_number]);
                 return response()->json([
                     'success' => false,
-                    'message' => 'Aucune inscription en attente pour ce numéro. Veuillez vous inscrire à nouveau.',
+                    'message' => 'Aucune donnée d\'inscription trouvée. Veuillez recommencer l\'inscription.',
                 ], 404);
             }
 
-            // Vérifier l'expiration de la session
-            if (Carbon::now()->gt(Carbon::parse($pendingUser['expires_at']))) {
-                Session::forget($sessionKey);
+            // Vérifier expiration
+            if ($pending->isExpired()) {
+                $pending->delete();
+                $otpRecord->delete();
                 return response()->json([
                     'success' => false,
-                    'message' => 'Votre session d’inscription a expiré. Veuillez recommencer l’inscription.',
+                    'message' => 'Les données d\'inscription ont expiré. Veuillez recommencer l\'inscription.',
                 ], 422);
             }
 
-            // Supprime les anciens OTP
-            OtpCode::where('phone_number', $request->phone_number)->delete();
+            // Créer l'utilisateur
+            $user = User::create([
+                'name'         => $pending->name,
+                'email'        => $pending->email,
+                'phone_number' => $pending->phone_number,
+                'address'      => $pending->address,
+                'password'     => $pending->password,
+            ]);
 
-            // Génère un nouvel OTP
-            $otp = random_int(100000, 999999);
+            // Nettoyage complet
+            $pending->delete();
+            $otpRecord->delete();
 
-            // Mettre à jour l'expiration dans la session
-            $pendingUser['expires_at'] = Carbon::now()->addMinutes(15)->toDateTimeString();
-            Session::put($sessionKey, $pendingUser);
+            Log::info('Inscription réussie via OTP', ['user_id' => $user->id]);
 
-            // Envoie l'OTP
-            // $this->sendOTP($request->phone_number, $otp);
+            $token = $user->createToken('bkassoua_back')->plainTextToken;
 
             return response()->json([
                 'success' => true,
-                'message' => 'Nouvel OTP envoyé à ' . $request->phone_number,
+                'message' => 'Inscription réussie !',
                 'data' => [
-                    'phone_number' => $request->phone_number,
-                    'expires_at' => $pendingUser['expires_at'],
+                    'user'  => $user,
+                    'token' => $token,
+                ],
+            ], 201);
+        }
+
+        // ====================== TYPE PASSWORD_RESET ======================
+        elseif ($request->type === 'password_reset') {
+            $user = User::where('phone_number', $request->phone_number)->first();
+            if (!$user) {
+                $otpRecord->delete();
+                return response()->json(['success' => false, 'message' => 'Utilisateur non trouvé.'], 404);
+            }
+
+            $otpRecord->delete();
+            $resetToken = Str::random(60);
+            Cache::put('reset_token_' . $user->phone_number, $resetToken, now()->addMinutes(30));
+
+            return response()->json([
+                'success' => true,
+                'message' => 'OTP vérifié avec succès.',
+                'data' => [
+                    'reset_token'  => $resetToken,
+                    'phone_number' => $user->phone_number,
                 ],
             ], 200);
-        } catch (\Exception $e) {
-            Log::error('Erreur renvoi OTP pour phone_number: ' . $request->phone_number . ' - ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Échec du renvoi OTP: ' . $e->getMessage(),
-            ], 500);
         }
-    }
 
+        // ====================== TYPE LOGIN ======================
+        elseif ($request->type === 'login') {
+            $user = User::where('phone_number', $request->phone_number)->first();
+            if (!$user) {
+                $otpRecord->delete();
+                return response()->json(['success' => false, 'message' => 'Utilisateur non trouvé.'], 404);
+            }
+
+            $otpRecord->delete();
+            $token = $user->createToken('bkassoua_back')->plainTextToken;
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Connexion réussie !',
+                'data' => [
+                    'user'  => $user,
+                    'token' => $token,
+                ],
+            ], 200);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Type de vérification non supporté.',
+        ], 400);
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Erreur de validation.',
+            'errors'  => $e->errors(),
+        ], 422);
+    } catch (\Exception $e) {
+        Log::error('Erreur critique dans verifyOtp', [
+            'phone_number' => $request->phone_number ?? null,
+            'error'        => $e->getMessage()
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Une erreur est survenue lors de la vérification.',
+        ], 500);
+    }
+}
+    // public function resendOtp(Request $request)
+    // {
+    //     try {
+    //         $phoneNumber = preg_replace('/^\+?227/', '', $request->phone_number);
+    //         $request->merge(['phone_number' => $phoneNumber]);
+
+    //         $request->validate([
+    //             'phone_number' => 'required|string|regex:/^[0-9]{8}$/',
+    //             'type' => 'required|string|in:register,password_reset,login',
+    //         ]);
+
+    //         Log::info('Resending OTP', [
+    //             'phone_number' => $request->phone_number,
+    //             'type' => $request->type,
+    //         ]);
+
+    //         if ($request->type === 'password_reset') {
+    //             $user = User::where('phone_number', $request->phone_number)->first();
+    //             if (!$user) {
+    //                 return response()->json([
+    //                     'success' => false,
+    //                     'message' => 'Utilisateur non trouvé.',
+    //                 ], 404);
+    //             }
+    //         }
+
+    //         // Supprimer l'ancien OTP
+    //         OtpCode::where('phone_number', $request->phone_number)->delete();
+
+    //         // Générer un nouvel OTP
+    //         $code = sprintf("%06d", rand(0, 999999));
+
+    //         OtpCode::create([
+    //             'phone_number' => $request->phone_number,
+    //             'code' => $code, // En clair pour correspondre aux logs
+    //             'expires_at' => now()->addMinutes(3),
+    //         ]);
+
+    //         // Envoyer l'OTP via BkassouaSMS
+    //         try {
+    //             $response = Http::withBasicAuth(env('SMS_API_USERNAME'), env('SMS_API_PASSWORD'))
+    //                 ->post(env('SMS_API_URL'), [
+    //                     'to' => '227' . $request->phone_number,
+    //                     'from' => env('SMS_SENDER'),
+    //                     'content' => "Votre code OTP est : $code",
+    //                     'dlr' => 'yes',
+    //                     'dlr-level' => 3,
+    //                     'dlr-method' => 'GET',
+    //                     'dlr-url' => env('SMS_DLR_URL'),
+    //                 ]);
+
+    //             Log::info('BkassouaSMS Response', [
+    //                 'phone_number' => $request->phone_number,
+    //                 'otp' => $code,
+    //                 'response_status' => $response->status(),
+    //                 'response_body' => $response->body(),
+    //             ]);
+
+    //             if ($response->successful()) {
+    //                 return response()->json([
+    //                     'success' => true,
+    //                     'message' => 'Nouveau code OTP envoyé.',
+    //                 ], 200);
+    //             } else {
+    //                 return response()->json([
+    //                     'success' => false,
+    //                     'message' => 'Erreur lors de l\'envoi de l\'OTP.',
+    //                 ], 500);
+    //             }
+    //         } catch (\Exception $e) {
+    //             Log::error('SMS sending failed', [
+    //                 'phone_number' => $request->phone_number,
+    //                 'error' => $e->getMessage(),
+    //             ]);
+    //             return response()->json([
+    //                 'success' => false,
+    //                 'message' => 'Erreur lors de l\'envoi de l\'OTP : ' . $e->getMessage(),
+    //             ], 500);
+    //         }
+    //     } catch (\Illuminate\Validation\ValidationException $e) {
+    //         Log::warning('Validation error during OTP resend', [
+    //             'phone_number' => $request->phone_number,
+    //             'errors' => $e->errors(),
+    //         ]);
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Erreur de validation.',
+    //             'errors' => $e->errors(),
+    //         ], 422);
+    //     } catch (\Exception $e) {
+    //         Log::error('OTP resend failed', [
+    //             'phone_number' => $request->phone_number,
+    //             'error' => $e->getMessage(),
+    //         ]);
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Une erreur est survenue lors du renvoi de l’OTP.',
+    //         ], 500);
+    //     }
+    // }
+    /**
+ * Renvoi d'OTP (SMS + Email)
+ */
+public function resendOtp(Request $request)
+{
+    try {
+        // Nettoyage du numéro de téléphone
+        $phoneNumber = preg_replace('/^\+?227/', '', $request->phone_number);
+        $request->merge(['phone_number' => $phoneNumber]);
+
+        $request->validate([
+            'phone_number' => 'required|string|regex:/^[0-9]{8}$/',
+            'type'         => 'required|string|in:register,password_reset,login',
+        ]);
+
+        Log::info('Tentative de renvoi OTP', [
+            'phone_number' => $request->phone_number,
+            'type'         => $request->type,
+        ]);
+
+        // Vérification utilisateur pour password_reset
+        if ($request->type === 'password_reset') {
+            $user = User::where('phone_number', $request->phone_number)->first();
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Utilisateur non trouvé.',
+                ], 404);
+            }
+        }
+
+        // Récupérer les données de session (pour l'email si disponible)
+        $sessionKey = 'pending_user_' . $request->phone_number;
+        // $pendingUser = Session::get($sessionKey);
+        $pendingUser = Cache::get('pending_user_' . $request->phone_number);
+
+        // Supprimer l'ancien OTP
+        OtpCode::where('phone_number', $request->phone_number)->delete();
+
+        // Générer nouveau OTP
+        $otp = sprintf("%06d", rand(0, 999999));
+
+        OtpCode::create([
+            'phone_number' => $request->phone_number,
+            'code'         => $otp,
+            'expires_at'   => now()->addMinutes(3),
+        ]);
+
+        $smsSuccess = false;
+        $emailSuccess = false;
+
+        // ====================== ENVOI SMS ======================
+        try {
+            $response = Http::withBasicAuth(env('SMS_API_USERNAME'), env('SMS_API_PASSWORD'))
+                ->post(env('SMS_API_URL'), [
+                    'to'          => '227' . $request->phone_number,
+                    'from'        => env('SMS_SENDER'),
+                    'content'     => "Votre code OTP est : $otp. Valable pendant 3 minutes.",
+                    'dlr'         => 'yes',
+                    'dlr-level'   => 3,
+                    'dlr-method'  => 'GET',
+                    'dlr-url'     => env('SMS_DLR_URL'),
+                ]);
+
+            Log::info('Resend SMS OTP', [
+                'phone_number' => $request->phone_number,
+                'otp'          => $otp,
+                'status'       => $response->status(),
+                'body'         => $response->body(),
+            ]);
+
+            $smsSuccess = $response->successful();
+
+        } catch (\Exception $e) {
+            Log::error('Échec renvoi SMS OTP', [
+                'phone_number' => $request->phone_number,
+                'error'        => $e->getMessage()
+            ]);
+        }
+
+        // ====================== ENVOI EMAIL ======================
+        $email = $pendingUser['email'] ?? null;
+
+        if ($email) {
+            try {
+                Mail::to($email)->send(new OtpMail(
+                    $otp, 
+                    $pendingUser['name'] ?? 'Utilisateur', 
+                    $request->phone_number
+                ));
+
+                Log::info('Resend Email OTP', [
+                    'email' => $email,
+                    'otp'   => $otp
+                ]);
+
+                $emailSuccess = true;
+
+            } catch (\Exception $e) {
+                Log::error('Échec renvoi Email OTP', [
+                    'email' => $email,
+                    'error' => $e->getMessage()
+                ]);
+            }
+        }
+
+        // ====================== RÉPONSE FINALE ======================
+        if ($smsSuccess || $emailSuccess) {
+            $message = 'Nouveau code OTP envoyé avec succès.';
+            
+            if ($smsSuccess && $emailSuccess) {
+                $message = 'Nouveau code OTP envoyé par SMS et par email.';
+            } elseif ($smsSuccess) {
+                $message = 'Nouveau code OTP envoyé par SMS.';
+            } elseif ($emailSuccess) {
+                $message = 'Nouveau code OTP envoyé par email.';
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+            ], 200);
+        }
+
+        // Aucun envoi n'a réussi
+        return response()->json([
+            'success' => false,
+            'message' => 'Impossible d\'envoyer le nouveau code OTP. Veuillez réessayer.',
+        ], 500);
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        Log::warning('Erreur de validation lors du renvoi OTP', [
+            'phone_number' => $request->phone_number ?? null,
+            'errors'       => $e->errors(),
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Données invalides.',
+            'errors'  => $e->errors(),
+        ], 422);
+
+    } catch (\Exception $e) {
+        Log::error('Erreur générale lors du renvoi OTP', [
+            'phone_number' => $request->phone_number ?? null,
+            'error'        => $e->getMessage(),
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Une erreur est survenue lors du renvoi de l’OTP.',
+        ], 500);
+    }
+}
     /**
      * Send OTP via Twilio
      *
@@ -312,34 +542,82 @@ $existingUser = $existingUserQuery->first();
      * @return void
      * @throws \Exception
      */
-    // protected function sendOTP($phoneNumber, $otp)
-    // {
-    //     try {
-    //         $sid = config('services.twilio.sid');
-    //         $token = config('services.twilio.token');
-    //         $from = config('services.twilio.phone_number');
+    // Envoie un OTP au téléphone
+    public function sendOtp(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'phone_number' => 'required|string|exists:users,phone_number',
+        ]);
 
-    //         $twilio = new Client($sid, $token);
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Numéro invalide ou non enregistré',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
 
-    //         $twilio->messages->create(
-    //             $this->formatPhoneNumber($phoneNumber),
-    //             [
-    //                 'from' => $from,
-    //                 'body' => "Votre code de vérification B Kassoua est: $otp"
-    //             ]
-    //         );
+        $phone = $request->phone_number;
+       
+            $code = sprintf("%06d", rand(0, 999999));
 
-    //         // Stocker l'OTP après envoi réussi
-    //         $expiresAt = Carbon::now()->addMinutes(15);
-    //         OtpCode::updateOrCreate(
-    //             ['phone_number' => $phoneNumber],
-    //             ['code' => $otp, 'expires_at' => $expiresAt]
-    //         );
-    //     } catch (\Exception $e) {
-    //         Log::error('Erreur Twilio pour phone_number: ' . $phoneNumber . ' - ' . $e->getMessage());
-    //         throw new \Exception('Échec de l\'envoi SMS: ' . $e->getMessage());
-    //     }
-    // }
+            OtpCode::create([
+                'phone_number' => $request->phone_number,
+                'code' => $code, // En clair pour correspondre aux logs
+                'expires_at' => now()->addMinutes(3),
+            ]);
+
+        // Stocker OTP en cache pendant 10 minutes
+        Cache::put('otp_' . $phone, $code, now()->addMinutes(10));
+
+        // TODO: appeler service SMS ici avec $otp et $phone
+             try {
+                $response = Http::withBasicAuth(env('SMS_API_USERNAME'), env('SMS_API_PASSWORD'))
+                    ->post(env('SMS_API_URL'), [
+                        'to' => '227' . $request->phone_number,
+                        'from' => env('SMS_SENDER'),
+                        'content' => "Votre code OTP est : $code",
+                        'dlr' => 'yes',
+                        'dlr-level' => 3,
+                        'dlr-method' => 'GET',
+                        'dlr-url' => env('SMS_DLR_URL'),
+                    ]);
+
+                Log::info('BkassouaSMS Response', [
+                    'phone_number' => $request->phone_number,
+                    'otp' => $code,
+                    'response_status' => $response->status(),
+                    'response_body' => $response->body(),
+                ]);
+
+                if ($response->successful()) {
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Nouveau code OTP envoyé.',
+                    ], 200);
+                } else {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Erreur lors de l\'envoi de l\'OTP.',
+                    ], 500);
+                }
+            } catch (\Exception $e) {
+                Log::error('SMS sending failed', [
+                    'phone_number' => $request->phone_number,
+                    'error' => $e->getMessage(),
+                ]);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Erreur lors de l\'envoi de l\'OTP : ' . $e->getMessage(),
+                ], 500);
+            }        // Pour tests, on renvoie l'otp (à enlever en prod)
+        return response()->json([
+            'success' => true,
+            'message' => "Code OTP envoyé au $phone",
+            'otp' => $code,
+        ]);
+    }
+
 
     /**
      * Format phone number for Niger (+227)
@@ -428,5 +706,106 @@ $existingUser = $existingUserQuery->first();
         // $user->notify(new OtpNotification($code));
 
         return response()->json(['success' => true, 'message' => 'Code OTP envoyé.']);
+    }
+    public function forgotPassword(Request $request)
+    {
+    $request->validate([
+        'phone_number' => 'required|string|regex:/^[0-9]{8}$/',
+    ]);
+
+    $user = User::where('phone_number', $request->phone_number)->first();
+
+    if (!$user) {
+        return response()->json([
+            'success' => false, 
+            'message' => 'Aucun compte trouvé avec ce numéro.'
+        ], 404);
+    }
+
+    // Générer OTP
+    $code = rand(100000, 999999);
+
+    // Supprimer ancien OTP
+    OtpCode::where('phone_number', $request->phone_number)->delete();
+
+    OtpCode::create([
+        'phone_number' => $request->phone_number,
+        'code' => $code,
+        'expires_at' => now()->addMinutes(10),   // 10 minutes pour reset
+        'type' => 'password_reset'   // important de distinguer
+    ]);
+
+    // Envoyer SMS
+    try {
+        $response = Http::withBasicAuth(env('SMS_API_USERNAME'), env('SMS_API_PASSWORD'))
+            ->post(env('SMS_API_URL'), [
+                'to' => '227' . $request->phone_number,
+                'from' => env('SMS_SENDER'),
+                'content' => "Votre code de réinitialisation est : $code (valable 10 min)",
+            ]);
+
+        if ($response->successful()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Un code OTP a été envoyé sur votre numéro pour réinitialiser votre mot de passe.'
+            ]);
+        }
+    } catch (\Exception $e) {
+        Log::error('SMS reset password failed', ['error' => $e->getMessage()]);
+    }
+
+    return response()->json([
+        'success' => false,
+        'message' => 'Erreur lors de l\'envoi du code.'
+    ], 500);
+}
+     // Réinitialise le mot de passe avec le reset_token
+    public function resetPassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'phone_number' => 'required|string|exists:users,phone_number',
+            'password' => 'required|string|min:8|confirmed',
+            'reset_token' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation échouée',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+
+       $phone = preg_replace('/^\+?227/', '', $request->phone_number);
+        $token = $request->reset_token;
+
+        $cachedToken = Cache::get('reset_token_' . $phone);
+
+        if (!$cachedToken || $cachedToken !== $token) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Token de réinitialisation invalide ou expiré',
+            ], 400);
+        }
+
+        $user = User::where('phone_number', $phone)->first();
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Utilisateur non trouvé',
+            ], 404);
+        }
+
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        // Supprimer token après usage
+        Cache::forget('reset_token_' . $phone);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Mot de passe réinitialisé avec succès',
+        ]);
     }
 }

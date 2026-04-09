@@ -257,103 +257,6 @@
                                 </div>
                             </div>
 
-                            <!-- Modal Modification Produit -->
-                            {{-- <div @class(['modal', 'fade']) id="modalUpdate{{ $product->id }}" tabindex="-1"
-                                aria-labelledby="updateLabel{{ $product->id }}" aria-hidden="true">
-                                <div @class(['modal-dialog', 'modal-lg'])>
-                                    <div @class(['modal-content'])>
-                                        <div @class(['modal-header'])>
-                                            <h5 @class(['modal-title']) id="updateLabel{{ $product->id }}">
-                                                <i @class(['bi', 'bi-pencil', 'me-2'])></i>Modifier le produit
-                                            </h5>
-                                            <button type="button" @class(['btn-close']) data-bs-dismiss="modal" aria-label="Close"></button>
-                                        </div>
-                                        <div @class(['modal-body'])>
-                                            <form action="{{ route('vendor.products.update', $product->id) }}" method="POST" enctype="multipart/form-data">
-                                                @csrf
-                                                @method('PUT')
-                                                <div @class(['row'])>
-                                                    <div @class(['col-md-6'])>
-                                                        <div @class(['mb-3'])>
-                                                            <label @class(['form-label', 'fw-semibold'])>Nom du produit</label>
-                                                           <input type="text" @class(['form-control', 'is-invalid' => $errors->has('name')]) 
-                                                                name="name" 
-                                                                value="{{ old('name', $product->name) }}" 
-                                                                required>
-                                                            @error('name')
-                                                                <div @class(['invalid-feedback'])>{{ $message }}</div>
-                                                            @enderror
-                                                        </div>
-                                                        <div @class(['mb-3'])>
-                                                            <label @class(['form-label', 'fw-semibold'])>Description</label>
-                                                            <textarea @class(['form-control', '@error('description')', 'is-invalid', '@enderror']) name="description" rows="4" required>{{ old('description', $product->description) }}</textarea>
-                                                            @error('description')
-                                                                <div @class(['invalid-feedback'])>{{ $message }}</div>
-                                                            @enderror
-                                                        </div>
-                                                        <div @class(['mb-3'])>
-                                                            <label @class(['form-label', 'fw-semibold'])>Prix (FCFA)</label>
-                                                            <input type="number" @class(['form-control', '@error('price')', 'is-invalid', '@enderror'])
-                                                                name="price" value="{{ old('price', $product->price) }}" required>
-                                                            @error('price')
-                                                                <div @class(['invalid-feedback'])>{{ $message }}</div>
-                                                            @enderror
-                                                        </div>
-                                                    </div>
-                                                    <div @class(['col-md-6'])>
-                                                        <div @class(['mb-3'])>
-                                                            <label @class(['form-label', 'fw-semibold'])>Quantité en stock</label>
-                                                            <input type="number" @class(['form-control', '@error('stock_quantity')', 'is-invalid', '@enderror'])
-                                                                name="stock_quantity" value="{{ old('stock_quantity', $product->stock_quantity) }}" required>
-                                                            @error('stock_quantity')
-                                                                <div @class(['invalid-feedback'])>{{ $message }}</div>
-                                                            @enderror
-                                                        </div>
-                                                        <div @class(['mb-3'])>
-                                                            <label @class(['form-label', 'fw-semibold'])>Image du produit</label>
-                                                            <input type="file" @class(['form-control', '@error('image')', 'is-invalid', '@enderror']) name="image">
-                                                            @error('image')
-                                                                <div @class(['invalid-feedback'])>{{ $message }}</div>
-                                                            @enderror
-                                                            <div @class(['mt-2'])>
-                                                                <img src="{{ $product->image ? asset('storage/' . $product->image) : asset('images/default-product.jpg') }}"
-                                                                    @class(['img-thumbnail']) style="max-height: 100px;">
-                                                            </div>
-                                                        </div>
-                                                        <div @class(['mb-3'])>
-                                                            <label @class(['form-label', 'fw-semibold'])>Catégorie</label>
-                                                            <select name="category_id" @class(['form-control', '@error('category_id')', 'is-invalid', '@enderror']) required>
-                                                                <option value="">--- Choisir une catégorie ---</option>
-                                                                @foreach ($categories as $category)
-                                                                    <option value="{{ $category->id }}"
-                                                                        {{ old('category_id', $product->category_id) == $category->id ? 'selected' : '' }}>
-                                                                        {{ $category->name }}
-                                                                    </option>
-                                                                @endforeach
-                                                            </select>
-                                                            @error('category_id')
-                                                                <div @class(['invalid-feedback'])>{{ $message }}</div>
-                                                            @enderror
-                                                        </div>
-                                                        <div @class(['mb-3', 'form-check', 'form-switch'])>
-                                                            <input @class(['form-check-input']) type="checkbox" name="is_active"
-                                                                id="isActive{{ $product->id }}" value="1"
-                                                                {{ old('is_active', $product->is_active) ? 'checked' : '' }}>
-                                                            <label @class(['form-check-label']) for="isActive{{ $product->id }}">Produit actif</label>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div @class(['modal-footer'])>
-                                                    <button type="button" @class(['btn', 'btn-secondary']) data-bs-dismiss="modal">Annuler</button>
-                                                    <button type="submit" @class(['btn', 'btn-primary'])>
-                                                        <i @class(['bi', 'bi-check-lg', 'me-1'])></i>Modifier le produit
-                                                    </button>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div> --}}
                             <div @class(['modal', 'fade']) id="modalUpdate{{ $product->id }}" tabindex="-1"
      aria-labelledby="updateLabel{{ $product->id }}" aria-hidden="true">
     <div @class(['modal-dialog', 'modal-lg'])>
@@ -465,92 +368,6 @@
 </div>
 
 <!-- Modal Ajout Produit -->
-{{-- <div @class(['modal', 'fade']) id="addProductModal" tabindex="-1" aria-labelledby="addProductLabel" aria-hidden="true">
-    <div @class(['modal-dialog', 'modal-lg'])>
-        <div @class(['modal-content'])>
-            <div @class(['modal-header'])>
-                <h5 @class(['modal-title']) id="addProductLabel">
-                    <i @class(['bi', 'bi-plus-circle', 'me-2'])></i>Ajouter un produit
-                </h5>
-                <button type="button" @class(['btn-close']) data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div @class(['modal-body'])>
-                <form action="{{ route('vendor.user.store') }}" method="POST" enctype="multipart/form-data">
-                    @csrf
-                    <div @class(['row'])>
-                        <div @class(['col-md-6'])>
-                            <div @class(['mb-3'])>
-                                <label @class(['form-label', 'fw-semibold'])>Nom du produit</label>
-                                <input type="text" @class(['form-control', '@error('name')', 'is-invalid', '@enderror'])
-                                    name="name" value="{{ old('name') }}" required>
-                                @error('name')
-                                    <div @class(['invalid-feedback'])>{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div @class(['mb-3'])>
-                                <label @class(['form-label', 'fw-semibold'])>Description</label>
-                                <textarea @class(['form-control', '@error('description')', 'is-invalid', '@enderror']) name="description" rows="4" required>{{ old('description') }}</textarea>
-                                @error('description')
-                                    <div @class(['invalid-feedback'])>{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div @class(['mb-3'])>
-                                <label @class(['form-label', 'fw-semibold'])>Prix (FCFA)</label>
-                                <input type="number" @class(['form-control', '@error('price')', 'is-invalid', '@enderror'])
-                                    name="price" value="{{ old('price') }}" required>
-                                @error('price')
-                                    <div @class(['invalid-feedback'])>{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-                        <div @class(['col-md-6'])>
-                            <div @class(['mb-3'])>
-                                <label @class(['form-label', 'fw-semibold'])>Quantité en stock</label>
-                                <input type="number" @class(['form-control', '@error('stock_quantity')', 'is-invalid', '@enderror'])
-                                    name="stock_quantity" value="{{ old('stock_quantity') }}" required>
-                                @error('stock_quantity')
-                                    <div @class(['invalid-feedback'])>{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div @class(['mb-3'])>
-                                <label @class(['form-label', 'fw-semibold'])>Image du produit</label>
-                                <input type="file" @class(['form-control', '@error('image')', 'is-invalid', '@enderror']) name="image">
-                                @error('image')
-                                    <div @class(['invalid-feedback'])>{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div @class(['mb-3'])>
-                                <label @class(['form-label', 'fw-semibold'])>Catégorie</label>
-                                <select name="category_id" @class(['form-control', '@error('category_id')', 'is-invalid', '@enderror']) required>
-                                    <option value="">--- Choisir une catégorie ---</option>
-                                    @foreach ($categories as $category)
-                                        <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
-                                            {{ $category->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('category_id')
-                                    <div @class(['invalid-feedback'])>{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div @class(['mb-3', 'form-check', 'form-switch'])>
-                                <input @class(['form-check-input']) type="checkbox" name="is_active" id="isActiveAdd"
-                                    value="1" {{ old('is_active', 1) ? 'checked' : '' }}>
-                                <label @class(['form-check-label']) for="isActiveAdd">Produit actif</label>
-                            </div>
-                        </div>
-                    </div>
-                    <div @class(['modal-footer'])>
-                        <button type="button" @class(['btn', 'btn-secondary']) data-bs-dismiss="modal">Annuler</button>
-                        <button type="submit" @class(['btn', 'btn-primary'])>
-                            <i @class(['bi', 'bi-plus-circle', 'me-1'])></i>Ajouter le produit
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div> --}}
 <div @class(['modal', 'fade']) id="addProductModal" tabindex="-1" aria-labelledby="addProductLabel" aria-hidden="true">
     <div @class(['modal-dialog', 'modal-lg'])>
         <div @class(['modal-content'])>
@@ -602,7 +419,7 @@
                             <div @class(['mb-3'])>
                                 <label @class(['form-label', 'fw-semibold'])>Image du produit</label>
                                 <input type="file"
-                                name="images[]"
+                                name="image[]"
                                 multiple
                                 accept="image/*"  @class(['form-control', 'is-invalid' => $errors->has('image')]) >
                                 @error('image')
@@ -611,15 +428,15 @@
                             </div>
                             <div @class(['mb-3'])>
                                 <label @class(['form-label', 'fw-semibold'])>Catégorie</label>
-                                <select name="category_id" @class(['form-control', 'is-invalid' => $errors->has('category_id')]) required>
+                                <select name="sous_cat_id" @class(['form-control', 'is-invalid' => $errors->has('sous_cat_id')]) required>
                                     <option value="">--- Choisir une catégorie ---</option>
                                     @foreach ($categories as $category)
-                                        <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                                        <option value="{{ $category->id }}" {{ old('sous_cat_id') == $category->id ? 'selected' : '' }}>
                                             {{ $category->name }}
                                         </option>
                                     @endforeach
                                 </select>
-                                @error('category_id')
+                                @error('sous_cat_id')
                                     <div @class(['invalid-feedback'])>{{ $message }}</div>
                                 @enderror
                             </div>

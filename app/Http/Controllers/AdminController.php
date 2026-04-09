@@ -167,13 +167,12 @@ class AdminController extends Controller
             return redirect()->route('admin.categories.edit', $id)->with('error', 'Une erreur s\'est produite lors de la mise à jour de la catégorie.');
         }
     }
+    
     public function destroyCategories($id)
     {
         Category::findOrFail($id)->delete();
         return redirect()->route('admin.categories')->with('success', 'Produit supprimé avec succès');
     }
-    // Afficher toutes les commandes pour l'admin
-
 
     public function orders()
     {
@@ -252,7 +251,6 @@ class AdminController extends Controller
         ]);
     }
 
-
     public function bulkAction(Request $request)
     {
         $request->validate([
@@ -285,13 +283,6 @@ class AdminController extends Controller
         ]);
     }
 
-
-    /**
-     * Annule une commande
-     */
-
-
-    // Ajouter une nouvelle publicité via un formulaire
     public function storeAd(Request $request)
     {
         // Validation des données du formulaire
@@ -440,7 +431,7 @@ class AdminController extends Controller
     }
     public function showAttributes()
     {
-        $attributes = Attribute::with('options', 'sousCategorie')->get();
+        $attributes = Attribute::with('options')->get();
         $sousCategories = SousCat::all();
         return view('admin.attribut', compact('attributes', 'sousCategories'));
     }
@@ -449,16 +440,14 @@ class AdminController extends Controller
         try {
             $request->validate([
                 'name'               => 'required|string|max:255|unique:attributes,name',
-                'sous_cat_id' => 'required|exists:sous_cats,id',
-                // 'type'              => 'required|in:texte,couleur,nombre,booleen',
+                'type'              => 'required|in:texte,couleur,nombre,booleen',
                 'value'           => 'nullable|string',
 
             ]);
 
             $attribute = Attribute::create([
                 'name'            => $request->name,
-                'sous_cat_id' => $request->sous_cat_id,
-                // 'type'            => $request->type,
+                'type'            => $request->type,
             ]);
 
             // Créer les options si des valeurs sont fournies
@@ -511,5 +500,22 @@ class AdminController extends Controller
         }
 
         return redirect()->back()->with('success', 'Attribut mis à jour avec succès.');
+    }
+
+    public function latest(Request $request)
+    {
+        $lastId = $request->last_id ?? 0;
+
+        $orders = Order::with(['user', 'payment'])
+            ->withCount('items')
+            ->where('id', '>', $lastId)
+            ->latest()
+            ->take(10)
+            ->get();
+
+        return response()->json([
+            'html' => view('admin.order_rows', compact('orders'))->render(),
+            'last_id' => $orders->max('id')
+        ]);
     }
 }

@@ -10,14 +10,17 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "ably/laravel-broadcaster": "^1.0",
         "dedoc/scramble": "^0.13.10",
         "doctrine/dbal": "^4.4",
         "google/apiclient": "^2.15.0",
         "guzzlehttp/guzzle": "*",
         "laravel/framework": "^11.31",
+        "laravel/reverb": "^1.9",
         "laravel/sanctum": "^4.0",
         "laravel/socialite": "^5.25",
         "laravel/tinker": "^2.9",
+        "pusher/pusher-php-server": "^7.2",
         "twilio/sdk": "^8.5"
     }, 
     "require-dev": {

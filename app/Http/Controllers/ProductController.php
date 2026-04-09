@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Cart;
+use App\Models\Vendor;
+use App\Models\Attribute;
+use App\Models\AttributeOptions;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -59,14 +62,79 @@ class ProductController extends Controller
             ], 500);
         }
     }
-    public function index()
+    public function index(Request $request)
     {
-        // Récupérer les produits avec leurs vendeurs et catégories associés, paginés à 10 par page
-        $products = Product::with(['vendor', 'sousCat'])->paginate(10);
-        $categories = Category::with('sousCat')->get();
-        // dd($products);
-        // Passer les produits paginés à la vue
-        return view('admin.product', compact('products', 'categories'));
+        $query = Product::with([
+            'vendor',
+            'sousCat',                    // Assure-toi que c'est bien sousCat (relation)
+            'attributeValues.attributeOption.attribute'
+        ]);
+
+        // 🔍 Recherche par nom
+        if ($request->filled('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        // 📂 Catégorie (sous-catégorie)
+        if ($request->filled('category')) {
+            $query->where('sous_cat_id', $request->category);
+        }
+
+        // 👁️ Visibilité
+        if ($request->filled('visible')) {
+            $query->where('is_visible', $request->visible);
+        }
+
+        // 📦 Stock (filtre rapide)
+        if ($request->filled('stock')) {
+            if ($request->stock === 'in_stock') {
+                $query->where('stock_quantity', '>', 3);
+            } elseif ($request->stock === 'low_stock') {
+                $query->whereBetween('stock_quantity', [1, 3]);
+            } elseif ($request->stock === 'out_of_stock') {
+                $query->where('stock_quantity', 0);
+            }
+        }
+
+        // Filtres avancés
+        if ($request->filled('min_price')) {
+            $query->where('price', '>=', $request->min_price);
+        }
+        if ($request->filled('max_price')) {
+            $query->where('price', '<=', $request->max_price);
+        }
+        if ($request->filled('min_stock')) {
+            $query->where('stock_quantity', '>=', $request->min_stock);
+        }
+        if ($request->filled('start_date')) {
+            $query->whereDate('created_at', '>=', $request->start_date);
+        }
+        if ($request->filled('end_date')) {
+            $query->whereDate('created_at', '<=', $request->end_date);
+        }
+
+        $products = $query->paginate(10)->withQueryString();
+
+        // Statistiques globales (non filtrées)
+        $totalProducts     = Product::count();
+        $visibleProducts   = Product::where('is_visible', 1)->count();
+        $lowStockProducts  = Product::whereBetween('stock_quantity', [1, 3])->count();
+        $outOfStockProducts = Product::where('stock_quantity', 0)->count();
+
+        $categories = Category::with('sousCat')->get();   // Ou SousCategory si tu as un model séparé
+        $vendors    = Vendor::all();
+        $attributes = Attribute::with('options')->get();
+
+        return view('admin.product', compact(
+            'products',
+            'categories',
+            'vendors',
+            'attributes',
+            'totalProducts',
+            'visibleProducts',
+            'lowStockProducts',
+            'outOfStockProducts'
+        ));
     }
 
     public function create()
@@ -83,6 +151,7 @@ class ProductController extends Controller
             'category_id' => 'required|exists:categories,id',
         ]);
 
+        dd($validated);
         Product::create($validated);
 
         return redirect()->route('admin.products.index')->with('success', 'Produit ajouté avec succès');
@@ -128,7 +197,7 @@ class ProductController extends Controller
     public function shop()
     {
         $categories = Category::all();
-        $products = Product::with(['images', 'mainImage','vendor', 'sousCat'])->get();
+        $products = Product::with(['images', 'mainImage', 'vendor', 'sousCat'])->get();
         return view('shop.shop', compact('products', 'categories'));
     }
     public function productPerCategory($categorySlug)
@@ -151,7 +220,7 @@ class ProductController extends Controller
     {
         // Retrieve all categories for display
         $categories = Category::all();
-        $product = Product::with(['vendor', 'category'])->find($id);
+        $product = Product::with(['vendor', 'sousCat'])->find($id);
         return view('shop.detail', compact('product', 'categories'));
     }
     // public function storeCart(Request $request)

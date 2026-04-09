@@ -17,9 +17,4 @@ class SousCat extends Model
     {
         return $this->belongsTo(Category::class);
     }
-
-    public function attributes()
-    {
-        return $this->hasMany(Attribute::class, 'sous_cat_id');
-    }
 }

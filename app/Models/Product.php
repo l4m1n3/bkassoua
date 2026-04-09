@@ -17,7 +17,7 @@ class Product extends Model
         'stock_quantity',
         'image',
         'is_active',
-        'category_id'
+        'sous_cat_id'
     ];
 
     public function vendor()
@@ -29,11 +29,7 @@ class Product extends Model
     {
         return $this->belongsToMany(Order::class);
     }
-    // public function category()
-    // {
-    //     return $this->belongsTo(Category::class);
-    // }
-
+   
     public function sousCat()
     {
         return $this->belongsTo(SousCat::class, 'sous_cat_id');
@@ -50,4 +46,8 @@ class Product extends Model
     {
         return $this->hasOne(ProductImage::class)->where('is_main', true);
     }
+   public function attributeValues()
+{
+    return $this->hasMany(AttributeValueProduct::class);
+}
 }

@@ -502,10 +502,7 @@
                             <i @class(['bi', 'bi-lightning'])></i>
                             Inscription rapide et sécurisée
                         </li>
-                        <li @class(['fade-in']) style="animation-delay: 0.1s;">
-                            <i @class(['bi', 'bi-truck'])></i>
-                            Livraison gratuite dès 50,000 fcfa
-                        </li>
+                       
                         <li @class(['fade-in']) style="animation-delay: 0.2s;">
                             <i @class(['bi', 'bi-percent'])></i>
                             Offres exclusives et promotions
@@ -518,7 +515,7 @@
                 </div>
             </div>
 
-<form class="register-form" method="POST" action="{{ route('register') }}">
+<form class="register-form" method="POST" action="{{ route('register.store') }}">
     @csrf
 
     <!-- Nom -->

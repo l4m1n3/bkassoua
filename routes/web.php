@@ -23,7 +23,7 @@ use App\Http\Controllers\Auth\GoogleController;
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth'])->name('dashboard');
-
+Route::get('/orders/latest', [AdminController::class, 'latest'])->name('orders.latest');
 Route::get('/', [HomeController::class, 'home'])->name('home');
 Route::get('shop', [ProductController::class, 'shop'])->name('shop');
 Route::get('/shop/{name}', [ProductController::class, 'productPerCategory'])->name('productPerCategory');
@@ -50,7 +50,7 @@ Route::get('/cart/checkout/show', [OrderController::class, 'showCheckout'])->nam
 Route::post('/cart/checkout/order', [OrderController::class, 'placeOrder'])->name('checkout.process');
 
 // Admin routes group
-Route::prefix('admin')->middleware(['auth'])->name('admin.')->group(function () {
+Route::prefix('admin')->middleware(['auth','role:admin'])->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
     Route::get('/ads', [AdminController::class, 'ads'])->name('ads.index');
     Route::get('/ads/create', [AdminController::class, 'createAd'])->name('ads.create');
@@ -108,20 +108,23 @@ Route::get('/ads/create', [AdController::class, 'create'])->middleware('auth');
 // Auth routes
 Route::get('/login', [CustomLoginController::class, 'showLoginForm'])->name('loginForm');
 Route::post('/login', [CustomLoginController::class, 'login'])->name('login');
-Route::post('/register', [RegisterController::class, 'register']);
+// Route::post('/register', [RegisterController::class, 'register']);
 Route::post('/verify-otp', [RegisterController::class, 'verifyOtp']);
 Route::post('/resend-otp', [RegisterController::class, 'resendOtp'])->name('resend.otp');
 Route::post('/forgot-password', [RegisterController::class, 'forgotPassword']);
 Route::post('/send-otp', [RegisterController::class, 'sendOtp']);
 Route::post('/send-otp', [OTPController::class, 'generateOTP']);
 Route::post('/verify-otp', [RegisterController::class, 'verifyOTP'])->name('verify.otp');
-Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
+// Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
 Route::get('/verify-otp', [RegisterController::class, 'showVerifyOtpForm'])->name('verify.otp.form');
+Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
+Route::post('/register', [RegisterController::class, 'register'])->name('register.store');
 
 // Vendor routes
 Route::get('/vendor/dashboard', [VendorController::class, 'dashboard'])->name('vendor.dashboard');
 Route::get('/vendor/register', [VendorController::class, 'showForm'])->name('vendor.register');
 Route::post('/vendor/register', [VendorController::class, 'store'])->name('vendor.store');
+
 
 // Vendor products
 Route::prefix('vendor')->name('vendor.')->group(function () {

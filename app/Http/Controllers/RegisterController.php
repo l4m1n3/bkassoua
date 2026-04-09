@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\OtpCode;
+use App\Models\PendingRegistration;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -14,6 +15,8 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\OtpMail;
 
 class RegisterController extends Controller
 {
@@ -44,22 +47,50 @@ class RegisterController extends Controller
             'type'       => $request->type,
         ];
 
-        Session::put('pending_user_' . $request->phone_number, $pendingUser);
+        // Create pending registration
 
         // Generate OTP
         $otp = sprintf("%06d", rand(0, 999999));
 
-        // Store OTP
+        // Supprimer ancien pending + OTP
+        PendingRegistration::where('phone_number', $request->phone_number)->delete();
         OtpCode::where('phone_number', $request->phone_number)->delete();
+
+        // Créer l'enregistrement pending
+        PendingRegistration::create([
+            'phone_number' => $request->phone_number,
+            'name'         => $request->name,
+            'email'        => $request->email,
+            'address'      => $request->address,
+            'password'     => Hash::make($request->password),
+            'expires_at'   => now()->addMinutes(30),
+        ]);
+
         OtpCode::create([
             'phone_number' => $request->phone_number,
             'code'         => $otp,
-            'expires_at'   => now()->addMinutes(3),
+            'expires_at'   => now()->addMinutes(10),
         ]);
-
+        // Envoi SMS + Email
+        $smsSuccess = false;
+        $emailSuccess = false;
         // SEND OTP via BkassouaSMS
-        $this->sendOtp($request->phone_number, $otp);
-
+        try {
+            $this->sendOtp($request->phone_number, $otp);
+        } catch (\Exception $e) {
+            Log::error('Failed to send OTP SMS', [
+                'phone_number' => $request->phone_number,
+                'error' => $e->getMessage(),
+            ]);
+        }
+        if ($request->filled('email')) {
+            try {
+                Mail::to($request->email)->send(new OtpMail($otp, $request->name, $request->phone_number));
+                $emailSuccess = true;
+            } catch (\Exception $e) {
+                Log::error('Email failed', ['email' => $request->email]);
+            }
+        }
         // return response()->json([
         //     'success' => true,
         //     'message' => 'Code OTP envoyé.',
@@ -78,6 +109,8 @@ class RegisterController extends Controller
     {
         try {
             // Validate request
+            $phoneNumber = preg_replace('/^\+?227/', '', $request->phone_number);
+            $request->merge(['phone_number' => $phoneNumber]);
             $request->validate([
                 'phone_number' => 'required|string|regex:/^[0-9]{8}$/',
                 'otp' => 'required|numeric|digits:6',
@@ -113,83 +146,106 @@ class RegisterController extends Controller
             }
 
             if ($request->type === 'register') {
-                // Handle registration
-                $sessionKey = 'pending_user_' . $request->phone_number;
-                $pendingUser = Session::get($sessionKey);
 
-                if (!$pendingUser) {
+                $pending = PendingRegistration::where('phone_number', $request->phone_number)->first();
+
+                Log::info('Recherche PendingRegistration', [
+                    'phone_number' => $request->phone_number,
+                    'found'        => $pending ? true : false,
+                    'expires_at'   => $pending ? $pending->expires_at : null,
+                ]);
+                Log::info('CHECK PENDING', [
+                    'phone' => $request->phone_number,
+                    'exists' => PendingRegistration::where('phone_number', $request->phone_number)->exists()
+                ]);
+                if (!$pending) {
+                    $otpRecord->delete();
+                    Log::warning('Aucune PendingRegistration trouvée', ['phone' => $request->phone_number]);
                     return response()->json([
                         'success' => false,
-                        'message' => 'Aucune inscription en attente pour ce numéro. Veuillez vous inscrire à nouveau.',
+                        'message' => 'Aucune donnée d\'inscription trouvée. Veuillez recommencer l\'inscription.',
                     ], 404);
                 }
 
-                // Check session expiration
-                if (Carbon::now()->gt(Carbon::parse($pendingUser['expires_at']))) {
-                    Session::forget($sessionKey);
+                // Vérifier expiration
+                if ($pending->isExpired()) {
+                    $pending->delete();
                     $otpRecord->delete();
                     return response()->json([
                         'success' => false,
-                        'message' => 'Votre session d’inscription a expiré. Veuillez recommencer l’inscription.',
+                        'message' => 'Les données d\'inscription ont expiré. Veuillez recommencer l\'inscription.',
                     ], 422);
                 }
 
-                // Check for duplicates
-                $existingUser = User::where('phone_number', $pendingUser['phone_number'])
-                    ->orWhere('email', $pendingUser['email'] ?? null)
-                    ->first();
-
-                if ($existingUser) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Ce numéro ou cet email est déjà utilisé.',
-                    ], 409);
-                }
-
-                // Create user
+                // Créer l'utilisateur
                 $user = User::create([
-                    'name' => $pendingUser['name'],
-                    'email' => $pendingUser['email'],
-                    'phone_number' => $pendingUser['phone_number'],
-                    'address' => $pendingUser['address'],
-                    'password' => $pendingUser['password'], // Pre-hashed
-                    'is_verified' => true,
+                    'name'         => $pending->name,
+                    'email'        => $pending->email,
+                    'phone_number' => $pending->phone_number,
+                    'address'      => $pending->address,
+                    'password'     => $pending->password,
                 ]);
 
-                // Clean up
-                Session::forget($sessionKey);
+                // Nettoyage complet
+                $pending->delete();
                 $otpRecord->delete();
 
-                // Generate token and login
-                $token = $user->createToken('bkassoua_back')->plainTextToken;
-                Auth::login($user);
-                return redirect(route('home'));
-            } elseif ($request->type === 'password_reset') {
-                // Handle password reset
-                $user = User::where('phone_number', $request->phone_number)->first();
+                Log::info('Inscription réussie via OTP', ['user_id' => $user->id]);
 
+                $token = $user->createToken('bkassoua_back')->plainTextToken;
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Inscription réussie !',
+                    'data' => [
+                        'user'  => $user,
+                        'token' => $token,
+                    ],
+                ], 201);
+            }
+
+
+            // ====================== TYPE PASSWORD_RESET ======================
+            elseif ($request->type === 'password_reset') {
+                $user = User::where('phone_number', $request->phone_number)->first();
                 if (!$user) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Utilisateur non trouvé.',
-                    ], 404);
+                    $otpRecord->delete();
+                    return response()->json(['success' => false, 'message' => 'Utilisateur non trouvé.'], 404);
                 }
 
-                // Clean up OTP
                 $otpRecord->delete();
-
-                // Generate temporary token for password reset
                 $resetToken = Str::random(60);
-                Cache::put('password_reset_token_' . $user->id, $resetToken, now()->addMinutes(30));
-                return redirect(route('loginForm'));
-                // return response()->json([
-                //     'success' => true,
-                //     'message' => 'OTP vérifié. Vous pouvez réinitialiser votre mot de passe.',
-                //     'data' => [
-                //         'reset_token' => $resetToken,
-                //         'phone_number' => $user->phone_number,
-                //     ],
-                // ], 200);
+                Cache::put('reset_token_' . $user->phone_number, $resetToken, now()->addMinutes(30));
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'OTP vérifié avec succès.',
+                    'data' => [
+                        'reset_token'  => $resetToken,
+                        'phone_number' => $user->phone_number,
+                    ],
+                ], 200);
+            }
+
+            // ====================== TYPE LOGIN ======================
+            elseif ($request->type === 'login') {
+                $user = User::where('phone_number', $request->phone_number)->first();
+                if (!$user) {
+                    $otpRecord->delete();
+                    return response()->json(['success' => false, 'message' => 'Utilisateur non trouvé.'], 404);
+                }
+
+                $otpRecord->delete();
+                $token = $user->createToken('bkassoua_back')->plainTextToken;
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Connexion réussie !',
+                    'data' => [
+                        'user'  => $user,
+                        'token' => $token,
+                    ],
+                ], 200);
             }
         } catch (\Illuminate\Validation\ValidationException $e) {
             Log::warning('Validation error during OTP verification', [

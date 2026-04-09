@@ -11,13 +11,7 @@ class Order extends Model
     use HasFactory;
     protected $fillable = ['user_id', 'total_amount', 'status'];
 
-  
 
-
-    public function product()
-    {
-        return $this->belongsTo(Product::class);  // Relie la commande au produit via la colonne 'product_id'
-    }
 
     public function user()
     {
@@ -31,7 +25,7 @@ class Order extends Model
 
     public function items()
     {
-        return $this->hasMany(OrderItem::class);
+        return $this->hasMany(OrderItem::class)->with('product');
     }
 
     public function payment()

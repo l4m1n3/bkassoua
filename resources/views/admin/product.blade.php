@@ -12,9 +12,9 @@
                 <p class="page-subtitle">Gérez l'ensemble des produits de votre plateforme</p>
             </div>
             <div class="header-actions">
-                <a href="" class="btn btn-primary">
+                <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addProductModal">
                     <i class="bi bi-plus-circle me-2"></i>Nouveau produit
-                </a>
+                </button>
                 <button class="btn btn-outline-primary" onclick="exportProducts()">
                     <i class="bi bi-download me-2"></i>Exporter
                 </button>
@@ -64,6 +64,9 @@
                     <i class="bi bi-arrow-clockwise"></i>
                 </button>
             </div>
+            <button class="btn btn-primary" onclick="applyFilters()">
+                Rechercher
+            </button>
         </div>
     </div>
 
@@ -206,11 +209,13 @@
                                 </td>
                                 <td>
                                     <div class="action-buttons">
-                                        <a href="" 
+                                        <button
                                            class="btn btn-sm btn-outline-primary" 
-                                           title="Modifier">
+                                           title="Modifier"
+                                           data-bs-toggle="modal" 
+                                                data-bs-target="#editProductModal{{ $product->id }}">
                                             <i class="bi bi-pencil"></i>
-                                        </a>
+                                        </button>
                                         
                                         <button class="btn btn-sm btn-outline-secondary" 
                                                 data-bs-toggle="modal" 
@@ -352,8 +357,29 @@
                             </div>
                         </div>
                     </div>
+                <div class="attributes-section mb-4">
+                    <h6 class="section-title">Attributs</h6>
+
+                    @if($product->attributeValues->isNotEmpty())
+                        <div class="attributes-list">
+                            @foreach($product->attributeValues as $attrValue)
+                                <div class="attribute-item d-flex justify-content-between mb-2">
+                                    <strong>
+                                        {{ $attrValue->attributeOption->attribute->name ?? 'Attribut' }}
+                                    </strong>
+                                    <span class="badge bg-primary">
+                                        {{ $attrValue->attributeOption->value ?? '' }}
+                                    </span>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <p class="text-muted">Aucun attribut défini</p>
+                    @endif
+                </div>
                 </div>
             </div>
+           
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
                 <a href="" class="btn btn-primary">
@@ -368,8 +394,118 @@
         </div>
     </div>
 </div>
+
 @endforeach
 
+{{-- modal modification produit --}}
+@foreach ($products as $product)
+
+<div class="modal fade" id="editProductModal{{ $product->id }}" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <form action="{{ route('vendor.products.update', $product->id) }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                @method('PUT')
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Modifier produit</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label>Boutique</label>
+                                <select name="vendor_id" id="vendor_id" class="form-control">
+                                    <option value="">-- Choisir un vendeur --</option>
+                                    @foreach($vendors as $vendor)
+                                        <option value="{{ $vendor->id }}" {{ $product->vendor_id == $vendor->id ? 'selected' : '' }}>
+                                            {{ $vendor->store_name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                 </div>
+                        <!-- Nom -->
+                        <div class="col-md-6 mb-3">
+                            <label>Nom</label>
+                            <input type="text" name="name" class="form-control" value="{{ $product->name }}">
+                        </div>
+
+                        <!-- Prix -->
+                        <div class="col-md-6 mb-3">
+                            <label>Prix</label>
+                            <input type="number" name="price" class="form-control" value="{{ $product->price }}">
+                        </div>
+
+                        <!-- Description -->
+                        <div class="col-md-12 mb-3">
+                            <label>Description</label>
+                            <textarea name="description" class="form-control">{{ $product->description }}</textarea>
+                        </div>
+
+                        <!-- Stock -->
+                        <div class="col-md-6 mb-3">
+                            <label>Stock</label>
+                            <input type="number" name="stock_quantity" class="form-control" value="{{ $product->stock_quantity }}">
+                        </div>
+
+                        <!-- Catégorie -->
+                        <div class="col-md-6 mb-3">
+                            <label>Catégorie</label>
+                            <select name="sous_cat_id" class="form-control">
+                                @foreach ($categories as $cat)
+                                    <option value="{{ $cat->id }}" {{ $product->sous_cat_id == $cat->id ? 'selected' : '' }}>
+                                        {{ $cat->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Images -->
+                        <div class="col-md-12 mb-3">
+                            <label>Images (remplacer)</label>
+                            <input type="file" name="images[]" multiple class="form-control">
+                        </div>
+
+                        <!-- Attribut -->
+                        <div class="col-md-6 mb-3">
+                            <label>Attribut</label>
+                            <select class="form-control attribute-select" data-product="{{ $product->id }}">
+                                <option value="">Choisir</option>
+                                @foreach ($attributes as $attr)
+                                    <option value="{{ $attr->id }}">{{ $attr->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- Options -->
+                        <div class="col-md-6 mb-3">
+                            <label>Option</label>
+                            <select name="attribute_option_id" id="options_{{ $product->id }}" class="form-control">
+                                <option value="">Choisir</option>
+                            </select>
+                        </div>
+
+                        <!-- Actif -->
+                        <div class="col-md-12 form-check">
+                            <input type="checkbox" name="is_active" value="1" {{ $product->is_active ? 'checked' : '' }}>
+                            <label>Actif</label>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-primary">Mettre à jour</button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+@endforeach
 <!-- Modal Filtres avancés -->
 <div class="modal fade" id="filtersModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
@@ -412,148 +548,283 @@
     </div>
 </div>
 
+<!-- Modal Ajout Produit -->
+<div @class(['modal', 'fade']) id="addProductModal" tabindex="-1" aria-labelledby="addProductLabel" aria-hidden="true">
+    <div @class(['modal-dialog', 'modal-lg'])>
+        <div @class(['modal-content'])>
+            <div @class(['modal-header'])>
+                <h5 @class(['modal-title']) id="addProductLabel">
+                    <i @class(['bi', 'bi-plus-circle', 'me-2'])></i>Ajouter un produit
+                </h5>
+                <button type="button" @class(['btn-close']) data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div @class(['modal-body'])>
+                <form action="{{ route('vendor.user.store') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <div @class(['row'])>
+                        <div @class(['col-md-6'])>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Nom Boutique</label>
+
+                               <select name="vendor_id" id="vendor_id" class="form-control">
+                                    <option value="">-- Choisir un vendeur --</option>
+                                    @foreach($vendors as $vendor)
+                                        <option value="{{ $vendor->id }}">{{ $vendor->store_name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div @class(['mb-3'])>
+                                <label @class(['form-label', 'fw-semibold'])>Nom du produit</label>
+                                <input type="text" @class(['form-control', 'is-invalid' => $errors->has('name')])
+                                       name="name" value="{{ old('name') }}" required>
+                                @error('name')
+                                    <div @class(['invalid-feedback'])>{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div @class(['mb-3'])>
+                                <label @class(['form-label', 'fw-semibold'])>Description</label>
+                                <textarea @class(['form-control', 'is-invalid' => $errors->has('description')]) 
+                                          name="description" rows="4" required>{{ old('description') }}</textarea>
+                                @error('description')
+                                    <div @class(['invalid-feedback'])>{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div @class(['mb-3'])>
+                                <label @class(['form-label', 'fw-semibold'])>Prix (FCFA)</label>
+                                <input type="number" @class(['form-control', 'is-invalid' => $errors->has('price')])
+                                       name="price" value="{{ old('price') }}" required>
+                                @error('price')
+                                    <div @class(['invalid-feedback'])>{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div @class(['col-md-6'])>
+                            <div @class(['mb-3'])>
+                                <label @class(['form-label', 'fw-semibold'])>Quantité en stock</label>
+                                <input type="number" @class(['form-control', 'is-invalid' => $errors->has('stock_quantity')])
+                                       name="stock_quantity" value="{{ old('stock_quantity') }}" required>
+                                @error('stock_quantity')
+                                    <div @class(['invalid-feedback'])>{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div @class(['mb-3'])>
+                                <label @class(['form-label', 'fw-semibold'])>Image du produit</label>
+                                <input type="file"
+                                name="images[]"
+                                multiple
+                                accept="image/*"  @class(['form-control', 'is-invalid' => $errors->has('image')]) >
+                                @error('image')
+                                    <div @class(['invalid-feedback'])>{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div @class(['mb-3'])>
+                                <label @class(['form-label', 'fw-semibold'])>Catégorie</label>
+                                <select name="sous_cat_id" @class(['form-control', 'is-invalid' => $errors->has('sous_cat_id')]) required>
+                                    <option value="">--- Choisir une catégorie ---</option>
+                                    @foreach ($categories as $category)
+                                        <option value="{{ $category->id }}" {{ old('sous_cat_id') == $category->id ? 'selected' : '' }}>
+                                            {{ $category->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('sous_cat_id')
+                                    <div @class(['invalid-feedback'])>{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div @class(['mb-3'])>
+                                <label @class(['form-label', 'fw-semibold'])>Attributs</label>
+                                <select name="attribute_id" id="attribute_id" @class(['form-control', 'is-invalid' => $errors->has('sous_cat_id')]) required>
+                                    <option value="">--- Choisir un attribut ---</option>
+                                    @foreach ($attributes as $attribute)
+                                        <option value="{{ $attribute->id }}" {{ old('sous_cat_id') == $attribute->id ? 'selected' : '' }}>
+                                            {{ $attribute->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('attribute_id')
+                                    <div @class(['invalid-feedback'])>{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Options</label>
+                                <select name="attribute_option_id" id="attribute_options" class="form-control">
+                                    <option value="">--- Choisir une option ---</option>
+                                </select>
+                            </div>
+                            <div @class(['mb-3', 'form-check', 'form-switch'])>
+                                <input @class(['form-check-input']) type="checkbox" name="is_active" id="isActiveAdd"
+                                       value="1" {{ old('is_active', 1) ? 'checked' : '' }}>
+                                <label @class(['form-check-label']) for="isActiveAdd">Produit actif</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div @class(['modal-footer'])>
+                        <button type="button" @class(['btn', 'btn-secondary']) data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" @class(['btn', 'btn-primary'])>
+                            <i @class(['bi', 'bi-plus-circle', 'me-1'])></i>Ajouter le produit
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+const input = document.getElementById('vendor_search');
+const hiddenInput = document.getElementById('vendor_id');
+const options = document.querySelectorAll('#vendorsList option');
+
+input.addEventListener('change', function () {
+    let value = this.value;
+    let found = false;
+
+    options.forEach(option => {
+        if (option.value === value) {
+            hiddenInput.value = option.dataset.id;
+            found = true;
+        }
+    });
+
+    // Si aucun vendeur trouvé → on reset
+    if (!found) {
+        hiddenInput.value = '';
+    }
+});
+</script>
+{{-- ==================== JAVASCRIPT CORRIGÉ ==================== --}}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Gestion de la sélection multiple
-    const selectAllCheckbox = document.getElementById('selectAll');
-    const selectAllFooter = document.getElementById('selectAllFooter');
-    const productCheckboxes = document.querySelectorAll('.product-checkbox');
 
-    selectAllCheckbox.addEventListener('change', function() {
-        productCheckboxes.forEach(checkbox => {
-            checkbox.checked = selectAllCheckbox.checked;
-        });
-        selectAllFooter.checked = selectAllCheckbox.checked;
-    });
-
-    selectAllFooter.addEventListener('change', function() {
-        productCheckboxes.forEach(checkbox => {
-            checkbox.checked = selectAllFooter.checked;
-        });
-        selectAllCheckbox.checked = selectAllFooter.checked;
-    });
-
-    // Application des filtres
+    // =============================================
+    // 1. Filtres Rapides (le plus important)
+    // =============================================
     window.applyFilters = function() {
-        const search = document.getElementById('searchInput').value;
-        const category = document.getElementById('categoryFilter').value;
-        const visibility = document.getElementById('visibilityFilter').value;
-        const stock = document.getElementById('stockFilter').value;
-        
-        const params = new URLSearchParams();
-        if (search) params.append('search', search);
-        if (category) params.append('category', category);
-        if (visibility) params.append('visible', visibility);
-        if (stock) params.append('stock', stock);
-        
-        window.location.href = '{{ route('admin.products') }}?' + params.toString();
+        const search     = document.getElementById('searchInput')?.value.trim() || '';
+        const category   = document.getElementById('categoryFilter')?.value || '';
+        const visibility = document.getElementById('visibilityFilter')?.value || '';
+        const stock      = document.getElementById('stockFilter')?.value || '';
+
+        const params = new URLSearchParams(window.location.search);
+
+        search ? params.set('search', search) : params.delete('search');
+        category ? params.set('category', category) : params.delete('category');
+        visibility ? params.set('visible', visibility) : params.delete('visible');
+        stock ? params.set('stock', stock) : params.delete('stock');
+
+        params.delete('page'); // Retour à la première page après filtrage
+
+        window.location.href = '{{ route("admin.products") }}?' + params.toString();
     };
 
-    // Réinitialisation des filtres
     window.resetFilters = function() {
-        window.location.href = '{{ route('admin.products') }}';
+        window.location.href = '{{ route("admin.products") }}';
     };
 
-    // Export des produits
-    window.exportProducts = function() {
-        showToast('Export des produits en cours...', 'info');
-        // Implémentation réelle de l'export
-    };
+    // Recherche avec la touche Entrée
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                applyFilters();
+            }
+        });
+    }
 
-    // Actions sur les produits
-    window.toggleVisibility = function(productId) {
-        if (confirm('Êtes-vous sûr de vouloir changer la visibilité de ce produit ?')) {
-            // Simulation de changement de visibilité
-            fetch(`/admin/products/${productId}/toggle-visibility`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                showToast('Visibilité mise à jour avec succès', 'success');
-                setTimeout(() => location.reload(), 1000);
-            })
-            .catch(error => {
-                showToast('Erreur lors de la mise à jour', 'error');
-            });
-        }
-    };
-
-    window.deleteProduct = function(productId) {
-        if (confirm('Êtes-vous sûr de vouloir supprimer ce produit ? Cette action est irréversible.')) {
-            // Simulation de suppression
-            fetch(`/admin/products/${productId}`, {
-                method: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                showToast('Produit supprimé avec succès', 'success');
-                setTimeout(() => location.reload(), 1000);
-            })
-            .catch(error => {
-                showToast('Erreur lors de la suppression', 'error');
-            });
-        }
-    };
-
-    // Actions groupées
-    window.applyBulkAction = function() {
-        const selectedProducts = Array.from(document.querySelectorAll('.product-checkbox:checked'))
-            .map(checkbox => checkbox.value);
-        
-        const action = document.getElementById('bulkAction').value;
-        
-        if (selectedProducts.length === 0) {
-            showToast('Veuillez sélectionner au moins un produit', 'warning');
-            return;
-        }
-        
-        if (!action) {
-            showToast('Veuillez sélectionner une action', 'warning');
-            return;
-        }
-        
-        if (confirm(`Appliquer l'action "${action}" sur ${selectedProducts.length} produit(s) ?`)) {
-            // Simulation d'action groupée
-            showToast(`Action appliquée sur ${selectedProducts.length} produit(s)`, 'success');
-        }
-    };
-
-    // Filtres avancés
+    // =============================================
+    // 2. Filtres Avancés
+    // =============================================
     window.applyAdvancedFilters = function() {
         const form = document.getElementById('advancedFilters');
+        if (!form) return;
+
+        const params = new URLSearchParams(window.location.search);
         const formData = new FormData(form);
-        const params = new URLSearchParams();
-        
+
         for (let [key, value] of formData) {
-            if (value) params.append(key, value);
+            if (value) params.set(key, value);
+            else params.delete(key);
         }
-        
-        window.location.href = '{{ route('admin.products') }}?' + params.toString();
+        params.delete('page');
+
+        window.location.href = '{{ route("admin.products") }}?' + params.toString();
     };
+
+    // =============================================
+    // 3. Sélection multiple (checkboxes)
+    // =============================================
+    const selectAll = document.getElementById('selectAll');
+    const selectAllFooter = document.getElementById('selectAllFooter');
+    const checkboxes = document.querySelectorAll('.product-checkbox');
+
+    if (selectAll) {
+        selectAll.addEventListener('change', () => {
+            checkboxes.forEach(cb => cb.checked = selectAll.checked);
+            if (selectAllFooter) selectAllFooter.checked = selectAll.checked;
+        });
+    }
+
+    if (selectAllFooter) {
+        selectAllFooter.addEventListener('change', () => {
+            checkboxes.forEach(cb => cb.checked = selectAllFooter.checked);
+            if (selectAll) selectAll.checked = selectAllFooter.checked;
+        });
+    }
+
+    // =============================================
+    // 4. Vendor Search (modal ajout produit)
+    // =============================================
+    const vendorInput = document.getElementById('vendor_search');
+    const hiddenVendorId = document.getElementById('vendor_id');
+    if (vendorInput && hiddenVendorId) {
+        vendorInput.addEventListener('change', function() {
+            // Ton logique existante si tu en as une
+            console.log('Vendor changed to:', this.value);
+        });
+    }
+
+    // =============================================
+    // 5. Gestion des Attributs (modals édition + ajout)
+    // =============================================
+    const attributesData = @json($attributes ?? []);
+
+    // Modal Ajout Produit
+    const attrSelectAdd = document.getElementById('attribute_id');
+    const optionsSelectAdd = document.getElementById('attribute_options');
+    if (attrSelectAdd && optionsSelectAdd) {
+        attrSelectAdd.addEventListener('change', function() {
+            optionsSelectAdd.innerHTML = '<option value="">--- Choisir une option ---</option>';
+            const attr = attributesData.find(a => a.id == this.value);
+            if (attr && attr.options) {
+                attr.options.forEach(opt => {
+                    const option = new Option(opt.value, opt.id);
+                    optionsSelectAdd.appendChild(option);
+                });
+            }
+        });
+    }
+
+    // Modals Édition (plusieurs produits)
+    document.querySelectorAll('.attribute-select').forEach(select => {
+        select.addEventListener('change', function() {
+            const productId = this.dataset.product;
+            const targetSelect = document.getElementById('options_' + productId);
+            if (!targetSelect) return;
+
+            targetSelect.innerHTML = '<option value="">Choisir</option>';
+
+            const attr = attributesData.find(a => a.id == this.value);
+            if (attr && attr.options) {
+                attr.options.forEach(opt => {
+                    const option = new Option(opt.value, opt.id);
+                    targetSelect.appendChild(option);
+                });
+            }
+        });
+    });
+
+    console.log('✅ Tous les scripts admin produits initialisés avec succès');
 });
-
-// Fonction utilitaire pour les notifications
-function showToast(message, type = 'info') {
-    // Implémentation des toasts (à adapter selon votre système)
-    const toast = document.createElement('div');
-    toast.className = `alert alert-${type} alert-dismissible fade show`;
-    toast.innerHTML = `
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 3000);
-}
 </script>
-
 <style>
 .products-container {
     padding: 0;
@@ -884,4 +1155,63 @@ function showToast(message, type = 'info') {
     }
 }
 </style>
+<script>
+    const attributes = @json($attributes);
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const attributeSelect = document.getElementById('attribute_id');
+    const optionsSelect = document.getElementById('attribute_options');
+
+    if (!attributeSelect) return; // sécurité
+
+    attributeSelect.addEventListener('change', function () {
+        const attributeId = this.value;
+
+        optionsSelect.innerHTML = '<option value="">--- Choisir une option ---</option>';
+
+        if (!attributeId) return;
+
+        const attribute = attributes.find(attr => attr.id == attributeId);
+
+        if (attribute && attribute.options) {
+            attribute.options.forEach(option => {
+                let opt = document.createElement('option');
+                opt.value = option.id;
+                opt.textContent = option.value;
+                optionsSelect.appendChild(opt);
+            });
+        }
+    });
+
+});
+</script>
+<script>
+document.querySelectorAll('.attribute-select').forEach(select => {
+
+    select.addEventListener('change', function () {
+
+        const productId = this.dataset.product;
+        const optionsSelect = document.getElementById('options_' + productId);
+
+        optionsSelect.innerHTML = '<option>Chargement...</option>';
+
+        const attribute = attributes.find(a => a.id == this.value);
+
+        optionsSelect.innerHTML = '<option value="">Choisir</option>';
+
+        if (attribute) {
+            attribute.options.forEach(opt => {
+                let option = document.createElement('option');
+                option.value = opt.id;
+                option.textContent = opt.value;
+                optionsSelect.appendChild(option);
+            });
+        }
+    });
+
+});
+</script>
+
 @endsection

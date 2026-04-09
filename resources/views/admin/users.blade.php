@@ -3,7 +3,7 @@
 @section('title', 'Gestion des Utilisateurs - Admin Bkassoua')
 
 @section('content')
-<div class="users-container">
+<div class="users-container">  
     <!-- En-tête de la page -->
     <div class="page-header">
         <div class="header-content">
@@ -12,11 +12,14 @@
                 <p class="page-subtitle">Gérez les utilisateurs et vendeurs de votre plateforme</p>
             </div>
             <div class="header-actions">
-                <button class="btn btn-outline-primary" onclick="exportUsers()">
+                {{-- <button class="btn btn-outline-primary" onclick="exportUsers()">
                     <i class="bi bi-download me-2"></i>Exporter
-                </button>
+                </button> --}}
                 <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#filtersModal">
                     <i class="bi bi-funnel me-2"></i>Filtres avancés
+                </button>
+                <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#vendorModal">
+                    <i class="bi bi-plus me-2"></i>Ajouter un vendeur
                 </button>
             </div>
         </div>
@@ -602,7 +605,108 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="vendorModal" tabindex="-1" aria-labelledby="vendorModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            
+            <!-- Header -->
+            <div class="modal-header">
+                <h5 class="modal-title" id="vendorModalLabel">
+                    Inscription vendeur
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
 
+            <!-- Body -->
+            <div class="modal-body">
+                <form action="{{ route('vendor.store') }}" method="POST" enctype="multipart/form-data" id="vendorForm">
+                    @csrf
+
+                    <!-- Informations -->
+                    <h5 class="mb-3">Informations de votre boutique</h5>
+                   <div class="mb-3">
+                        <label class="form-label">Nom complet</label>
+
+                        <input type="text" id="user_search" class="form-control" list="usersList" placeholder="Rechercher un utilisateur..." required>
+
+                        <datalist id="usersList">
+                            @foreach($users as $user)
+                                <option value="{{ $user->name }} ({{ $user->phone_number }})" data-id="{{ $user->id }}"></option>
+                            @endforeach
+                        </datalist>
+
+                        <!-- Champ caché pour envoyer l'ID -->
+                        <input type="hidden" name="user_id" id="user_id">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nom du magasin</label>
+                        <input type="text" name="store_name" class="form-control" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Adresse</label>
+                        <input type="text" name="address" class="form-control" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea name="store_description" class="form-control" rows="4" required></textarea>
+                    </div>
+
+                    <!-- Logo -->
+                    <div class="mb-3">
+                        <label class="form-label">Logo</label>
+                        <input type="file" name="logo" class="form-control">
+                    </div>
+
+                    <!-- Conditions -->
+                    <div class="form-check mb-2">
+                        <input type="checkbox" name="terms" class="form-check-input" required>
+                        <label class="form-check-label">
+                            J'accepte les conditions
+                        </label>
+                    </div>
+
+                    <div class="form-check mb-3">
+                        <input type="checkbox" name="compliance" class="form-check-input" required>
+                        <label class="form-check-label">
+                            Je respecte les règles
+                        </label>
+                    </div>
+
+                </form>
+            </div>
+
+            <!-- Footer -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    Fermer
+                </button>
+
+                <button type="submit" form="vendorForm" class="btn btn-primary">
+                    Soumettre
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+<script>
+document.getElementById('user_search').addEventListener('input', function () {
+    let input = this.value;
+    let options = document.querySelectorAll('#usersList option');
+
+    let userId = null;
+
+    options.forEach(option => {
+        if (option.value === input) {
+            userId = option.getAttribute('data-id');
+        }
+    });
+
+    document.getElementById('user_id').value = userId;
+});
+</script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Gestion des onglets

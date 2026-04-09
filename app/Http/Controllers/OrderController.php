@@ -17,6 +17,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Exception;
+use Illuminate\Http\Resources\Json\JsonResource; 
+use Nette\Utils\Json;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Events\NewOrderCreated;
 
 class OrderController extends Controller
 {
@@ -150,7 +154,8 @@ class OrderController extends Controller
 
             // Valider la transaction
             DB::commit();
-
+            // Log::info('Broadcasting NewOrderCreated pour order ID: ' . $order->id);
+            // broadcast(new NewOrderCreated($order))->toOthers();
             return redirect()->back()
                 ->with('success', 'Commande passée avec succès. Paiement en attente.');
         } catch (\Exception $e) {
