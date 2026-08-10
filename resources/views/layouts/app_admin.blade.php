@@ -703,6 +703,20 @@
                         <span class="nav-text">Annonces</span>
                     </a>
                 </div>
+                <div class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('admin.delivery*') ? 'active' : '' }}" 
+                    href="{{ route('admin.delivery.index') }}">
+                        <i class="bi bi-truck"></i>
+                        <span class="nav-text">Livraison</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('admin.package-deliveries*') ? 'active' : '' }}" 
+                    href="{{ route('admin.package-deliveries') }}">
+                        <i class="bi bi-truck"></i>
+                        <span class="nav-text">Livraison Colis</span>
+                    </a>
+                </div>
             </div>
 
             <!-- Analytics -->

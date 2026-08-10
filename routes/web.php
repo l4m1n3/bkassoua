@@ -26,9 +26,9 @@ Route::get('/dashboard', function () {
 Route::get('/orders/latest', [AdminController::class, 'latest'])->name('orders.latest');
 Route::get('/', [HomeController::class, 'home'])->name('home');
 Route::get('shop', [ProductController::class, 'shop'])->name('shop');
-Route::get('/shop/{name}', [ProductController::class, 'productPerCategory'])->name('productPerCategory');
 Route::get('/shop/detail/{id}', [ProductController::class, 'productDetail'])->name('shop.detail');
 Route::get('/search', [HomeController::class, 'search'])->name('search');
+Route::get('/shop/{slug}', [ProductController::class, 'byCategory'])->name('shop.category');
 
 Route::get('/about', [AboutController::class, 'index'])->name('about');
 Route::get('/contact', [ContactController::class, 'index'])->name('contact');
@@ -50,8 +50,10 @@ Route::get('/cart/checkout/show', [OrderController::class, 'showCheckout'])->nam
 Route::post('/cart/checkout/order', [OrderController::class, 'placeOrder'])->name('checkout.process');
 
 // Admin routes group
-Route::prefix('admin')->middleware(['auth','role:admin'])->name('admin.')->group(function () {
+
+Route::prefix('admin')->middleware(['auth', 'role:admin'])->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+    Route::get('/dashboard/data', [AdminController::class, 'dashboardData']);
     Route::get('/ads', [AdminController::class, 'ads'])->name('ads.index');
     Route::get('/ads/create', [AdminController::class, 'createAd'])->name('ads.create');
     Route::post('/ads', [AdminController::class, 'storeAd'])->name('ads.store');
@@ -100,6 +102,12 @@ Route::prefix('admin')->middleware(['auth','role:admin'])->name('admin.')->group
 
     Route::post('/orders/{order}/status', [AdminController::class, 'updateStatus'])
         ->name('admin.orders.updateStatus');
+    Route::get('/delivery', [AdminController::class, 'delivery'])->name('delivery');
+    Route::get('/delivery',         [AdminController::class, 'delivery'])->name('delivery.index');
+    Route::post('/delivery',        [AdminController::class, 'storeDelivery'])->name('delivery.store');
+    Route::put('/delivery/{id}',    [AdminController::class, 'updateDelivery'])->name('delivery.update');
+    Route::delete('/delivery/{id}', [AdminController::class, 'destroyDelivery'])->name('delivery.destroy');
+    Route::get('/vendors/{vendorId}/products', [AdminController::class, 'vendorProducts'])->name('vendor.products');
 });
 
 // Ads
@@ -168,4 +176,46 @@ Route::prefix('orders')->name('orders.')->group(function () {
 
 Route::get('/auth/google/redirect', [GoogleController::class, 'redirectToGoogle'])->name('google.redirect');
 Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
+
+
+// ── Commandes de livraison ──────────────────────────────────────────────
+Route::get('/admin/package-deliveries', [AdminController::class, 'packageDeliveries'])
+    ->name('admin.package-deliveries');
+
+Route::get('/admin/package-deliveries/{packageDelivery}', [AdminController::class, 'showPackageDelivery'])
+    ->name('admin.package-delivery.show');
+
+Route::patch('/admin/package-deliveries/{packageDelivery}/status', [AdminController::class, 'updatePackageDeliveryStatus'])
+    ->name('admin.package-delivery.update-status');
+
+Route::patch('/admin/package-deliveries/{packageDelivery}/cancel', [AdminController::class, 'cancelPackageDelivery'])
+    ->name('admin.package-delivery.cancel');
+
+Route::post('/admin/package-deliveries/bulk-action', [AdminController::class, 'bulkPackageDeliveryAction'])
+    ->name('admin.package-deliveries.bulk-action');
+
+Route::get('/admin/package-deliveries/latest', [AdminController::class, 'latestPackageDeliveries'])
+    ->name('admin.package-deliveries.latest');
+
+// ── Quartiers & grille tarifaire ────────────────────────────────────────
+Route::get('/admin/package-delivery-settings', [AdminController::class, 'packageDeliverySettings'])
+    ->name('admin.package-delivery-settings');
+
+Route::post('/admin/package-delivery-zones', [AdminController::class, 'storePackageDeliveryZone'])
+    ->name('admin.package-delivery-zone.store');
+
+Route::put('/admin/package-delivery-zones/{id}', [AdminController::class, 'updatePackageDeliveryZone'])
+    ->name('admin.package-delivery-zone.update');
+
+Route::delete('/admin/package-delivery-zones/{id}', [AdminController::class, 'destroyPackageDeliveryZone'])
+    ->name('admin.package-delivery-zone.destroy');
+
+Route::post('/admin/package-delivery-zone-prices', [AdminController::class, 'storePackageDeliveryZonePrice'])
+    ->name('admin.package-delivery-zone-price.store');
+
+Route::put('/admin/package-delivery-zone-prices/{id}', [AdminController::class, 'updatePackageDeliveryZonePrice'])
+    ->name('admin.package-delivery-zone-price.update');
+
+Route::delete('/admin/package-delivery-zone-prices/{id}', [AdminController::class, 'destroyPackageDeliveryZonePrice'])
+    ->name('admin.package-delivery-zone-price.destroy');
 require __DIR__ . '/auth.php';

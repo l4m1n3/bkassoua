@@ -24,15 +24,17 @@ class HomeController extends Controller
         // Requête pour les produits ajoutés cette semaine
         $productsThisWeeks = Product::whereBetween('created_at', [$startOfWeek, $endOfWeek])->get();
         $productsCount = Product::count();
-        dd($productsThisWeeks);
+        // dd($productsThisWeeks);
         // $categories = Category::all();
         $promotions = Promotion::with('category')->get();
         $popularProducts = Product::whereIn('id', OrderItem::pluck('product_id'))
             ->distinct()
             ->get();
-        $categories = Category::withCount('products')
+        $categories = Category::with('sousCat')
+        ->withCount('products')
             ->having('products_count', '>', 0)
             ->get();
+            // dd($categories);
         $vendor = Vendor::where('user_id', Auth::id())->first();
         // dd($popularProducts);
         // return view('layouts.master', compact('categories','vendor'));
@@ -65,9 +67,8 @@ class HomeController extends Controller
         $popularProducts = Product::whereIn('id', OrderItem::pluck('product_id'))
             ->distinct()
             ->get();
-        $categories = Category::whereHas('products')
-            ->withCount('products')
-            ->get();
+      $categories = Category::with('sousCat')
+        ->get();
 
         $vendor = Vendor::where('user_id', Auth::id())->first();
         return view('layouts.masters', compact(['categories', 'promotions', 'popularProducts', 'productsThisWeeks', 'vendor','productsCount']));

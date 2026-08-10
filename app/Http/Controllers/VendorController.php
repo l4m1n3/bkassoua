@@ -7,25 +7,21 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\Order;
 use App\Models\User;
-use App\Models\Payment;
-use App\Models\Attribute;
-use App\Models\AttributeOptions;
+use App\Models\SousCat;
+use App\Models\AttributeValueProduct;
 use App\Http\Requests\StoreVendorRequest;
 use App\Http\Requests\UpdateVendorRequest;
-use App\Models\SousCat;
-
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-
+use Illuminate\Support\Facades\Storage;
 
 class VendorController extends Controller
 {
     public function showForm()
     {
-        $categories = Category::all();
+        $categories = SousCat::all();
 
         return view('vendeurs.register', compact('categories'));
     }
@@ -57,16 +53,16 @@ class VendorController extends Controller
         $vendor->status = 'inactive'; // Par défaut, le vendeur n'est pas approuvé
 
 
-
         if ($request->hasFile('logo')) {
             $vendor->logo = $request->file('logo')->store('vendor_logos', 'public');
         }
+
         $vendor->save();
 
-        $user = User::where('id', Auth::user()->id)->update(['role' => 'vendor']);
+        $user = User::where('id',$request->user_id)->update(['role'=>'vendor']);
         // dd($user);
 
-        return redirect()->back()->with('message', 'Votre demande a été envoyee avec succes!');
+        return redirect()->back()->with('message','Votre demande a été envoyee avec succes!');
     }
 
     // Tableau de bord des vendeurs
@@ -125,145 +121,69 @@ class VendorController extends Controller
     //     return redirect()->route('vendor.dashboard');
     // }
 
-    // public function storeProduct(Request $request)
-    // {
-    //     // Étape 1 : Valider les données entrantes
-    //     try {
-    //         $request->validate([
-    //             'name' => 'required|string|max:255',
-    //             'description' => 'required|string|max:255',
-    //             'price' => 'required|numeric',
-    //             'stock_quantity' => 'required|integer',
-    //             'is_active' => 'required|boolean',
-    //             'category_id' => 'required|integer',
-    //             'images' => 'nullable|array|max:4',
-    //             'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:2048',
-    //         ]);
-    //     } catch (\Illuminate\Validation\ValidationException $e) {
-    //         // Affiche les erreurs de validation
-    //         dd($e->errors());
-    //     }
+ 
+//   public function storeProduct(Request $request)
+//     {
+//         $request->validate([
+//             'name' => 'required|string|max:255',
+//             'description' => 'required|string|max:255',
+//             'price' => 'required|numeric|min:0',
+//             'stock_quantity' => 'required|integer|min:0',
+//             'is_active' => 'required|boolean',
+//             'sous_cat_id' => 'required|exists:sous_cats,id',
+//             'images' => 'nullable|array|max:4',
+//             'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:2048',
+//             'vendor_id' => 'required|exists:vendors,id',
+//         ]);
 
-    //     // Étape 2 : Vérifier si l'utilisateur est authentifié et s'il a un vendeur
-    //     if (!Auth::check()) {
-    //         return back()->withErrors(['error' => 'Utilisateur non authentifié']);
-    //     }
+//         // $vendor = auth()->user()->vendor;
+//         $vendor = Vendor::findOrFail($request->vendor_id);
+//         DB::beginTransaction();
 
-    //     if (!Auth::user()->vendor) {
-    //         return back()->withErrors(['error' => 'Aucun vendeur associé à cet utilisateur']);
-    //     }
+//         try {
+//             $product = Product::create([
+//                 // 'vendor_id' => $request->vendor_id,
+//                 'name' => $request->name,
+//                 'description' => $request->description,
+//                 'price' => $request->price,
+//                 'stock_quantity' => $request->stock_quantity,
+//                 'is_active' => $request->is_active,
+//               'sous_cat_id' => $request->sous_cat_id,
+//                 'vendor_id'=>$vendor->id
+//             ]);
 
-    //     // Étape 3 : Créer un produit
-    //     try {
-    //         $product = new Product();
-    //         $product->vendor_id = Auth::user()->vendor->id;
-    //         $product->name = $request->name;
-    //         $product->description = $request->description;
-    //         $product->price = $request->price;
-    //         $product->stock_quantity = $request->stock_quantity;
-    //         $product->is_active = $request->is_active;
-    //         $product->category_id = $request->category_id;
-    //         $product->save();
-    //         // Étape 4 : Gérer l'image du produit
-    //         // if ($request->hasFile('image')) {
-    //         //     $product->image = $request->file('image')->store('product_images', 'public');
-    //         // }
-    //         // 📸 Upload images (max 4)
-    //         if ($request->hasFile('images')) {
-    //             foreach ($request->file('images') as $image) {
-    //                 $path = $image->store('products', 'public');
+//              if ($request->hasFile('images')) {
 
-    //                 $product->images()->create([
-    //                     'path' => $path
-    //                 ]);
-    //             }
-    //         }
-    //         // Sauvegarder le produit
+//             // Supprimer les anciennes images si elles existent (sécurité)
+//             foreach ($product->images as $oldImage) {
+//                 Storage::disk('public')->delete($oldImage->path);
+//                 $oldImage->delete();
+//             }
 
-    //     } catch (\Exception $e) {
-    //         // Afficher les erreurs de sauvegarde
-    //         return back()->withErrors(['error' => 'Erreur lors de la sauvegarde du produit : ' . $e->getMessage()]);
-    //     }
+//             foreach ($request->file('images') as $index => $image) {
+//                 $path = $image->store('products', 'public');
 
-    //     // Étape 5 : Rediriger vers le tableau de bord avec un message de succès
-    //     return redirect()->route('vendor.dashboard')->with('success', 'Produit créé avec succès');
-    // }
+//                 // Assurer qu'il n'y a qu'une seule image principale
+//                 $product->images()->create([
+//                     'path' => $path,
+//                     'is_main' => $index === 0,
+//                 ]);
+//             }
+//         }
 
+//             DB::commit();
 
-    // public function storeProduct(Request $request)
-    // {
-    //     $request->validate([
-    //         'name' => 'required|string|max:255',
-    //         'description' => 'required|string|max:255',
-    //         'price' => 'required|numeric|min:0',
-    //         'stock_quantity' => 'required|integer|min:0',
-    //         'is_active' => 'required|boolean',
-    //         'sous_cat_id' => 'required|exists:sous_cats,id',
-    //         'images' => 'nullable|array|max:4',
-    //         'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:4096',
-    //         'vendor_id' => 'required|exists:vendors,id',
-
-
-    //         // attributs
-    //         'attribute_option_id' => 'nullable|array',
-    //         'attribute_option_id.*' => 'exists:attribute_options,id',
-    //     ]);
-
-    //     // dd($request);
-    //     // $vendor = auth()->user()->vendor;
-
-    //     DB::beginTransaction();
-
-    //     try {
-    //         $product = Product::create([
-    //             'vendor_id' => $request->vendor_id,
-    //             'name' => $request->name,
-    //             'description' => $request->description,
-    //             'price' => $request->price,
-    //             'stock_quantity' => $request->stock_quantity,
-    //             'is_active' => $request->is_active,
-    //             'sous_cat_id' => $request->sous_cat_id,
-
-    //         ]);
-
-    //         if ($request->hasFile('images')) {
-    //             foreach ($request->file('images') as $index => $image) {
-    //                 $product->images()->create([
-    //                     'path' => $image->store('products', 'public'),
-    //                     'is_main' => $index === 0, // la 1ère image est principale
-    //                 ]);
-    //             }
-    //         }
-
-
-    //         // ✅ ATTRIBUTES
-    //         if ($request->has('attribute_option_id')) {
-    //             foreach ($request->attribute_option_ids as $optionId) {
-    //                 $product->attributeValues()->create([
-    //                     'attribute_option_id' => $optionId,
-    //                     'additional_price' => 0,
-    //                     'stock_quantity' => 0,
-    //                 ]);
-    //             }
-    //         }
-
-    //         // ✅ Charger relations
-    //         $product->load(['images', 'attributeValues.attributeOption']);
-
-    //         DB::commit();
-
-
-    //         return redirect()
-    //             ->back()
-    //             ->with('success', 'Produit créé avec succès');
-    //     } catch (\Throwable $e) {
-    //         Log::error('Erreur lors de la création du produit : ' . $e->getMessage());
-    //         DB::rollBack();
-    //         return back()->withErrors([
-    //             'error' => $e->getMessage()
-    //         ]);
-    //     }
-    // }
+//             return redirect()
+//                 ->back()
+//                 ->with('success', 'Produit créé avec succès');
+//         } catch (\Throwable $e) {
+//             DB::rollBack();
+//              Log::error('Erreur lors ajout du produit : ' . $th->getMessage());
+//             return back()->withErrors([
+//                 'error' => $e->getMessage()
+//             ]);
+//         }
+//     }
     public function storeProduct(Request $request)
     {
         $request->validate([
@@ -276,16 +196,18 @@ class VendorController extends Controller
 
             // images
             'images' => 'nullable|array|max:4',
-            'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:4096',
+            'images.*' => 'image|mimes:jpeg,png,jpg,webp,gif|max:4096',
 
-            // attribut
-            'attribute_option_id' => 'nullable|exists:attribute_options,id',
+            // ✅ attributs multiples
+            'attribute_option_ids' => 'nullable|array',
+            'attribute_option_ids.*' => 'exists:attribute_options,id',
         ]);
 
         DB::beginTransaction();
 
         try {
 
+            // ✅ CREATE PRODUIT
             $product = Product::create([
                 'vendor_id' => $request->vendor_id,
                 'name' => $request->name,
@@ -299,6 +221,7 @@ class VendorController extends Controller
             // ✅ IMAGES
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $index => $file) {
+
                     $path = $file->store('products', 'public');
 
                     $product->images()->create([
@@ -308,26 +231,39 @@ class VendorController extends Controller
                 }
             }
 
-            // ✅ ATTRIBUT (SINGLE)
-            if ($request->filled('attribute_option_id')) {
-                $product->attributeValues()->create([
-                    'attribute_option_id' => $request->attribute_option_id,
-                    'additional_price' => 0,
-                    'stock_quantity' => 0,
-                ]);
+            // ✅ ATTRIBUTS MULTIPLES
+            if ($request->has('attribute_option_ids')) {
+
+                $data = [];
+
+                foreach (array_unique($request->attribute_option_ids) as $optionId) {
+
+                    $data[] = [
+                        'product_id' => $product->id,
+                        'attribute_option_id' => $optionId,
+                        'additional_price' => 0,
+                        'stock_quantity' => 0,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                }
+
+                // insertion optimisée
+                AttributeValueProduct::insert($data);
             }
 
             DB::commit();
 
             return back()->with('success', 'Produit créé avec succès');
         } catch (\Throwable $e) {
+            Log::error('Erreur lors de la création du produit : ' . $e->getMessage());
             DB::rollBack();
-            dd($e->getMessage());
+             return back()->with('error', 'Produit non créé '.$e->getMessage());
+        
         }
     }
     public function updateProduct(Request $request, $id)
     {
-        // $vendor = Auth::user()->vendor;
         $product = Product::with(['images', 'attributeValues'])->find($id);
 
         if (!$product) {
@@ -340,13 +276,15 @@ class VendorController extends Controller
             'price' => 'required|numeric|min:0',
             'stock_quantity' => 'required|integer|min:0',
             'sous_cat_id' => 'required|exists:sous_cats,id',
-            'vendor_id'           => 'nullable|exists:vendors,id',   // ← 
-            // images multiples
+            'vendor_id' => 'nullable|exists:vendors,id',
+
+            // images
             'images' => 'nullable|array|max:4',
             'images.*' => 'image|mimes:jpeg,png,jpg,webp|max:4096',
 
-            // attributs
-            'attribute_option_id' => 'nullable',
+            // ✅ attributs multiples
+            'attribute_option_ids' => 'nullable|array',
+            'attribute_option_ids.*' => 'exists:attribute_options,id',
         ]);
 
         DB::beginTransaction();
@@ -361,22 +299,25 @@ class VendorController extends Controller
                 'stock_quantity' => $request->stock_quantity,
                 'is_active' => $request->has('is_active') ? 1 : 0,
                 'sous_cat_id' => $request->sous_cat_id,
-                'vendor_id' => $request->vendor_id ?? $product->vendor_id, // ←
+                'vendor_id' => $request->vendor_id ?? $product->vendor_id,
             ]);
 
-            // ✅ UPDATE IMAGES (optionnel : reset total)
+            // ✅ UPDATE IMAGES (remplacement complet)
             if ($request->hasFile('images')) {
 
                 // supprimer anciennes images
                 foreach ($product->images as $img) {
+
                     if (Storage::exists('public/' . $img->path)) {
                         Storage::delete('public/' . $img->path);
                     }
+
                     $img->delete();
                 }
 
                 // ajouter nouvelles
                 foreach ($request->file('images') as $index => $file) {
+
                     $path = $file->store('products', 'public');
 
                     $product->images()->create([
@@ -386,30 +327,40 @@ class VendorController extends Controller
                 }
             }
 
-            // ✅ UPDATE ATTRIBUTS
-            if ($request->filled('attribute_option_id')) {
+            // ✅ UPDATE ATTRIBUTS MULTIPLES
 
-                // supprimer anciens
-                $product->attributeValues()->delete();
+            // supprimer anciens
+            $product->attributeValues()->delete();
 
-                // ajouter nouveau
-                $product->attributeValues()->create([
-                    'attribute_option_id' => $request->attribute_option_id,
-                    'additional_price' => 0,
-                    'stock_quantity' => 0,
-                ]);
+            // ajouter nouveaux
+            if ($request->has('attribute_option_ids')) {
+
+                $data = [];
+
+                foreach (array_unique($request->attribute_option_ids) as $optionId) {
+
+                    $data[] = [
+                        'product_id' => $product->id,
+                        'attribute_option_id' => $optionId,
+                        'additional_price' => 0,
+                        'stock_quantity' => 0,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                }
+
+                AttributeValueProduct::insert($data);
             }
 
             DB::commit();
 
             return back()->with('success', 'Produit mis à jour avec succès');
         } catch (\Throwable $e) {
-
+            Log::error('Erreur lors de la mise à jour du produit : ' . $e->getMessage());
             DB::rollBack();
             dd($e->getMessage());
         }
     }
-
 
 
     public function editProduct(Product $product)
@@ -417,30 +368,30 @@ class VendorController extends Controller
         return view('vendeurs.products.edit', compact('product'));
     }
 
-
-
-    public function destroyProduct($id)
+    public function destroyProduct(Product $product)
     {
-        // Vérifier si le produit appartient au vendeur connecté
-        $vendor = Auth::user()->vendor;
-        $product = $vendor->products()->find($id);
-
-        if (!$product) {
-            return redirect()->route('vendor.dashboard')->with('error', 'Produit introuvable ou vous n\'avez pas l\'autorisation de le supprimer.');
+        DB::beginTransaction();
+        try {
+            // Supprimer les images du storage
+            foreach ($product->images as $image) {
+                Storage::disk('public')->delete($image->path);
+                $image->delete();
+            }
+    
+            $product->delete();
+    
+            DB::commit();
+    
+            return redirect()
+                ->back()
+                ->with('success', 'Produit supprimé avec succès');
+    
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            Log::error('Erreur lors de la suppression du produit : ' . $e->getMessage());
+            return back()->withErrors(['error' => $e->getMessage()]);
         }
-
-        // Supprimer l'image du produit si elle existe
-        if ($product->image && \Storage::exists('public/' . $product->image)) {
-            \Storage::delete('public/' . $product->image);
-        }
-
-        // Supprimer le produit de la base de données
-        $product->delete();
-
-        // Redirection avec un message de succès
-        return redirect()->route('vendeurs.dashboard')->with('success', 'Produit supprimé avec succès.');
     }
-
 
     // Gestion des commandes du vendeur
     public function orders()

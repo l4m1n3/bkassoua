@@ -481,10 +481,13 @@
 
                         <!-- Options -->
                         <div class="col-md-6 mb-3">
-                            <label>Option</label>
-                            <select name="attribute_option_id" id="options_{{ $product->id }}" class="form-control">
-                                <option value="">Choisir</option>
-                            </select>
+                            <label>Options</label>
+
+                            <div id="options_{{ $product->id }}" 
+                                class="border rounded p-2" 
+                                style="max-height: 150px; overflow-y:auto;">
+                                <p class="text-muted mb-0">Choisissez un attribut</p>
+                            </div>
                         </div>
 
                         <!-- Actif -->
@@ -597,6 +600,14 @@
                                     <div @class(['invalid-feedback'])>{{ $message }}</div>
                                 @enderror
                             </div>
+                            <div @class(['mb-3'])>
+                                <label @class(['form-label', 'fw-semibold'])>Prix promotionnel (optionnel)</label>
+                                <input type="color" @class(['form-control', 'is-invalid' => $errors->has('promotional_price')])
+                                       name="promotional_price" value="{{ old('promotional_price') }}">
+                                @error('promotional_price')
+                                    <div @class(['invalid-feedback'])>{{ $message }}</div>
+                                @enderror
+                            </div>
                         </div>
                         <div @class(['col-md-6'])>
                             <div @class(['mb-3'])>
@@ -647,9 +658,10 @@
                             </div>
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">Options</label>
-                                <select name="attribute_option_id" id="attribute_options" class="form-control">
-                                    <option value="">--- Choisir une option ---</option>
-                                </select>
+
+                                <div id="attribute_options_container" class="border rounded p-2" style="max-height: 150px; overflow-y:auto;">
+                                    <p class="text-muted mb-0">Choisissez un attribut d'abord</p>
+                                </div>
                             </div>
                             <div @class(['mb-3', 'form-check', 'form-switch'])>
                                 <input @class(['form-check-input']) type="checkbox" name="is_active" id="isActiveAdd"
@@ -787,41 +799,94 @@ document.addEventListener('DOMContentLoaded', function() {
     // =============================================
     const attributesData = @json($attributes ?? []);
 
-    // Modal Ajout Produit
+    // ============================
+    // AJOUT PRODUIT
+    // ============================
     const attrSelectAdd = document.getElementById('attribute_id');
-    const optionsSelectAdd = document.getElementById('attribute_options');
-    if (attrSelectAdd && optionsSelectAdd) {
-        attrSelectAdd.addEventListener('change', function() {
-            optionsSelectAdd.innerHTML = '<option value="">--- Choisir une option ---</option>';
-            const attr = attributesData.find(a => a.id == this.value);
+    const optionsContainerAdd = document.getElementById('attribute_options_container');
+
+    if (attrSelectAdd && optionsContainerAdd) {
+
+        attrSelectAdd.addEventListener('change', function () {
+
+            const attributeId = this.value;
+            optionsContainerAdd.innerHTML = '';
+
+            if (!attributeId) {
+                optionsContainerAdd.innerHTML = '<p class="text-muted mb-0">Choisissez un attribut d\'abord</p>';
+                return;
+            }
+
+            const attr = attributesData.find(a => a.id == attributeId);
+
             if (attr && attr.options) {
+
                 attr.options.forEach(opt => {
-                    const option = new Option(opt.value, opt.id);
-                    optionsSelectAdd.appendChild(option);
+
+                    const div = document.createElement('div');
+                    div.classList.add('form-check');
+
+                    div.innerHTML = `
+                        <input class="form-check-input" 
+                               type="checkbox" 
+                               name="attribute_option_ids[]" 
+                               value="${opt.id}" 
+                               id="add_opt_${opt.id}">
+                        
+                        <label class="form-check-label" for="add_opt_${opt.id}">
+                            ${opt.value}
+                        </label>
+                    `;
+
+                    optionsContainerAdd.appendChild(div);
                 });
+
+            } else {
+                optionsContainerAdd.innerHTML = '<p class="text-muted mb-0">Aucune option disponible</p>';
             }
         });
     }
 
-    // Modals Édition (plusieurs produits)
+    // ============================
+    // EDIT PRODUIT
+    // ============================
     document.querySelectorAll('.attribute-select').forEach(select => {
-        select.addEventListener('change', function() {
-            const productId = this.dataset.product;
-            const targetSelect = document.getElementById('options_' + productId);
-            if (!targetSelect) return;
 
-            targetSelect.innerHTML = '<option value="">Choisir</option>';
+        select.addEventListener('change', function () {
+
+            const productId = this.dataset.product;
+            const container = document.getElementById('options_' + productId);
+
+            container.innerHTML = '';
 
             const attr = attributesData.find(a => a.id == this.value);
+
             if (attr && attr.options) {
+
                 attr.options.forEach(opt => {
-                    const option = new Option(opt.value, opt.id);
-                    targetSelect.appendChild(option);
+
+                    const div = document.createElement('div');
+                    div.classList.add('form-check');
+
+                    div.innerHTML = `
+                        <input class="form-check-input" 
+                               type="checkbox" 
+                               name="attribute_option_ids[]" 
+                               value="${opt.id}">
+                        
+                        <label class="form-check-label">
+                            ${opt.value}
+                        </label>
+                    `;
+
+                    container.appendChild(div);
                 });
+
+            } else {
+                container.innerHTML = '<p class="text-muted mb-0">Aucune option</p>';
             }
         });
     });
-
     console.log('✅ Tous les scripts admin produits initialisés avec succès');
 });
 </script>

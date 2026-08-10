@@ -26,7 +26,22 @@
             </small>
         </div>
     </td>
+    <td>
+        @php
+            $vendors = $order->items
+                ->map(fn($item) => $item->product?->vendor)
+                ->filter()
+                ->unique('id');
+        @endphp
 
+        @forelse($vendors as $vendor)
+            <span class="badge bg-light text-dark border">
+                {{ $vendor->store_name }}
+            </span>
+        @empty
+            <span class="text-muted">Aucun vendeur</span>
+        @endforelse
+    </td>
     <td>
         <div class="amount">
             {{ number_format($order->total_amount ?? 0, 0, ',', ' ') }} fcfa

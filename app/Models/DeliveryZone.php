@@ -3,16 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class DeliveryRegion extends Model
+class DeliveryZone extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'name',
-        'fee',
+        'is_active',
     ];
 
+    protected $casts = [
+        'is_active' => 'boolean',
+    ];
 }
- 

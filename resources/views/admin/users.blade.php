@@ -12,9 +12,6 @@
                 <p class="page-subtitle">Gérez les utilisateurs et vendeurs de votre plateforme</p>
             </div>
             <div class="header-actions">
-                {{-- <button class="btn btn-outline-primary" onclick="exportUsers()">
-                    <i class="bi bi-download me-2"></i>Exporter
-                </button> --}}
                 <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#filtersModal">
                     <i class="bi bi-funnel me-2"></i>Filtres avancés
                 </button>
@@ -105,13 +102,13 @@
             <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="users-tab" data-bs-toggle="tab" data-bs-target="#users" type="button" role="tab">
                     <i class="bi bi-people me-2"></i>Utilisateurs
-                    {{-- <span class="badge bg-primary ms-2">{{ $users->total() }}</span> --}}
+                    <span class="badge bg-primary ms-2">{{ $users->total() }}</span>
                 </button>
             </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="vendors-tab" data-bs-toggle="tab" data-bs-target="#vendors" type="button" role="tab">
                     <i class="bi bi-shop me-2"></i>Vendeurs
-                    {{-- <span class="badge bg-info ms-2">{{ $vendors->total() }}</span> --}}
+                    <span class="badge bg-info ms-2">{{ $vendors->total() }}</span>
                 </button>
             </li>
         </ul>
@@ -127,7 +124,7 @@
                         <i class="bi bi-people me-2"></i>Liste des utilisateurs
                     </h5>
                     <div class="card-actions">
-                        {{-- <span class="text-muted">{{ $users->total() }} utilisateur(s) trouvé(s)</span> --}}
+                        <span class="text-muted">{{ $users->total() }} utilisateur(s) trouvé(s)</span>
                     </div>
                 </div>
                 <div class="card-body p-0">
@@ -761,10 +758,9 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     // Actions sur les vendeurs
-    window.viewVendorProducts = function(vendorId) {
-        // Redirection vers la page des produits du vendeur
-        window.location.href = `/admin/vendors/${vendorId}/products`;
-    };
+   window.viewVendorProducts = function(vendorId) {
+    window.location.href = '{{ url("admin/vendors") }}/' + vendorId + '/products';
+};
 
     // Filtres avancés
     window.applyAdvancedFilters = function() {

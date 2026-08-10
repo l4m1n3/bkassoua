@@ -29,7 +29,7 @@ class Product extends Model
     {
         return $this->belongsToMany(Order::class);
     }
-   
+
     public function sousCat()
     {
         return $this->belongsTo(SousCat::class, 'sous_cat_id');
@@ -46,8 +46,8 @@ class Product extends Model
     {
         return $this->hasOne(ProductImage::class)->where('is_main', true);
     }
-   public function attributeValues()
-{
-    return $this->hasMany(AttributeValueProduct::class);
-}
+    public function attributeValues()
+    {
+        return $this->hasMany(AttributeValueProduct::class);
+    }
 }

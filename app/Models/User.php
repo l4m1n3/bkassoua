@@ -28,7 +28,8 @@ class User extends Authenticatable
         'latitude',
         'longitude',
         'is_verified',
-        'google_id'
+        'google_id',
+        'fcm_token',
     ];
     
     /**

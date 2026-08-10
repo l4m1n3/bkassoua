@@ -84,4 +84,21 @@ class UserController extends Controller
             'message' => 'Votre compte a été supprimé définitivement.'
         ], 200);
     }
+    public function saveFcmToken(Request $request)
+    {
+        $request->validate([
+            'fcm_token' => 'required|string'
+        ]);
+
+        $user = auth()->user();
+
+        $user->update([
+            'fcm_token' => $request->fcm_token
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Token sauvegardé'
+        ]);
+    }
 }

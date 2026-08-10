@@ -4,7 +4,8 @@
 
 @section('content')
 <div class="dashboard-container">
-    <!-- En-tête du Dashboard -->
+
+    {{-- EN-TÊTE --}}
     <div class="dashboard-header">
         <div class="header-content">
             <div class="header-text">
@@ -14,17 +15,18 @@
             <div class="header-actions">
                 <div class="action-group">
                     <button type="button" class="btn btn-outline-primary btn-sm" onclick="shareDashboard()">
-                        <i class="bi bi-share me-2"></i>Partager
+                        <i class="bi bi-share me-1"></i>Partager
                     </button>
                     <button type="button" class="btn btn-outline-success btn-sm" onclick="exportDashboard()">
-                        <i class="bi bi-download me-2"></i>Exporter
+                        <i class="bi bi-download me-1"></i>Exporter
                     </button>
                 </div>
                 <div class="dropdown">
-                    <button class="btn btn-outline-info btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                        <i class="bi bi-calendar me-2"></i>Cette Semaine
+                    <button class="btn btn-outline-info btn-sm dropdown-toggle" type="button"
+                            id="periodDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-calendar me-1"></i><span id="selectedPeriod">Cette Semaine</span>
                     </button>
-                    <ul class="dropdown-menu">
+                    <ul class="dropdown-menu" aria-labelledby="periodDropdown">
                         <li><a class="dropdown-item" href="#" onclick="selectPeriod('this_week')">Cette Semaine</a></li>
                         <li><a class="dropdown-item" href="#" onclick="selectPeriod('last_week')">Semaine dernière</a></li>
                         <li><a class="dropdown-item" href="#" onclick="selectPeriod('this_month')">Ce mois</a></li>
@@ -36,13 +38,14 @@
         </div>
     </div>
 
-    <!-- Filtres rapides -->
+    {{-- FILTRES --}}
     <div class="filters-section mb-4">
         <div class="row g-3">
             <div class="col-md-4">
                 <div class="search-box">
                     <i class="bi bi-search"></i>
-                    <input type="text" class="form-control" placeholder="Rechercher par produit..." id="productSearch">
+                    <input type="text" class="form-control" placeholder="Rechercher par produit..."
+                           id="productSearch">
                 </div>
             </div>
             <div class="col-md-3">
@@ -63,94 +66,78 @@
             </div>
             <div class="col-md-2">
                 <button class="btn btn-primary w-100" onclick="applyFilters()">
-                    <i class="bi bi-funnel me-2"></i>Filtrer
+                    <i class="bi bi-funnel me-1"></i>Filtrer
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Cartes statistiques principales -->
+    {{-- CARTES STATISTIQUES --}}
     <div class="stats-grid mb-5">
         <div class="stat-card primary">
-            <div class="stat-icon">
-                <i class="bi bi-people"></i>
-            </div>
+            <div class="stat-icon"><i class="bi bi-people"></i></div>
             <div class="stat-content">
-                <div class="stat-value">{{ $customersCount }}</div>
+                <div class="stat-value">{{ number_format($customersCount, 0, ',', ' ') }}</div>
                 <div class="stat-label">Clients</div>
-                <div class="stat-change positive">
-                    <i class="bi bi-arrow-up"></i> 12% ce mois
-                </div>
+                <div class="stat-change positive"><i class="bi bi-arrow-up"></i> 12% ce mois</div>
             </div>
         </div>
 
         <div class="stat-card success">
-            <div class="stat-icon">
-                <i class="bi bi-person-badge"></i>
-            </div>
+            <div class="stat-icon"><i class="bi bi-person-badge"></i></div>
             <div class="stat-content">
-                <div class="stat-value">{{ $vendorsCount }}</div>
+                <div class="stat-value">{{ number_format($vendorsCount, 0, ',', ' ') }}</div>
                 <div class="stat-label">Vendeurs</div>
-                <div class="stat-change positive">
-                    <i class="bi bi-arrow-up"></i> 8% ce mois
-                </div>
+                <div class="stat-change positive"><i class="bi bi-arrow-up"></i> 8% ce mois</div>
             </div>
         </div>
 
         <div class="stat-card warning">
-            <div class="stat-icon">
-                <i class="bi bi-box-seam"></i>
-            </div>
+            <div class="stat-icon"><i class="bi bi-box-seam"></i></div>
             <div class="stat-content">
-                <div class="stat-value">{{ $productsCount }}</div>
+                <div class="stat-value">{{ number_format($productsCount, 0, ',', ' ') }}</div>
                 <div class="stat-label">Produits</div>
-                <div class="stat-change positive">
-                    <i class="bi bi-arrow-up"></i> 15% ce mois
-                </div>
+                <div class="stat-change positive"><i class="bi bi-arrow-up"></i> 15% ce mois</div>
             </div>
         </div>
 
         <div class="stat-card danger">
-            <div class="stat-icon">
-                <i class="bi bi-cart-check"></i>
-            </div>
+            <div class="stat-icon"><i class="bi bi-cart-check"></i></div>
             <div class="stat-content">
-                <div class="stat-value">{{ $ordersCount }}</div>
+                <div class="stat-value">{{ number_format($ordersCount, 0, ',', ' ') }}</div>
                 <div class="stat-label">Commandes</div>
-                <div class="stat-change positive">
-                    <i class="bi bi-arrow-up"></i> 23% ce mois
-                </div>
+                <div class="stat-change positive"><i class="bi bi-arrow-up"></i> 23% ce mois</div>
             </div>
         </div>
 
         <div class="stat-card info">
-            <div class="stat-icon">
-                <i class="bi bi-tags"></i>
-            </div>
+            <div class="stat-icon"><i class="bi bi-tags"></i></div>
             <div class="stat-content">
-                <div class="stat-value">{{ $categoriesCount }}</div>
+                <div class="stat-value">{{ number_format($categoriesCount, 0, ',', ' ') }}</div>
                 <div class="stat-label">Catégories</div>
-                <div class="stat-change neutral">
-                    <i class="bi bi-dash"></i> Stable
-                </div>
+                <div class="stat-change neutral"><i class="bi bi-dash"></i> Stable</div>
+            </div>
+        </div>
+         <div class="stat-card info">
+            <div class="stat-icon"><i class="bi bi-tags"></i></div>
+            <div class="stat-content">
+                <div class="stat-value">{{ number_format($sousCategoriesCount, 0, ',', ' ') }}</div>
+                <div class="stat-label">Sous Catégories</div>
+                <div class="stat-change neutral"><i class="bi bi-dash"></i> Stable</div>
             </div>
         </div>
 
         <div class="stat-card secondary">
-            <div class="stat-icon">
-                <i class="bi bi-currency-dollar"></i>
-            </div>
+            <div class="stat-icon"><i class="bi bi-currency-dollar"></i></div>
             <div class="stat-content">
                 <div class="stat-value">{{ number_format($revenue ?? 0, 0, ',', ' ') }} fcfa</div>
                 <div class="stat-label">Chiffre d'affaires</div>
-                <div class="stat-change positive">
-                    <i class="bi bi-arrow-up"></i> 18% ce mois
-                </div>
+                <div class="stat-change positive"><i class="bi bi-arrow-up"></i> 18% ce mois</div>
             </div>
         </div>
     </div>
 
-    <!-- Graphiques et métriques -->
+    {{-- GRAPHIQUES --}}
     <div class="row mb-5">
         <div class="col-lg-8">
             <div class="admin-card">
@@ -159,13 +146,15 @@
                         <i class="bi bi-bar-chart me-2"></i>Statistiques des ventes
                     </h5>
                     <div class="card-actions">
-                        <button class="btn btn-sm btn-outline-secondary" onclick="toggleChartType()">
+                        <button class="btn btn-sm btn-outline-secondary" onclick="toggleChartType()"
+                                title="Changer le type de graphique">
                             <i class="bi bi-arrow-repeat"></i>
                         </button>
                     </div>
                 </div>
                 <div class="card-body">
-                    <canvas id="salesChart" height="300"></canvas>
+                    <canvas id="salesChart" height="300"
+                            aria-label="Graphique des ventes mensuelles"></canvas>
                 </div>
             </div>
         </div>
@@ -177,13 +166,14 @@
                     </h5>
                 </div>
                 <div class="card-body">
-                    <canvas id="categoryChart" height="300"></canvas>
+                    <canvas id="categoryChart" height="300"
+                            aria-label="Graphique de répartition par catégorie"></canvas>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Tableaux rapides -->
+    {{-- TABLEAUX --}}
     <div class="row mb-5">
         <div class="col-lg-6">
             <div class="admin-card">
@@ -191,7 +181,9 @@
                     <h5 class="card-title">
                         <i class="bi bi-clock-history me-2"></i>Commandes récentes
                     </h5>
-                    <a href="{{ route('admin.orders') }}" class="btn btn-sm btn-outline-primary">Voir tout</a>
+                    <a href="{{ route('admin.orders') }}" class="btn btn-sm btn-outline-primary">
+                        Voir tout
+                    </a>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
@@ -206,9 +198,12 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($recentOrders as $order)
+                                @forelse($recentOrders as $order)
                                 <tr>
-                                    <td>#{{ $order->id }}</td>
+                                    <td>
+                                        <a href="{{ route('admin.viewOrder', $order->id) }}"
+                                           class="text-decoration-none">#{{ $order->id }}</a>
+                                    </td>
                                     <td>{{ $order->user->name ?? 'N/A' }}</td>
                                     <td>{{ number_format($order->total_amount, 0, ',', ' ') }} fcfa</td>
                                     <td>
@@ -218,7 +213,13 @@
                                     </td>
                                     <td>{{ $order->created_at->format('d/m/Y') }}</td>
                                 </tr>
-                                @endforeach
+                                @empty
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted py-3">
+                                        Aucune commande récente
+                                    </td>
+                                </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
@@ -232,28 +233,23 @@
                     <h5 class="card-title">
                         <i class="bi bi-activity me-2"></i>Activité récente
                     </h5>
-                    <a href="#" class="btn btn-sm btn-outline-primary">Voir tout</a>
                 </div>
                 <div class="card-body p-0">
-                    <div class="activity-feed">
-                        {{-- @foreach($recentActivities as $activity)
+                    <div class="activity-feed" id="activityFeed">
                         <div class="activity-item">
-                            <div class="activity-icon">
-                                <i class="bi bi-{{ $activity->icon }}"></i>
-                            </div>
+                            <div class="activity-icon"><i class="bi bi-info-circle"></i></div>
                             <div class="activity-content">
-                                <div class="activity-text">{{ $activity->description }}</div>
-                                <div class="activity-time">{{ $activity->created_at->diffForHumans() }}</div>
+                                <div class="activity-text">Aucune activité récente</div>
+                                <div class="activity-time">—</div>
                             </div>
                         </div>
-                        @endforeach --}}
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Métriques supplémentaires -->
+    {{-- MÉTRIQUES SUPPLÉMENTAIRES --}}
     <div class="row">
         <div class="col-md-4">
             <div class="admin-card">
@@ -265,8 +261,13 @@
                 <div class="card-body">
                     <div class="metric-value">{{ $newUsersCount ?? 0 }}</div>
                     <div class="metric-label">Ce mois</div>
-                    <div class="progress mt-2">
-                        {{-- <div class="progress-bar bg-success" style="width: {{ ($newUsersCount / max($customersCount, 1)) * 100 }}%"></div> --}}
+                    <div class="progress mt-2" style="height:6px;">
+                        @php
+                            $progressVal = $customersCount > 0
+                                ? min(100, round(($newUsersCount / $customersCount) * 100))
+                                : 0;
+                        @endphp
+                        <div class="progress-bar bg-success" style="width: {{ $progressVal }}%"></div>
                     </div>
                 </div>
             </div>
@@ -281,9 +282,10 @@
                 </div>
                 <div class="card-body">
                     <div class="metric-value">{{ $conversionRate ?? 0 }}%</div>
-                    <div class="metric-label">Visites vers commandes</div>
-                    <div class="progress mt-2">
-                        <div class="progress-bar bg-info" style="width: {{ $conversionRate ?? 0 }}%"></div>
+                    <div class="metric-label">Commandes / Clients</div>
+                    <div class="progress mt-2" style="height:6px;">
+                        <div class="progress-bar bg-info"
+                             style="width: {{ min(100, $conversionRate ?? 0) }}%"></div>
                     </div>
                 </div>
             </div>
@@ -297,72 +299,77 @@
                     </h5>
                 </div>
                 <div class="card-body">
-                    <div class="metric-value">{{ $averageRating ?? '4.5' }}/5</div>
+                    <div class="metric-value">{{ number_format($averageRating ?? 4.5, 1) }}/5</div>
                     <div class="metric-label">Satisfaction clients</div>
                     <div class="stars mt-2">
                         @for($i = 1; $i <= 5; $i++)
-                            <i class="bi bi-star{{ $i <= ($averageRating ?? 4.5) ? '-fill' : '' }} text-warning"></i>
+                            @if($i <= floor($averageRating ?? 4.5))
+                                <i class="bi bi-star-fill text-warning"></i>
+                            @elseif($i - ($averageRating ?? 4.5) < 1)
+                                <i class="bi bi-star-half text-warning"></i>
+                            @else
+                                <i class="bi bi-star text-warning"></i>
+                            @endif
                         @endfor
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
 </div>
 
-<!-- Toast Notifications -->
-<div class="toast-container position-fixed top-0 end-0 p-3">
-    <div id="successToast" class="toast" role="alert">
-        <div class="toast-header bg-success text-white">
-            <i class="bi bi-check-circle me-2"></i>
-            <strong class="me-auto">Succès</strong>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+{{-- TOAST --}}
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index:1100;">
+    <div id="dashToast" class="toast align-items-center border-0" role="alert" aria-live="assertive">
+        <div class="d-flex">
+            <div class="toast-body" id="dashToastBody">Message</div>
+            <button type="button" class="btn-close me-2 m-auto"
+                    data-bs-dismiss="toast" aria-label="Fermer"></button>
         </div>
-        <div class="toast-body">Action réalisée avec succès</div>
     </div>
 </div>
 
+{{-- SCRIPTS --}}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialiser les graphiques
+document.addEventListener('DOMContentLoaded', function () {
     initCharts();
-    
-    // Afficher les données en temps réel
-    updateRealTimeData();
-    
-    // Configurer les mises à jour automatiques
-    setInterval(updateRealTimeData, 30000); // Mise à jour toutes les 30 secondes
+    startAutoRefresh();
 });
 
+// ─── Données depuis Laravel ───────────────────────────────────────────────────
+const salesData      = @json($salesChart);
+const categoryLabels = @json($categoryLabels);
+const categoryData   = @json($categoryCounts);
+
+// ─── Graphiques ───────────────────────────────────────────────────────────────
 function initCharts() {
-    // Graphique des ventes
     const salesCtx = document.getElementById('salesChart').getContext('2d');
-    const salesChart = new Chart(salesCtx, {
+
+    window.salesChart = new Chart(salesCtx, {
         type: 'line',
         data: {
-            labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'],
+            labels: ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'],
             datasets: [{
                 label: 'Ventes (fcfa)',
-                data: [1200000, 1900000, 1500000, 2200000, 1800000, 2500000, 3000000, 2800000, 3200000, 3500000, 4000000, 4500000],
+                data: salesData,
                 borderColor: '#1780d6',
-                backgroundColor: 'rgba(23, 128, 214, 0.1)',
+                backgroundColor: 'rgba(23,128,214,0.1)',
                 borderWidth: 2,
                 fill: true,
-                tension: 0.4
+                tension: 0.4,
+                pointRadius: 4,
+                pointHoverRadius: 6
             }]
         },
         options: {
             responsive: true,
             plugins: {
-                legend: {
-                    position: 'top',
-                },
+                legend: { position: 'top' },
                 tooltip: {
                     callbacks: {
-                        label: function(context) {
-                            return 'Ventes: ' + context.parsed.y.toLocaleString() + ' fcfa';
-                        }
+                        label: ctx => 'Ventes : ' + ctx.parsed.y.toLocaleString('fr-FR') + ' fcfa'
                     }
                 }
             },
@@ -370,30 +377,24 @@ function initCharts() {
                 y: {
                     beginAtZero: true,
                     ticks: {
-                        callback: function(value) {
-                            return value.toLocaleString() + ' fcfa';
-                        }
+                        callback: v => (v >= 1000000)
+                            ? (v / 1000000).toFixed(1) + 'M'
+                            : v.toLocaleString('fr-FR')
                     }
                 }
             }
         }
     });
 
-    // Graphique des catégories
     const categoryCtx = document.getElementById('categoryChart').getContext('2d');
-    const categoryChart = new Chart(categoryCtx, {
+
+    window.categoryChart = new Chart(categoryCtx, {
         type: 'doughnut',
         data: {
-            labels: ['Vêtements', 'Accessoires', 'Chaussures', 'Bijoux', 'Autres'],
+            labels: categoryLabels,
             datasets: [{
-                data: [35, 25, 20, 15, 5],
-                backgroundColor: [
-                    '#1780d6',
-                    '#f4a261',
-                    '#e76f51',
-                    '#28a745',
-                    '#6c757d'
-                ],
+                data: categoryData,
+                backgroundColor: ['#1780d6','#f4a261','#e76f51','#28a745','#6c757d','#6610f2','#fd7e14'],
                 borderWidth: 2,
                 borderColor: '#fff'
             }]
@@ -401,417 +402,282 @@ function initCharts() {
         options: {
             responsive: true,
             plugins: {
-                legend: {
-                    position: 'bottom'
+                legend: { position: 'bottom' },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => ctx.label + ' : ' + ctx.parsed + ' produits'
+                    }
                 }
             }
         }
     });
-
-    window.salesChart = salesChart;
-    window.categoryChart = categoryChart;
 }
 
 function toggleChartType() {
     const chart = window.salesChart;
-    const newType = chart.config.type === 'line' ? 'bar' : 'line';
-    chart.config.type = newType;
+    const isLine = chart.config.type === 'line';
+    chart.config.type = isLine ? 'bar' : 'line';
+    chart.data.datasets[0].fill = !isLine;
+    chart.data.datasets[0].backgroundColor = isLine
+        ? 'rgba(23,128,214,0.6)'
+        : 'rgba(23,128,214,0.1)';
     chart.update();
-    
-    showToast('Graphique changé en ' + (newType === 'line' ? 'ligne' : 'barres'));
+    showToast('Graphique affiché en ' + (isLine ? 'barres' : 'ligne'));
 }
 
-function applyFilters() {
-    const search = document.getElementById('productSearch').value;
-    const category = document.getElementById('categoryFilter').value;
-    const status = document.getElementById('statusFilter').value;
-    
-    // Simuler l'application des filtres
-    const filters = {
-        search: search,
-        category: category,
-        status: status
-    };
-    
-    console.log('Filtres appliqués:', filters);
-    showToast('Filtres appliqués avec succès');
-    
-    // Ici, vous ajouteriez un appel AJAX pour actualiser les données
+// ─── Mise à jour automatique ──────────────────────────────────────────────────
+function startAutoRefresh() {
+    setInterval(updateRealTimeData, 30000);
 }
+
+function updateRealTimeData() {
+    fetch('{{ url("/admin/dashboard/data") }}', {
+        headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(res => {
+        if (!res.ok) throw new Error('Erreur réseau');
+        return res.json();
+    })
+    .then(data => {
+        // Mettre à jour les cartes stat si les sélecteurs correspondent
+        updateStatCard('.stat-card.primary .stat-value',    data.customers);
+        updateStatCard('.stat-card.warning .stat-value',    data.products);
+        updateStatCard('.stat-card.danger .stat-value',     data.orders);
+
+        // Mettre à jour le graphique des ventes
+        if (data.salesChart && window.salesChart) {
+            window.salesChart.data.datasets[0].data = data.salesChart;
+            window.salesChart.update('none');
+        }
+    })
+    .catch(err => console.warn('Rafraîchissement dashboard :', err));
+}
+
+function updateStatCard(selector, value) {
+    const el = document.querySelector(selector);
+    if (!el || value === undefined) return;
+    el.textContent = Number(value).toLocaleString('fr-FR');
+}
+
+// ─── Filtres ──────────────────────────────────────────────────────────────────
+function applyFilters() {
+    const search   = document.getElementById('productSearch').value.trim();
+    const category = document.getElementById('categoryFilter').value;
+    const status   = document.getElementById('statusFilter').value;
+
+    const params = new URLSearchParams();
+    if (search)   params.set('search', search);
+    if (category) params.set('category', category);
+    if (status)   params.set('status', status);
+
+    // Redirige vers la liste des produits avec les filtres
+    const url = '{{ route("admin.products") }}' + (params.toString() ? '?' + params.toString() : '');
+    window.location.href = url;
+}
+
+// ─── Période ──────────────────────────────────────────────────────────────────
+const periodLabels = {
+    'this_week':    'Cette Semaine',
+    'last_week':    'Semaine dernière',
+    'this_month':   'Ce mois',
+    'last_month':   'Mois dernier',
+    'this_quarter': 'Ce trimestre'
+};
 
 function selectPeriod(period) {
-    const periods = {
-        'this_week': 'Cette Semaine',
-        'last_week': 'Semaine dernière',
-        'this_month': 'Ce mois',
-        'last_month': 'Mois dernier',
-        'this_quarter': 'Ce trimestre'
-    };
-    
-    showToast('Période sélectionnée: ' + periods[period]);
-    
-    // Ici, vous ajouteriez la logique pour charger les données de la période sélectionnée
+    document.getElementById('selectedPeriod').textContent = periodLabels[period] ?? period;
+    showToast('Période : ' + (periodLabels[period] ?? period));
 }
 
+// ─── Partage / Export ─────────────────────────────────────────────────────────
 function shareDashboard() {
-    // Simulation de partage
     if (navigator.share) {
         navigator.share({
             title: 'Tableau de Bord Bkassoua',
-            text: 'Consultez les statistiques de Bkassoua',
             url: window.location.href
-        });
+        }).catch(() => {});
     } else {
-        showToast('Lien copié dans le presse-papier');
-        // Fallback pour copier le lien
-        navigator.clipboard.writeText(window.location.href);
+        navigator.clipboard.writeText(window.location.href)
+            .then(() => showToast('Lien copié dans le presse-papier'))
+            .catch(() => showToast('Impossible de copier le lien', 'danger'));
     }
 }
 
 function exportDashboard() {
-    showToast('Export du tableau de bord en cours...');
-    // Simulation d'export
-    setTimeout(() => {
-        showToast('Tableau de bord exporté avec succès');
-    }, 2000);
+    showToast('Export en cours…', 'info');
+    // Vous pouvez implémenter un vrai export PDF ici
+    setTimeout(() => showToast('Export terminé'), 2000);
 }
 
-function updateRealTimeData() {
-    // Simulation de mise à jour des données en temps réel
-    const elements = document.querySelectorAll('.stat-value');
-    elements.forEach(element => {
-        const current = parseInt(element.textContent.replace(/\D/g, ''));
-        const variation = Math.floor(Math.random() * 10) - 2; // Variation aléatoire
-        const newValue = Math.max(0, current + variation);
-        
-        // Animation du changement
-        element.style.transform = 'scale(1.1)';
-        setTimeout(() => {
-            element.style.transform = 'scale(1)';
-        }, 300);
-    });
-}
-
+// ─── Toast ────────────────────────────────────────────────────────────────────
 function showToast(message, type = 'success') {
-    const toast = new bootstrap.Toast(document.getElementById('successToast'));
-    const toastBody = document.querySelector('#successToast .toast-body');
-    
+    const toastEl   = document.getElementById('dashToast');
+    const toastBody = document.getElementById('dashToastBody');
+
+    toastEl.className = 'toast align-items-center border-0 text-bg-' + type;
     toastBody.textContent = message;
-    toast.show();
+
+    bootstrap.Toast.getOrCreateInstance(toastEl, { delay: 3000 }).show();
 }
 
-// Gestion des événements clavier
-document.addEventListener('keydown', function(e) {
+// ─── Raccourcis clavier ───────────────────────────────────────────────────────
+document.addEventListener('keydown', function (e) {
     if (e.ctrlKey || e.metaKey) {
-        switch(e.key) {
-            case 'e':
-                e.preventDefault();
-                exportDashboard();
-                break;
-            case 'f':
-                e.preventDefault();
-                document.getElementById('productSearch').focus();
-                break;
-        }
+        if (e.key === 'f') { e.preventDefault(); document.getElementById('productSearch').focus(); }
+        if (e.key === 'e') { e.preventDefault(); exportDashboard(); }
     }
 });
 </script>
 
 <style>
-.dashboard-container {
-    padding: 0;
-}
+.dashboard-container { padding: 0; }
 
 .dashboard-header {
     background: white;
-    border-radius: var(--border-radius);
+    border-radius: var(--border-radius, 12px);
     padding: 1.5rem 2rem;
     margin-bottom: 2rem;
-    box-shadow: var(--shadow);
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
 }
 
 .header-content {
     display: flex;
-    justify-content: between;
+    justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
     gap: 1rem;
 }
 
-.dashboard-title {
-    font-weight: 700;
-    color: var(--dark);
-    margin: 0;
-    font-size: 2rem;
-}
+.dashboard-title { font-weight: 700; color: #1a1a2e; margin: 0; font-size: 2rem; }
+.dashboard-subtitle { color: #6c757d; margin: .5rem 0 0; }
 
-.dashboard-subtitle {
-    color: var(--gray);
-    margin: 0.5rem 0 0 0;
-}
-
-.header-actions {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-.action-group {
-    display: flex;
-    gap: 0.5rem;
-}
+.header-actions { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+.action-group { display: flex; gap: .5rem; }
 
 .filters-section {
     background: white;
-    border-radius: var(--border-radius);
+    border-radius: var(--border-radius, 12px);
     padding: 1.5rem;
-    box-shadow: var(--shadow);
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
 }
 
-.search-box {
-    position: relative;
-}
+.search-box { position: relative; }
+.search-box i { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #6c757d; }
+.search-box .form-control { padding-left: 2.5rem; }
 
-.search-box i {
-    position: absolute;
-    left: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--gray);
-}
-
-.search-box .form-control {
-    padding-left: 2.5rem;
-}
-
+/* ── Grille stats ── */
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 1.5rem;
-    margin-bottom: 2rem;
 }
 
 .stat-card {
     background: white;
-    border-radius: var(--border-radius);
+    border-radius: var(--border-radius, 12px);
     padding: 1.5rem;
-    box-shadow: var(--shadow);
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
     display: flex;
     align-items: center;
     gap: 1rem;
-    transition: var(--transition);
-    border-left: 4px solid var(--primary);
+    border-left: 4px solid #1780d6;
+    transition: transform .2s, box-shadow .2s;
 }
-
-.stat-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-}
-
-.stat-card.success {
-    border-left-color: var(--success);
-}
-
-.stat-card.warning {
-    border-left-color: var(--warning);
-}
-
-.stat-card.danger {
-    border-left-color: var(--danger);
-}
-
-.stat-card.info {
-    border-left-color: var(--primary);
-}
-
-.stat-card.secondary {
-    border-left-color: var(--gray);
-}
+.stat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,.1); }
+.stat-card.success  { border-left-color: #28a745; }
+.stat-card.warning  { border-left-color: #ffc107; }
+.stat-card.danger   { border-left-color: #dc3545; }
+.stat-card.info     { border-left-color: #17a2b8; }
+.stat-card.secondary{ border-left-color: #6c757d; }
 
 .stat-icon {
-    width: 60px;
-    height: 60px;
+    width: 60px; height: 60px;
     border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    color: white;
-}
-
-.stat-card .stat-icon {
-    background: var(--primary);
-}
-
-.stat-card.success .stat-icon {
-    background: var(--success);
-}
-
-.stat-card.warning .stat-icon {
-    background: var(--warning);
-}
-
-.stat-card.danger .stat-icon {
-    background: var(--danger);
-}
-
-.stat-card.info .stat-icon {
-    background: var(--primary);
-}
-
-.stat-card.secondary .stat-icon {
-    background: var(--gray);
-}
-
-.stat-value {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--dark);
-    line-height: 1;
-}
-
-.stat-label {
-    color: var(--gray);
-    font-weight: 500;
-    margin: 0.25rem 0;
-}
-
-.stat-change {
-    font-size: 0.8rem;
-    font-weight: 600;
-}
-
-.stat-change.positive {
-    color: var(--success);
-}
-
-.stat-change.negative {
-    color: var(--danger);
-}
-
-.stat-change.neutral {
-    color: var(--gray);
-}
-
-.activity-feed {
-    max-height: 400px;
-    overflow-y: auto;
-}
-
-.activity-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 1rem;
-    padding: 1rem 1.5rem;
-    border-bottom: 1px solid var(--gray-light);
-    transition: var(--transition);
-}
-
-.activity-item:hover {
-    background: var(--light);
-}
-
-.activity-item:last-child {
-    border-bottom: none;
-}
-
-.activity-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: var(--primary-light);
-    color: var(--primary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; color: white;
+    background: #1780d6;
     flex-shrink: 0;
 }
+.stat-card.success  .stat-icon { background: #28a745; }
+.stat-card.warning  .stat-icon { background: #ffc107; }
+.stat-card.danger   .stat-icon { background: #dc3545; }
+.stat-card.info     .stat-icon { background: #17a2b8; }
+.stat-card.secondary.stat-icon { background: #6c757d; }
 
-.activity-content {
-    flex: 1;
+.stat-value { font-size: 1.8rem; font-weight: 700; color: #1a1a2e; line-height: 1; }
+.stat-label { color: #6c757d; font-weight: 500; margin: .25rem 0; font-size: .9rem; }
+.stat-change { font-size: .8rem; font-weight: 600; }
+.stat-change.positive { color: #28a745; }
+.stat-change.negative { color: #dc3545; }
+.stat-change.neutral  { color: #6c757d; }
+
+/* ── Cards ── */
+.admin-card {
+    background: white;
+    border-radius: var(--border-radius, 12px);
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    overflow: hidden;
+    height: 100%;
 }
 
-.activity-text {
-    color: var(--dark);
-    margin-bottom: 0.25rem;
-}
-
-.activity-time {
-    color: var(--gray);
-    font-size: 0.8rem;
-}
-
-.metric-value {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: var(--primary);
-    line-height: 1;
-}
-
-.metric-label {
-    color: var(--gray);
-    font-size: 0.9rem;
-    margin-top: 0.5rem;
-}
-
-.stars {
+.admin-card .card-header {
     display: flex;
-    gap: 0.1rem;
+    justify-content: space-between;
+    align-items: center;
+    padding: .9rem 1.25rem;
+    border-bottom: 1px solid #f0f0f0;
+    background: white;
 }
 
+.admin-card .card-title {
+    font-size: 1rem; font-weight: 600; color: #1a1a2e; margin: 0;
+}
+
+/* ── Activité ── */
+.activity-feed { max-height: 380px; overflow-y: auto; }
+.activity-item {
+    display: flex; align-items: flex-start; gap: 1rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #f8f9fa;
+    transition: background .15s;
+}
+.activity-item:hover { background: #f8f9fa; }
+.activity-item:last-child { border-bottom: none; }
+.activity-icon {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: rgba(23,128,214,.1);
+    color: #1780d6;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.activity-text  { color: #1a1a2e; font-size: .9rem; margin-bottom: .2rem; }
+.activity-time  { color: #6c757d; font-size: .78rem; }
+
+/* ── Métriques ── */
+.metric-value { font-size: 2.2rem; font-weight: 700; color: #1780d6; line-height: 1; }
+.metric-label { color: #6c757d; font-size: .85rem; margin-top: .4rem; }
+.stars { display: flex; gap: .15rem; font-size: 1.1rem; }
+
+/* ── Badges statut ── */
 .status-badge {
-    padding: 0.35rem 0.75rem;
+    padding: .3rem .7rem;
     border-radius: 50px;
-    font-size: 0.8rem;
+    font-size: .78rem;
     font-weight: 600;
     text-transform: capitalize;
 }
+.status-pending    { background: rgba(255,193,7,.15);  color: #856404; }
+.status-completed  { background: rgba(40,167,69,.15);  color: #155724; }
+.status-cancelled  { background: rgba(220,53,69,.15);  color: #721c24; }
+.status-processing { background: rgba(23,128,214,.15); color: #0c447c; }
 
-.status-pending {
-    background: rgba(255, 193, 7, 0.1);
-    color: var(--warning);
-}
-
-.status-completed {
-    background: rgba(40, 167, 69, 0.1);
-    color: var(--success);
-}
-
-.status-cancelled {
-    background: rgba(220, 53, 69, 0.1);
-    color: var(--danger);
-}
-
-.status-processing {
-    background: rgba(23, 128, 214, 0.1);
-    color: var(--primary);
-}
-
-/* Responsive */
+/* ── Responsive ── */
 @media (max-width: 768px) {
-    .header-content {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    
-    .header-actions {
-        width: 100%;
-        justify-content: space-between;
-    }
-    
-    .stats-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .stat-card {
-        flex-direction: column;
-        text-align: center;
-    }
-    
-    .dashboard-title {
-        font-size: 1.5rem;
-    }
+    .header-content  { flex-direction: column; align-items: flex-start; }
+    .header-actions  { width: 100%; justify-content: space-between; }
+    .stats-grid      { grid-template-columns: 1fr; }
+    .dashboard-title { font-size: 1.5rem; }
 }
 </style>
 @endsection

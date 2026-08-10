@@ -181,7 +181,7 @@ class ProductController extends Controller
     public function destroy($id)
     {
         Product::findOrFail($id)->delete();
-        return redirect()->route('admin.products.index')->with('success', 'Produit supprimé avec succès');
+        return redirect()->back()->with('success', 'Produit supprimé avec succès');
     }
 
     public function search(Request $request)
@@ -194,10 +194,41 @@ class ProductController extends Controller
 
         return view('admin.product', compact('products'));
     }
+
+
     public function shop()
     {
-        $categories = Category::all();
-        $products = Product::with(['images', 'mainImage', 'vendor', 'sousCat'])->get();
+        $sort = request('sort', 'newest');
+
+        $query = Product::with(['images', 'mainImage', 'vendor', 'sousCat']);
+
+        // Tri
+        match ($sort) {
+            'price_asc'   => $query->orderBy('price', 'asc'),
+            'price_desc'  => $query->orderBy('price', 'desc'),
+            'best_seller' => $query->orderBy('sales_count', 'desc'),
+            'popular'     => $query->orderBy('views_count', 'desc'),
+            default       => $query->latest(),  // newest
+        };
+
+        // Filtre par catégorie (optionnel, depuis ?category_id=)
+        if (request()->filled('category_id')) {
+            $query->where('category_id', request('category_id'));
+        }
+
+        // Filtre par sous-catégorie (optionnel, depuis ?sous_cat_id=)
+        if (request()->filled('sous_cat_id')) {
+            $query->where('sous_categorie_id', request('sous_cat_id'));
+        }
+
+        // Recherche par nom (optionnel, depuis ?search=)
+        if (request()->filled('search')) {
+            $query->where('name', 'like', '%' . request('search') . '%');
+        }
+
+        $products   = $query->paginate(12)->withQueryString(); // withQueryString() conserve les paramètres d'URL dans la pagination
+        $categories = Category::with('sousCat')->get();        // charger les sous-catégories pour la sidebar
+
         return view('shop.shop', compact('products', 'categories'));
     }
     public function productPerCategory($categorySlug)
@@ -216,12 +247,29 @@ class ProductController extends Controller
         return view('shop.shop', compact('products', 'categories'));
     }
 
+    // public function productDetail($id)
+    // {
+    //     // Retrieve all categories for display
+    //     $categories = Category::all();
+    //     $product = Product::with(['vendor', 'sousCat'])->find($id);
+    //     return view('shop.detail', compact('product', 'categories'));
+    // }
     public function productDetail($id)
     {
-        // Retrieve all categories for display
-        $categories = Category::all();
-        $product = Product::with(['vendor', 'sousCat'])->find($id);
-        return view('shop.detail', compact('product', 'categories'));
+        $product = Product::with(['images', 'mainImage', 'vendor', 'sousCat'])
+            ->findOrFail($id);
+
+        // Produits similaires : même sous-catégorie, exclu le produit courant
+        $relatedProducts = Product::with(['mainImage', 'sousCat'])
+            // ->where('category_id', $product->category_id)
+            ->where('id', '!=', $product->id)
+            ->inRandomOrder()
+            ->take(4)
+            ->get();
+
+        $categories = Category::with('sousCat')->get();
+
+        return view('shop.detail', compact('product', 'relatedProducts', 'categories'));
     }
     // public function storeCart(Request $request)
     // {
@@ -414,5 +462,35 @@ class ProductController extends Controller
                 'message' => 'Produit introuvable dans le panier.'
             ]);
         }
+    }
+    public function byCategory($slug)
+    {
+        // Chercher la catégorie avec ses sous-catégories et ses produits
+        $category = Category::with(['sousCat', 'products'])
+            ->where('slug', $slug)
+            ->firstOrFail();
+
+        // Vérifier si c'est une sous-catégorie (paramètre ?sub=)
+        $subSlug = request('sub');
+        $activeSubCat = null;
+        $products = collect();
+
+        if ($subSlug) {
+            // Afficher les produits de la sous-catégorie sélectionnée
+            $activeSubCat = $category->sousCat->where('slug', $subSlug)->first();
+            if ($activeSubCat) {
+                $products = Product::where('sous_cat_id', $activeSubCat->id)
+                    ->latest()->paginate(12);
+            }
+        } else {
+            // Pas de sous-catégorie : afficher tous les produits de la catégorie
+            $products = Product::where('category_id', $category->id)
+                ->latest()->paginate(12);
+        }
+
+        // Données communes à toutes les pages (sidebar)
+        $categories = Category::with('sousCat')->get();
+
+        return view('shop.category', compact('category', 'products', 'activeSubCat', 'categories'));
     }
 }

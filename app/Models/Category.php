@@ -13,7 +13,7 @@ class Category extends Model
 
     public function sousCat()
     {
-        return $this->hasMany(SousCat::class);
+        return $this->hasMany(SousCat::class, 'category_id');
     }
     public function products()
     {
